@@ -8,6 +8,11 @@ SMH.MessageTypes = {
 
     "SelectEntity",
     "SelectEntityResponse",
+	
+	"UpdateServerAudio",
+	"PlayAudio",
+	"StopAudio",
+	"StopAllAudio",
 
     "CreateKeyframe",
     "UpdateKeyframe",

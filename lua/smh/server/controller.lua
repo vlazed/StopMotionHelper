@@ -588,6 +588,27 @@ function MGR.StopPhysicsRecordResponse(player)
     net.Send(player)
 end
 
+function MGR.PlayAudio(id, player)
+	net.Start(SMH.MessageTypes.PlayAudio)
+	net.WriteUInt(id, INT_BITCOUNT)
+	net.Send(player)
+end
+
+function MGR.StopAudio(id, player)
+	net.Start(SMH.MessageTypes.StopAudio)
+	net.WriteUInt(id, INT_BITCOUNT)
+	net.Send(player)
+end
+
+function MGR.StopAllAudio(player)
+	net.Start(SMH.MessageTypes.StopAllAudio)
+	net.Send(player)
+end
+
+local function UpdateServerAudio(len, ply)
+	SMH.PlaybackManager.UpdateServerAudio(len, ply)
+end
+
 SMH.Controller = MGR
 
 for _, message in pairs(SMH.MessageTypes) do
@@ -607,6 +628,8 @@ net.Receive(SMH.MessageTypes.DeleteKeyframe, DeleteKeyframe)
 
 net.Receive(SMH.MessageTypes.StartPlayback, StartPlayback)
 net.Receive(SMH.MessageTypes.StopPlayback, StopPlayback)
+
+net.Receive(SMH.MessageTypes.UpdateServerAudio, UpdateServerAudio)
 
 net.Receive(SMH.MessageTypes.SetRendering, SetRendering)
 net.Receive(SMH.MessageTypes.UpdateGhostState, UpdateGhostState)

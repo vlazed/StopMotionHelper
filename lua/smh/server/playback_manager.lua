@@ -115,8 +115,65 @@ function MGR.StopPlayback(player)
     ActivePlaybacks[player] = nil
 end
 
+-- AUDIO
+
+local playerAudio = {}
+
+function MGR.UpdateServerAudio(len,ply)
+	if not playerAudio[ply] then
+		playerAudio[ply] = {
+			audioFrames = {}
+		}
+	end
+	local audioTable = net.ReadTable()
+	if audioTable ~= nil then
+		table.Empty(playerAudio[ply].audioFrames)
+		playerAudio[ply].audioFrames = audioTable
+		print("SMH Audio: Updated serverside list of audios")
+		print(table.ToString(playerAudio, "Player Audios", true))
+	else
+		print("SMH Audio: Error receiving audio list from client.")
+	end
+end
+
+local audioStopFrames = {}
+
+local function AudioPlayback(player, playback)
+	--check for end of playback
+	if playback.CurrentFrame == playback.EndFrame then
+		SMH.Controller.StopAllAudio(player)
+		return
+	end
+	--check for end of clip
+	if audioStopFrames[playback.CurrentFrame] then
+		--stop audio
+		SMH.Controller.StopAudio(audioStopFrames[playback.CurrentFrame].ID, player)
+	end
+	
+	--check for start of clip
+	if playerAudio[player] then
+		if playerAudio[player].audioFrames[playback.CurrentFrame] then
+			local audioFrame = playerAudio[player].audioFrames[playback.CurrentFrame]
+			
+			--calculate end point
+			local endFrame = math.ceil(playback.CurrentFrame + playback.PlaybackRate * audioFrame.Duration)
+			local audioStop = {
+				ID = audioFrame.ID,
+				Player = player
+			}
+			table.insert(audioStopFrames, endFrame, audioStop)
+			
+			--start audio
+			SMH.Controller.PlayAudio(audioFrame.ID, player)
+		end
+	end
+end
+
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
+		print("playback")
+		AudioPlayback(player,playback)
+		
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
 
             playback.Timer = playback.Timer + FrameTime()
