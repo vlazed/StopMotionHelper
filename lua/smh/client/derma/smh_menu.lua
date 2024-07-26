@@ -71,6 +71,15 @@ function PANEL:Init()
     self.RecordButton = vgui.Create("DButton", self)
     self.RecordButton:SetText("Record")
     self.RecordButton.DoClick = function() self:OnRequestRecord() end
+	
+	-- AUDIO TEMP
+	self.LoadAudioButton = vgui.Create("DButton", self)
+    self.LoadAudioButton:SetText("Load Audio")
+    self.LoadAudioButton.DoClick = function() self:OnRequestAddAudio() end
+	
+	self.DebugAudioButton = vgui.Create("DButton", self)
+    self.DebugAudioButton:SetText("Debug Audio")
+    self.DebugAudioButton.DoClick = function() self:OnRequestDebugAudio() end
 
     self.PropertiesButton = vgui.Create("DButton", self)
     self.PropertiesButton:SetText("Properties")
@@ -133,6 +142,13 @@ function PANEL:PerformLayout(width, height)
 
     self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
+	
+	-- AUDIO TEMP
+	self.LoadAudioButton:SetPos(width - 60 * 6 - 5 * 6, 2)
+    self.LoadAudioButton:SetSize(60, 20)
+	
+	self.DebugAudioButton:SetPos(width - 60 * 7 - 5 * 7, 2)
+    self.DebugAudioButton:SetSize(60, 20)
 
     self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
     self.PropertiesButton:SetSize(60, 20)

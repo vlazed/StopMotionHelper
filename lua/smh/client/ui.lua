@@ -283,6 +283,16 @@ local function AddCallbacks()
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
     end
+	
+	-- AUDIO TEMP
+	WorldClicker.MainMenu.OnRequestAddAudio = function()
+		local path = "sound/elevatormusic.wav"
+        SMH.Controller.AddAudio(path)
+    end
+	WorldClicker.MainMenu.OnRequestDebugAudio = function()
+			print(util.TableToJSON(SMH.AudioClipData))
+    end
+	
     WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
         SaveMenu:SetVisible(true)
         SMH.Controller.GetServerSaves()
