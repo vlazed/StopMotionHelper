@@ -28,6 +28,8 @@ function PANEL:Init()
     self._scrollCursorOffset = 0
 
     self.FramePointers = {}
+	self.AudioClipPointers = {}
+	
 
 end
 
@@ -108,6 +110,9 @@ function PANEL:RefreshFrames()
     for _, pointer in pairs(self.FramePointers) do
         pointer:RefreshFrame()
     end
+	for _, pointer in pairs(self.AudioClipPointers) do
+        pointer:RefreshFrame()
+    end
 end
 
 function PANEL:SetScrollOffset(offset)
@@ -134,6 +139,19 @@ end
 
 function PANEL:DeleteFramePointer(pointer)
     table.RemoveByValue(self.FramePointers, pointer)
+    pointer:Remove()
+end
+
+function PANEL:CreateAudioClipPointer(audioClip)
+    local pointer = vgui.Create("SMHAudioClipPointer", self)
+	pointer:Setup(audioClip)
+    table.insert(self.AudioClipPointers, pointer)
+
+    return pointer
+end
+
+function PANEL:DeleteAudioClipPointer(pointer)
+    table.RemoveByValue(self.AudioClipPointers, pointer)
     pointer:Remove()
 end
 
