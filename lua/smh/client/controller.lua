@@ -92,10 +92,13 @@ end
 function CTRL.UpdateServerAudio()
 	local audioTable = {}
 	for i,clip in pairs(SMH.AudioClipData.AudioClips) do
-		audioTable[clip.Frame] = {
+		if audioTable[clip.Frame] == nil then
+			audioTable[clip.Frame] = {}
+		end
+		table.insert(audioTable[clip.Frame], {
 			ID = clip.ID,
 			Duration = clip.Duration
-		}
+		})
 	end
 	
 	net.Start(SMH.MessageTypes.UpdateServerAudio)
