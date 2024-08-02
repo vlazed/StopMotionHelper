@@ -13,6 +13,7 @@ function MGR.Create(path, frame)
 			audioclip.Duration = station:GetLength()
 			print( "SMH Audio: Loaded from '"..path.."'")
 			SMH.Controller.UpdateServerAudio()
+			SMH.UI.CreateAudioClipPointer(audioclip)
 		else
 			print( "SMH Audio: Error loading file!", errCode, errStr )
 		end

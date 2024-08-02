@@ -11,6 +11,8 @@ local SelectedPointers = {}
 local OffsetPointers = {}
 local LocalIDs = 0
 
+local AudioClipPointers = {}
+
 local LastSelectedKeyframe = nil
 local KeyColor = Color(0, 200, 0)
 
@@ -213,6 +215,19 @@ local function NewKeyframePointer(keyframeId)
     return pointer
 end
 
+local function NewAudioClipPointer(audioClip)
+
+    local pointer = WorldClicker.MainMenu.FramePanel:CreateAudioClipPointer(audioClip)
+	pointer.OnPointerReleased = function(_, frame)
+		--update start frame
+		audioClip.Frame = frame
+		SMH.Controller.UpdateServerAudio()
+		print("audio frame updated")
+	end
+	
+	return pointer
+end
+
 local function AddCallbacks()
 
     WorldClicker.OnEntitySelected = function(_, entity, multiselect)
@@ -269,6 +284,13 @@ local function AddCallbacks()
 	WorldClicker.MainMenu.OnRequestDebugAudio = function()
 			print(util.TableToJSON(SMH.AudioClipData))
     end
+	--AUDIO 
+	WorldClicker.MainMenu.OnRequestEditAudioTrack = function()
+		local bool = WorldClicker.MainMenu.EditAudioTrack:GetChecked()
+		SMH.State.EditAudioTrack = bool
+		WorldClicker.MainMenu:UpdateAudioTrackEditMode(bool)
+    end
+	--AUDIO
 	
     WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
         SaveMenu:SetVisible(true)
@@ -831,6 +853,11 @@ end
 
 function MGR.SetWorldData(console, push, release)
     PropertiesMenu:ShowWorldSettings(console, push, release)
+end
+
+function MGR.CreateAudioClipPointer(audioClip)
+	table.insert(AudioClipPointers, NewAudioClipPointer(audioClip))
+	--WorldClicker.MainMenu.FramePanel:CreateAudioClipPointer(audioClip)
 end
 
 SMH.UI = MGR

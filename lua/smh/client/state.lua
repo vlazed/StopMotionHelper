@@ -5,4 +5,6 @@ SMH.State = {
 
     PlaybackRate = 30,
     PlaybackLength = 100,
+	
+	EditAudioTrack = false
 }

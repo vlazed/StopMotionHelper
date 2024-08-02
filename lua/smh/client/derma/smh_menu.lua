@@ -72,14 +72,26 @@ function PANEL:Init()
     self.RecordButton:SetText("Record")
     self.RecordButton.DoClick = function() self:OnRequestRecord() end
 	
-	-- AUDIO TEMP
-	self.LoadAudioButton = vgui.Create("DButton", self)
-    self.LoadAudioButton:SetText("Load Audio")
-    self.LoadAudioButton.DoClick = function() self:OnRequestAddAudio() end
+	/*-- AUDIO TEMP
 	
 	self.DebugAudioButton = vgui.Create("DButton", self)
     self.DebugAudioButton:SetText("Debug Audio")
     self.DebugAudioButton.DoClick = function() self:OnRequestDebugAudio() end
+	-- AUDIO TEMP*/
+	
+	-- AUDIO
+	self.EditAudioTrack = vgui.Create("DCheckBoxLabel", self)
+    self.EditAudioTrack:SetText("Edit Audio Track")
+	self.EditAudioTrack.OnChange = function(bool) self:OnRequestEditAudioTrack(bool) end
+	
+	self.AudioClipTools = vgui.Create("DButton", self)
+    self.AudioClipTools:SetText("Audio Clip Tools")
+    self.AudioClipTools.DoClick = function() self:OnRequestAudioClipTools() end
+	
+	self.LoadAudioButton = vgui.Create("DButton", self)
+    self.LoadAudioButton:SetText("Load Audio")
+    self.LoadAudioButton.DoClick = function() self:OnRequestAddAudio() end
+	-- AUDIO
 
     self.PropertiesButton = vgui.Create("DButton", self)
     self.PropertiesButton:SetText("Properties")
@@ -143,12 +155,19 @@ function PANEL:PerformLayout(width, height)
     self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
 	
-	-- AUDIO TEMP
-	self.LoadAudioButton:SetPos(width - 60 * 6 - 5 * 6, 2)
+	--AUDIO
+	self.EditAudioTrack:SetPos(width - 60 * 7.25 - 5 * 7.25, 2)
+    self.EditAudioTrack:SetSize(120, 20)
+	
+	self.AudioClipTools:SetPos(width - 60 * 8.5 - 5 * 8.5, 2)
+    self.AudioClipTools:SetSize(80, 20)
+	
+	self.LoadAudioButton:SetPos(width - 60 * 9.5 - 5 * 9.5, 2)
     self.LoadAudioButton:SetSize(60, 20)
 	
-	self.DebugAudioButton:SetPos(width - 60 * 7 - 5 * 7, 2)
-    self.DebugAudioButton:SetSize(60, 20)
+	--AUDIO TEMP
+	--self.DebugAudioButton:SetPos(width - 60 * 7 - 5 * 7, 2)
+    --self.DebugAudioButton:SetSize(60, 20)
 
     self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
     self.PropertiesButton:SetSize(60, 20)
@@ -218,6 +237,11 @@ function PANEL:UpdatePositionLabel(frame, totalFrames)
     self.PositionLabel:SizeToContents()
 end
 
+--AUDIO
+function PANEL:UpdateAudioTrackEditMode(edit)
+	self.AudioClipTools:SetEnabled(edit)
+end
+
 function PANEL:ShowEasingControls(easeIn, easeOut)
     self._sendKeyframeChanges = false
     self.EaseInControl:SetValue(easeIn)
@@ -237,5 +261,6 @@ function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end
 function PANEL:OnRequestOpenLoadMenu() end
 function PANEL:OnRequestOpenSettings() end
+function PANEL:OnRequestEditAudioTrack(bool) end
 
 vgui.Register("SMHMenu", PANEL, "DFrame")
