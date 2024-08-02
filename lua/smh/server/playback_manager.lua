@@ -152,19 +152,21 @@ local function AudioPlayback(player, playback)
 	
 	--check for start of clip
 	if playerAudio[player] then
-		if playerAudio[player].audioFrames[playback.CurrentFrame] then
-			local audioFrame = playerAudio[player].audioFrames[playback.CurrentFrame]
-			
-			--calculate end point
-			local endFrame = math.ceil(playback.CurrentFrame + playback.PlaybackRate * audioFrame.Duration)
-			local audioStop = {
-				ID = audioFrame.ID,
-				Player = player
-			}
-			table.insert(audioStopFrames, endFrame, audioStop)
-			
-			--start audio
-			SMH.Controller.PlayAudio(audioFrame.ID, player)
+		if playerAudio[player].audioFrames[playback.CurrentFrame] ~= nil then
+			for i,clip in pairs(playerAudio[player].audioFrames[playback.CurrentFrame]) do
+				local audioFrame = clip
+				
+				--calculate end point
+				local endFrame = math.ceil(playback.CurrentFrame + playback.PlaybackRate * audioFrame.Duration)
+				local audioStop = {
+					ID = audioFrame.ID,
+					Player = player
+				}
+				table.insert(audioStopFrames, endFrame, audioStop)
+				
+				--start audio
+				SMH.Controller.PlayAudio(audioFrame.ID, player)
+			end
 		end
 	end
 end
