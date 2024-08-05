@@ -59,11 +59,11 @@ function PANEL:PerformLayout(width, height)
 
     self:RefreshScrollBar()
     self:RefreshFrames()
-
+	
 end
 
 function PANEL:Paint(width, height)
-
+	--print("PAINT FRAME PANEL")
     local startX, endX = unpack(self.FrameArea)
     local frameWidth = (endX - startX) / (self.Zoom - 1)
 
@@ -74,7 +74,10 @@ function PANEL:Paint(width, height)
             surface.DrawLine(x, 6, x, height - 6)
         end
     end
-
+	
+	for _, pointer in pairs(self.AudioClipPointers) do
+        pointer:PaintOverride()
+    end
 end
 
 function PANEL:UpdateFrameCount(totalframes)
@@ -110,9 +113,21 @@ function PANEL:RefreshFrames()
     for _, pointer in pairs(self.FramePointers) do
         pointer:RefreshFrame()
     end
-	for _, pointer in pairs(self.AudioClipPointers) do
-        pointer:RefreshFrame()
+	for i, pointer in pairs(self.AudioClipPointers) do
+        pointer:RefreshFrame(i)
     end
+end
+
+function PANEL:SortClipOrder()
+	table.sort(self.AudioClipPointers, function(a, b)
+		local aFrame = a:GetStartFrame()
+		local bFrame = b:GetStartFrame()
+		if aFrame == bFrame then
+			return a:GetDuration() > b:GetDuration()
+		else
+			return aFrame < bFrame
+		end
+	end)
 end
 
 function PANEL:SetScrollOffset(offset)
@@ -145,7 +160,7 @@ end
 function PANEL:CreateAudioClipPointer(audioClip)
     local pointer = vgui.Create("SMHAudioClipPointer", self)
 	pointer:Setup(audioClip)
-    table.insert(self.AudioClipPointers, pointer)
+	table.insert(self.AudioClipPointers, pointer)
 
     return pointer
 end
