@@ -128,6 +128,7 @@ function PANEL:SortClipOrder()
 			return aFrame < bFrame
 		end
 	end)
+	self:RefreshFrames()
 end
 
 function PANEL:SetScrollOffset(offset)
@@ -161,6 +162,7 @@ function PANEL:CreateAudioClipPointer(audioClip)
     local pointer = vgui.Create("SMHAudioClipPointer", self)
 	pointer:Setup(audioClip)
 	table.insert(self.AudioClipPointers, pointer)
+	self:SortClipOrder()
 
     return pointer
 end

@@ -2,6 +2,9 @@ local PANEL = {}
 
 local frameWidth = 8
 
+local lockedHeight = 5
+local editHeight = 15
+
 function PANEL:Init()
 
     self:SetSize(8, 15)
@@ -10,7 +13,8 @@ function PANEL:Init()
 	self:SetPaintBackground(true)
     self.OutlineColor = Color(0, 0, 0)
     self.OutlineColorDragged = Color(255, 255, 255)
-    self.VerticalPosition = 0
+    self.VerticalPosition = 32
+	self.CursorOffsetX = 0
 	
 	self._audioClip = nil
     self._startFrame = 0
@@ -30,10 +34,10 @@ end
 function PANEL:Setup(audioClip)
 	self._audioClip = audioClip
 	self._id = audioClip.ID
-	self._fileName = audioClip.AudioChannel:GetFileName()
+	self._fileName = table.GetLastValue(string.Split(audioClip.AudioChannel:GetFileName(),"/"))
 	self._startFrame = audioClip.Frame
 	self:SetFrame(self._startFrame)
-	self:GetParent():SortClipOrder()
+	--self:GetParent():SortClipOrder()
 end
 
 function PANEL:Paint(width, height)
@@ -60,6 +64,12 @@ function PANEL:Paint(width, height)
 end
 
 function PANEL:PaintOverride()
+	if SMH.State.EditAudioTrack then
+		self:SetHeight(editHeight)
+	else
+		self:SetHeight(lockedHeight)
+	end
+	
 	local width = self:GetWide()
 	local height = self:GetTall()
 	
@@ -78,10 +88,12 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX+width, self.PosY+height, self.PosX, self.PosY+height)
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
 	
-	surface.SetTextPos(self.PosX+2, self.PosY+2)
-	surface.SetTextColor(Color(255,255,255))
-	surface.SetFont("DefaultSmall")
-	surface.DrawText(self._fileName)
+	if SMH.State.EditAudioTrack then
+		surface.SetTextPos(self.PosX+2, self.PosY+2)
+		surface.SetTextColor(Color(255,255,255))
+		surface.SetFont("DefaultSmall")
+		surface.DrawText(self._fileName)
+	end
 end
 
 function PANEL:GetFrame()
@@ -100,7 +112,7 @@ function PANEL:SetFrame(frame)
 
     
 	self.PosX = x - frameWidth / 2
-	self.PosY = height - self:GetTall() / 2
+	self.PosY = height - self:GetTall()
 	
 	self:SetPos(self.PosX, self.PosY)
 	
@@ -108,7 +120,8 @@ function PANEL:SetFrame(frame)
     local frameGap = (endX - startX) / (parent.Zoom - 1)
 	
 	self._duration = self._audioClip.Duration
-	self:SetSize(frameGap*self._duration*SMH.State.PlaybackRate, 15)
+	
+	self:SetWidth(frameGap*self._duration*SMH.State.PlaybackRate)
 	
     self._startFrame = frame
 end
@@ -149,6 +162,10 @@ function PANEL:AddID(id, mod)
 end */
 
 function PANEL:OnMousePressed(mousecode)
+	if not SMH.State.EditAudioTrack then
+		return
+	end
+	
     if mousecode ~= MOUSE_LEFT then
         self:MouseCapture(false)
         self._dragging = false
@@ -157,6 +174,8 @@ function PANEL:OnMousePressed(mousecode)
     end
 
     self:MouseCapture(true)
+	local offsetX,offsetY = self:CursorPos()
+	self.CursorOffsetX = offsetX --get offset
     self._dragging = true
 
     SMH.UI.SetOffsets(self)
@@ -218,11 +237,10 @@ function PANEL:OnCursorMoved()
     end
 
     local parent = self:GetParent()
-
     local cursorX, cursorY = parent:CursorPos()
     local startX, endX = unpack(parent.FrameArea)
 
-    local targetX = cursorX - startX
+    local targetX = cursorX - startX - self.CursorOffsetX
     local width = endX - startX
 
     local targetPos = math.Round(parent.ScrollOffset + (targetX / width) * (parent.Zoom - 1))
