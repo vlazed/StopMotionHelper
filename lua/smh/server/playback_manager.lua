@@ -98,6 +98,10 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     end
 end
 
+-- AUDIO PLAYBACK CONTROL
+local playerAudio = {}
+local audioStopFrames = {}
+
 function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
         StartFrame = startFrame,
@@ -113,12 +117,10 @@ end
 
 function MGR.StopPlayback(player)
     ActivePlaybacks[player] = nil
+	table.Empty(audioStopFrames) --clear stop frames table when playback is stopped by user
 end
 
 -- AUDIO
-
-local playerAudio = {}
-
 function MGR.UpdateServerAudio(len,ply)
 	if not playerAudio[ply] then
 		playerAudio[ply] = {
@@ -136,18 +138,20 @@ function MGR.UpdateServerAudio(len,ply)
 	end
 end
 
-local audioStopFrames = {}
-
 local function AudioPlayback(player, playback)
 	--check for end of playback
 	if playback.CurrentFrame == playback.EndFrame then
 		SMH.Controller.StopAllAudio(player)
+		table.Empty(audioStopFrames) --clear stop frames table when playback reaches end of timeline
 		return
 	end
 	--check for end of clip
 	if audioStopFrames[playback.CurrentFrame] then
 		--stop audio
-		SMH.Controller.StopAudio(audioStopFrames[playback.CurrentFrame].ID, player)
+		for k,v in pairs(audioStopFrames[playback.CurrentFrame]) do
+			SMH.Controller.StopAudio(v.ID, player)
+		end
+		table.remove(audioStopFrames,playback.CurrentFrame) --remove stop frames once playback has reached them
 	end
 	
 	--check for start of clip
@@ -162,7 +166,15 @@ local function AudioPlayback(player, playback)
 					ID = audioFrame.ID,
 					Player = player
 				}
-				table.insert(audioStopFrames, endFrame, audioStop)
+				
+				--add stop frame
+				if not audioStopFrames[endFrame] then
+					audioStopFrames[endFrame] = {
+						audioStop
+					}
+				else
+					table.insert(audioStopFrames[endFrame], audioStop)
+				end
 				
 				--start audio
 				SMH.Controller.PlayAudio(audioFrame.ID, player)
@@ -173,7 +185,7 @@ end
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
-		print("playback")
+		--print("playback")
 		AudioPlayback(player,playback)
 		
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
