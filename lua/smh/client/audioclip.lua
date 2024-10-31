@@ -6,13 +6,22 @@ local function GetAudioChannelByID(id)
 	end
 end
 
-function AUD.Play(id, startTime)
-	startTime = startTime or 0
+local function GetAudioClipData(id)
+	if SMH.AudioClipData.AudioClips[id] then
+		return SMH.AudioClipData.AudioClips[id]
+	end
+end
 
+function AUD.Play(id, startTime)
 	local audioChannel = GetAudioChannelByID(id)
-	if startTime ~= 0 then
+	local audioData = GetAudioClipData(id)
+	
+	startTime = startTime or audioData.StartTime
+	
+	if startTime ~= audioData.StartTime then
 		audioChannel:SetTime(startTime)
 	end
+	
 	audioChannel:Play()
 end
 
@@ -20,9 +29,10 @@ function AUD.Stop(id, rewind)
 	rewind = rewind or true
 	
 	local audioChannel = GetAudioChannelByID(id)
+	local audioData = GetAudioClipData(id)
 	audioChannel:Pause()
 	if rewind then
-		audioChannel:SetTime(0)
+		audioChannel:SetTime(audioData.StartTime)
 	end
 end
 
@@ -37,6 +47,18 @@ end
 function AUD.Destroy(id)
 	local audioChannel = GetAudioChannelByID(id)
 	audioChannel:Stop()
+end
+
+function AUD.TrimStart(id, frame)
+	//get time between start frame and target frame
+	//set start time
+	//subtract time from duration
+	//move start frame to target frame
+end
+
+function AUD.TrimEnd(id, frame)
+	//get time between start frame and target frame
+	//modify duration of clip based on frame input
 end
 
 SMH.AudioClip = AUD

@@ -14,6 +14,7 @@ include("client/derma/spawn.lua")
 include("client/derma/world_clicker.lua")
 include("client/derma/tooltip.lua")
 include("client/derma/audioclip_pointer.lua")
+include("client/derma/audioclip_tools.lua")
 
 include("client/concommands.lua")
 include("client/controller.lua")

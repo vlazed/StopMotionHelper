@@ -2,16 +2,25 @@ local MGR = {}
 
 
 
-function MGR.Create(path, frame)
+function MGR.Create(path, frame, startTime, duration)
+	
     local audioclips = {}
 	
 	sound.PlayFile( path, "noplay noblock", function( station, errCode, errStr )
 		if ( IsValid( station ) ) then
-			station:EnableLooping(false)
-			audioclip = SMH.AudioClipData:New(station, path)
+			local startTime = startTime or 0
+			local duration = duration or station:GetLength()-startTime
+			
+			local audioclip = SMH.AudioClipData:New(station, path)
 			audioclip.Frame = frame
-			audioclip.Duration = station:GetLength()
+			audioclip.Duration = duration
+			audioclip.StartTime = startTime
+			
+			station:SetTime(startTime)
+			station:EnableLooping(false)
+			
 			print( "SMH Audio: Loaded from '"..path.."'")
+			
 			SMH.Controller.UpdateServerAudio()
 			SMH.UI.CreateAudioClipPointer(audioclip)
 		else
@@ -20,7 +29,6 @@ function MGR.Create(path, frame)
 	end )
 
 	table.insert(audioclips, audioclip)
-
     return audioclips
 end
 

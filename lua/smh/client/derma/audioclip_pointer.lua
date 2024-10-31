@@ -34,7 +34,8 @@ end
 function PANEL:Setup(audioClip)
 	self._audioClip = audioClip
 	self._id = audioClip.ID
-	self._fileName = table.GetLastValue(string.Split(audioClip.AudioChannel:GetFileName(),"/"))
+	local splitName = string.Split(audioClip.AudioChannel:GetFileName(),"/")
+	self._fileName = splitName[#splitName]
 	self._startFrame = audioClip.Frame
 	self:SetFrame(self._startFrame)
 	--self:GetParent():SortClipOrder()
@@ -111,7 +112,7 @@ function PANEL:SetFrame(frame)
     local x = startX + (offsetFrame / (parent.Zoom - 1)) * frameAreaWidth
 
     
-	self.PosX = x - frameWidth / 2
+	self.PosX = x //- frameWidth / 2
 	self.PosY = height - self:GetTall()
 	
 	self:SetPos(self.PosX, self.PosY)
@@ -145,6 +146,10 @@ end
 
 function PANEL:GetID()
     return self._id
+end
+
+function PANEL:GetDuration()
+	return self._duration
 end
 
 /* function PANEL:GetEnts()

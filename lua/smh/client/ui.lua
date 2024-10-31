@@ -269,6 +269,7 @@ local function AddCallbacks()
 
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
         SMH.Controller.UpdateState(newState)
+		WorldClicker.MainMenu.FramePanel:RefreshFrames()
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
         local keyframes = {}
@@ -299,9 +300,9 @@ local function AddCallbacks()
         SMH.Controller.Record()
     end
 	
-	-- AUDIO TEMP
+	-- AUDIO
 	WorldClicker.MainMenu.OnRequestAddAudio = function()
-		local path = "sound/elevatormusic.wav"
+		local path = "sound/elevatormusic.wav" -- AUDIO LOAD (temp)
         SMH.Controller.AddAudio(path)
     end
 	WorldClicker.MainMenu.OnRequestDebugAudio = function()
@@ -310,10 +311,29 @@ local function AddCallbacks()
 	--AUDIO 
 	WorldClicker.MainMenu.OnRequestEditAudioTrack = function()
 		local bool = WorldClicker.MainMenu.EditAudioTrack:GetChecked()
-		SMH.State.EditAudioTrack = bool
 		WorldClicker.MainMenu:UpdateAudioTrackEditMode(bool)
+		WorldClicker.AudioClipToolsMenu:SetEnabled(bool)
+		SMH.State.EditAudioTrack = bool
     end
 	--AUDIO
+	WorldClicker.MainMenu.OnRequestAudioClipTools = function()
+		if WorldClicker.AudioClipToolsMenu:IsVisible() then
+			WorldClicker.AudioClipToolsMenu:SetVis(false)
+		else
+			WorldClicker.AudioClipToolsMenu:SetVis(true)
+		end
+	end
+	
+	-- AUDIO TOOLS
+	WorldClicker.AudioClipToolsMenu.OnRequestAudioClipDelete = function()
+		local clip = WorldClicker.MainMenu.FramePanel:GetAudioClipAtFrame(SMH.State.Frame)
+		print(SMH.State.Frame)
+		if clip then
+			print("DELETE")
+			SMH.Controller.RemoveAudio(clip:GetID())
+			WorldClicker.MainMenu.FramePanel:DeleteAudioClipPointer(clip)
+		end
+	end
 	
     WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
         SaveMenu:SetVisible(true)
@@ -497,6 +517,9 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     WorldClicker.SpawnMenu = vgui.Create("SMHSpawn", WorldClicker)
     WorldClicker.SpawnMenu:SetPos(0, ScrH() - 405 - 90)
     WorldClicker.SpawnMenu:SetVisible(false)
+	
+	WorldClicker.AudioClipToolsMenu = vgui.Create("SMHAudioClipTools", WorldClicker)
+    WorldClicker.AudioClipToolsMenu:SetPos(ScrW() - 458, ScrH() - 220)
 
     PropertiesMenu = vgui.Create("SMHProperties")
     PropertiesMenu:MakePopup()

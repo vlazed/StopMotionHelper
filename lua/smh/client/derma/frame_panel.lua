@@ -118,6 +118,7 @@ function PANEL:RefreshFrames()
     end
 end
 
+-- AUDIO
 function PANEL:SortClipOrder()
 	table.sort(self.AudioClipPointers, function(a, b)
 		local aFrame = a:GetStartFrame()
@@ -129,6 +130,26 @@ function PANEL:SortClipOrder()
 		end
 	end)
 	self:RefreshFrames()
+end
+
+-- AUDIO
+function PANEL:GetAudioClipAtFrame(frame)
+	--get all clips that exist at this frame
+	local clips = {}
+	for k,v in pairs(self.AudioClipPointers) do
+		local startFrame = v:GetFrame()
+		local endFrame = v:GetDuration()*SMH.State.PlaybackRate
+		
+		print(startFrame..", "..endFrame)
+		
+		if startFrame <= frame and endFrame >= frame then
+			table.insert(clips,v)
+		end
+	end
+	--return last clip
+	if not table.IsEmpty(clips) then
+		return clips[#clips]
+	end
 end
 
 function PANEL:SetScrollOffset(offset)
