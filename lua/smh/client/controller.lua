@@ -86,7 +86,12 @@ function CTRL.AddAudio(path)
 
 	print(path, frame)
 	
-	local audioclips = SMH.AudioClipManager.Create(path, frame)
+	local audioclips = SMH.AudioClipManager.Create(path, frame, 2.938)
+end
+
+function CTRL.RemoveAudio(id)
+	SMH.AudioClipData:Delete(LocalPlayer(), id)
+	CTRL.UpdateServerAudio()
 end
 
 function CTRL.UpdateServerAudio()
@@ -222,7 +227,7 @@ function CTRL.StartPlayback()
 		local endFrame = math.ceil(SMH.State.Frame + SMH.State.PlaybackRate * clip.Duration)
 		if SMH.State.Frame > clip.Frame and SMH.State.Frame < endFrame then
 			--calculate start point
-			local startTime = (SMH.State.Frame-clip.Frame-0.5)/SMH.State.PlaybackRate
+			local startTime = ((SMH.State.Frame-clip.Frame-0.5)/SMH.State.PlaybackRate)+clip.StartTime
 			SMH.AudioClip.Play(clip.ID, startTime)
 		end
 	end
@@ -697,19 +702,19 @@ local function StopPhysicsRecordResponse(msgLength)
 end
 
 local function PlayAudio()
-	print("play audio")
+	//print("play audio")
 	local id = net.ReadUInt(INT_BITCOUNT)
 	SMH.AudioClip.Play(id)
 end
 
 local function StopAudio()
-	print("stop audio")
+	//print("stop audio")
 	local id = net.ReadUInt(INT_BITCOUNT)
 	SMH.AudioClip.Stop(id)
 end
 
 local function StopAllAudio()
-	print("stop all audio")
+	//print("stop all audio")
 	SMH.AudioClip.StopAll()
 end
 

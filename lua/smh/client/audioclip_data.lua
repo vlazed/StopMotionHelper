@@ -11,7 +11,8 @@ function META:New(station, path)
 		Path = path,
 		AudioChannel = station,
         Frame = -1,
-        Duration = 1
+        Duration = 1,
+		StartTime = 0
     }
     self.NextKeyframeId = self.NextKeyframeId + 1
 
