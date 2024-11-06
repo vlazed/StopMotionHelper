@@ -25,6 +25,10 @@ function PANEL:Init()
     self.Load.DoClick = function()
         self:LoadSelected()
     end
+	
+	self.LoadFrameRate = vgui.Create("DCheckBoxLabel", self)
+    self.LoadFrameRate:SetText("Load Framerate & Length")
+	self.LoadFrameRate:SetValue(true)
 
 end
 
@@ -41,6 +45,9 @@ function PANEL:PerformLayout(width, height)
 
     self.Load:SetPos(self:GetWide() - 60 - 5, self:GetTall() - 31)
     self.Load:SetSize(60, 20)
+	
+	self.LoadFrameRate:SetPos(5, self:GetTall() - 31)
+	self.LoadFrameRate:SetSize(200, 20)
 
 end
 
@@ -56,7 +63,7 @@ function PANEL:LoadSelected()
     end
 	
 	self:SetVisible(false)
-    self:OnLoadRequested(selectedSave:GetValue(1))
+    self:OnLoadRequested(selectedSave:GetValue(1), self.LoadFrameRate:GetChecked())
 end
 
 function PANEL:OnLoadRequested(path) end

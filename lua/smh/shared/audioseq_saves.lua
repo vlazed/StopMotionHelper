@@ -30,7 +30,7 @@ end
 
 function MGR.Serialize(clips)
 
-    local serializedClips = {}
+    local clipList = {}
 	
 	for k,v in pairs(clips) do
 		local clip = {
@@ -39,8 +39,14 @@ function MGR.Serialize(clips)
 			Duration = v.Duration,
 			StartTime = v.StartTime
 		}
-		table.insert(serializedClips, clip)
+		table.insert(clipList, clip)
 	end
+	
+	local serializedClips = {
+		PlaybackRate = SMH.State.PlaybackRate,
+		PlaybackLength = SMH.State.PlaybackLength,
+		Clips = clipList
+	}
 
     return serializedClips
 end

@@ -398,18 +398,31 @@ function CTRL.DeleteAudioSeq(path)
 	SMH.AudioSeqSaves.Delete(path)
 end
 
-function CTRL.LoadAudioSeq(path)
+function CTRL.LoadAudioSeq(path, setFrameRate)
+	local setFrameRate = setFrameRate or false
+	
 	// Clear audio clips
 	CTRL.DeleteAllAudio()
 	
 	// Create new clips
-	local audioClipLoad = SMH.AudioSeqSaves.Load(path)
+	local loadFile = SMH.AudioSeqSaves.Load(path)
+	local audioClipLoad = loadFile.Clips
 	for k,v in pairs(audioClipLoad) do
 		if v.Path and v.Frame and v.StartTime and v.Duration then
 			SMH.AudioClipManager.Create(v.Path, v.Frame, v.StartTime, v.Duration)
 		else
 			print("SMH Audio: Sequence file contains errors!")
 		end
+	end
+	
+	//Set frame rate if required
+	if setFrameRate then
+		local newState = {
+			Frame = SMH.State.Frame,
+			PlaybackRate = loadFile.PlaybackRate,
+			PlaybackLength = loadFile.PlaybackLength
+		}
+		CTRL.UpdateState(newState, true)
 	end
 end
 -- ================================================================
@@ -436,7 +449,9 @@ function CTRL.CloseMenu()
     SMH.UI.Close()
 end
 
-function CTRL.UpdateState(newState)
+function CTRL.UpdateState(newState, updatePlaybackControls)
+	local updatePlaybackControls = updatePlaybackControls or false
+	
     local allowedKeys = {
         Frame = true,
         Timeline = true,
@@ -451,7 +466,7 @@ function CTRL.UpdateState(newState)
         SMH.State[k] = v
     end
 
-    SMH.UI.UpdateState(SMH.State)
+    SMH.UI.UpdateState(SMH.State, updatePlaybackControls)
 end
 
 function CTRL.UpdateSettings(newSettings)
