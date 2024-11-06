@@ -64,7 +64,10 @@ function PANEL:SetSaves(saves)
 end
 
 function PANEL:AddSave(path)
-    self.FileList:AddLine(path)
+	for k,v in pairs(self.FileList:GetLines()) do
+		if v:GetValue(1) == path then return end
+	end
+	self.FileList:AddLine(path)
 end
 
 function PANEL:RemoveSave(path)
@@ -82,7 +85,7 @@ function PANEL:DoSave()
         return
     end
 
-    -- TODO clientside support for loading and saving
+    self:SetVisible(false)
     self:OnSaveRequested(path, false)
 end
 

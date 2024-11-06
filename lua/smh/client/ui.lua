@@ -403,8 +403,8 @@ local function AddCallbacks()
 		SaveAudioMenu:RemoveSave(path)
     end
 
-    LoadAudioMenu.OnLoadRequested = function(_, path)
-        SMH.Controller.LoadAudioSeq(path)
+    LoadAudioMenu.OnLoadRequested = function(_, path, setFrameRate)
+        SMH.Controller.LoadAudioSeq(path, setFrameRate)
     end
 	-- ===================================================
 
@@ -504,7 +504,6 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     LoadAudioMenu:SetVisible(false)
 	
 	InsertAudioMenu = vgui.Create("SMHInsertAudio", WorldClicker)
-	//InsertAudioMenu:MakePopup()
     InsertAudioMenu:SetVisible(false)
 	
 	WorldClicker.AudioClipToolsMenu = vgui.Create("SMHAudioClipTools", WorldClicker)
@@ -882,9 +881,16 @@ function MGR.SetTimeline(timeline)
     end
 end
 
-function MGR.UpdateState(newState)
+//modified for loading playback length and rate from audio sequence save
+function MGR.UpdateState(newState, updatePlaybackControls)
+	local updatePlaybackControls = updatePlaybackControls or false
+	
     WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
     WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
+	
+	if updatePlaybackControls then
+		WorldClicker.MainMenu:SetInitialState(newState)
+	end
 end
 
 function MGR.UpdateModifier(timelineinfo, changed)

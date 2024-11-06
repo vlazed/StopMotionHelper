@@ -179,10 +179,10 @@ function PANEL:PerformLayout(width, height)
 	self.InsertAudioButton:SetPos(width - 60 * 9.5 - 5 * 9.5 - 20, 2)
     self.InsertAudioButton:SetSize(80, 20)
 	
-	self.SaveAudioButton:SetPos(width - 85 * 9.5 - 5 * 9.5 + 20, 2)
+	self.SaveAudioButton:SetPos(width - 85 * 9.5 - 5 * 9.5 + 30, 2)
     self.SaveAudioButton:SetSize(85, 20)
 	
-	self.LoadAudioButton:SetPos(width - 85 * 8.5 - 5 * 8.5 + 20, 2)
+	self.LoadAudioButton:SetPos(width - 85 * 8.5 - 5 * 8.5 + 30, 2)
     self.LoadAudioButton:SetSize(85, 20)
 	-- ================================================================
 
