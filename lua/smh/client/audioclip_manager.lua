@@ -32,5 +32,16 @@ function MGR.Create(path, frame, startTime, duration)
     return audioclips
 end
 
+function MGR.TrimStart(id, frame)
+	//get time between start frame and target frame
+	//set start time
+	//subtract time from duration
+	//move start frame to target frame
+end
+
+function MGR.TrimEnd(id, frame)
+	//get time between start frame and target frame
+	//modify duration of clip based on frame input
+end
 
 SMH.AudioClipManager = MGR

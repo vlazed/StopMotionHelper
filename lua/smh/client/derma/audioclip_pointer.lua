@@ -1,7 +1,5 @@
 local PANEL = {}
 
-local frameWidth = 8
-
 local lockedHeight = 5
 local editHeight = 15
 
@@ -26,9 +24,7 @@ function PANEL:Init()
     self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
-	
-	/* self.PosX = 0
-	self.PosY = 0 */
+
 end
 
 function PANEL:Setup(audioClip)
@@ -38,31 +34,9 @@ function PANEL:Setup(audioClip)
 	self._fileName = splitName[#splitName]
 	self._startFrame = audioClip.Frame
 	self:SetFrame(self._startFrame)
-	--self:GetParent():SortClipOrder()
 end
 
-function PANEL:Paint(width, height)
-    /* local parent = self:GetParent()
-    if self._startFrame < parent.ScrollOffset or self._startFrame > (parent.ScrollOffset + parent.Zoom - 1) then
-        return
-    end */
-
-    /*local outlineColor = ((self._selected or self._dragging) and self.OutlineColorDragged) or self.OutlineColor
-
-	surface.SetDrawColor(self.Color:Unpack())
-	surface.DrawRect(1, 1, width - 1, height - 1)
-
-	surface.SetDrawColor(outlineColor:Unpack())
-	surface.DrawLine(0, 0, width, 0)
-	surface.DrawLine(width, 0, width, height)
-	surface.DrawLine(width, height, 0, height)
-	surface.DrawLine(0, height, 0, 0)
-	
-	surface.SetTextPos(2, 2)
-	surface.SetTextColor(Color(255,255,255))
-	surface.SetFont("DefaultSmall")
-	surface.DrawText(self._fileName) */
-end
+function PANEL:Paint(width, height) end
 
 function PANEL:PaintOverride()
 	if SMH.State.EditAudioTrack then
@@ -73,10 +47,6 @@ function PANEL:PaintOverride()
 	
 	local width = self:GetWide()
 	local height = self:GetTall()
-	
-	/* print("PAINT AUDIOCLIP POINTER")
-	print(self.PosX)
-	print(self.PosY) */
 	
 	local outlineColor = ((self._selected or self._dragging) and self.OutlineColorDragged) or self.OutlineColor
 
@@ -112,7 +82,7 @@ function PANEL:SetFrame(frame)
     local x = startX + (offsetFrame / (parent.Zoom - 1)) * frameAreaWidth
 
     
-	self.PosX = x //- frameWidth / 2
+	self.PosX = x
 	self.PosY = height - self:GetTall()
 	
 	self:SetPos(self.PosX, self.PosY)
@@ -151,20 +121,6 @@ end
 function PANEL:GetDuration()
 	return self._duration
 end
-
-/* function PANEL:GetEnts()
-    return self._ent
-end
-
-function PANEL:RemoveID(id)
-    self._ent[self._ids[id]] = nil
-    self._ids[id] = nil
-end
-
-function PANEL:AddID(id, mod)
-    self._ids[id] = mod
-    self._ent[mod] = id
-end */
 
 function PANEL:OnMousePressed(mousecode)
 	if not SMH.State.EditAudioTrack then
@@ -220,7 +176,6 @@ function PANEL:OnMouseReleased(mousecode)
 
     self:MouseCapture(false)
     self._dragging = false
-    --SMH.UI.ClearFrames(self)
     self:OnPointerReleased(self._startFrame)
 
     if mousecode == MOUSE_LEFT then

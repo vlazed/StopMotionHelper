@@ -1,4 +1,5 @@
 local PANEL = {}
+local deleteConfirmColour = Color(255,0,0)
 
 function PANEL:Init()
 
@@ -45,17 +46,18 @@ function PANEL:Init()
 	
 	self.Delete = vgui.Create("DButton", self)
     self.Delete:SetText("Delete")
-	--self.Delete:SetEnabled(false)
     self.Delete.DoClick = function()
-        self:OnRequestAudioClipDelete()
+        self:DoDelete()
     end
+	self.DeleteDefaultColour = self.Delete:GetColor()
+	self.DeleteConfirm = false
 	
 	self.DeleteAll = vgui.Create("DButton", self)
     self.DeleteAll:SetText("Delete All")
-	self.DeleteAll:SetEnabled(false)
     self.DeleteAll.DoClick = function()
-        print("delete all")
+        self:DoDeleteAll()
     end
+	self.DeleteAllConfirm = false
 	
 	self.Hide = vgui.Create("DButton", self)
     self.Hide:SetText("Hide")
@@ -106,11 +108,6 @@ function PANEL:PerformLayout(width, height)
 
 end
 
-/* function PANEL:SpawnSelected()
-    local _, selectedEntity = self.EntityList:GetSelectedLine()
-    self:OnSpawnRequested(SaveFile, selectedEntity:GetValue(1), false)
-end */
-
 function PANEL:SetVis(bool)
 	self.Visible = bool
 	if SMH.State.EditAudioTrack then
@@ -132,7 +129,44 @@ function PANEL:OnClose()
 	self.Visible = false
 end
 
+function PANEL:DoDelete()
+	if not self.DeleteConfirm then
+		self.Delete:SetText("Confirm?")
+		self.Delete:SetColor(deleteConfirmColour)
+		self.DeleteConfirm = true
+		timer.Create("DeleteConfirm", 3, 0, function()
+			self.Delete:SetText("Delete")
+			self.Delete:SetColor(self.DeleteDefaultColour)
+			self.DeleteConfirm = false
+		end)
+	else
+		self.Delete:SetText("Delete")
+		self.Delete:SetColor(self.DeleteDefaultColour)
+		self.DeleteConfirm = false
+		self.OnRequestAudioClipDelete()
+	end
+end
+
+function PANEL:DoDeleteAll()
+	if not self.DeleteAllConfirm then
+		self.DeleteAll:SetText("Confirm?")
+		self.DeleteAll:SetColor(deleteConfirmColour)
+		self.DeleteAllConfirm = true
+		timer.Create("DeleteAllConfirm", 3, 0, function()
+			self.DeleteAll:SetText("Delete All")
+			self.DeleteAll:SetColor(self.DeleteDefaultColour)
+			self.DeleteAllConfirm = false
+		end)
+	else
+		self.DeleteAll:SetText("Delete All")
+		self.DeleteAll:SetColor(self.DeleteDefaultColour)
+		self.DeleteAllConfirm = false
+		self.OnRequestAudioClipDeleteAll()
+	end
+end
+
 function PANEL:OnRequestAudioClipDelete() end
+function PANEL:OnRequestAudioClipDeleteAll() end
 
 
 vgui.Register("SMHAudioClipTools", PANEL, "DFrame")

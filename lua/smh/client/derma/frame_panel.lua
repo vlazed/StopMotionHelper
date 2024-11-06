@@ -63,7 +63,6 @@ function PANEL:PerformLayout(width, height)
 end
 
 function PANEL:Paint(width, height)
-	--print("PAINT FRAME PANEL")
     local startX, endX = unpack(self.FrameArea)
     local frameWidth = (endX - startX) / (self.Zoom - 1)
 
@@ -113,43 +112,9 @@ function PANEL:RefreshFrames()
     for _, pointer in pairs(self.FramePointers) do
         pointer:RefreshFrame()
     end
-	for i, pointer in pairs(self.AudioClipPointers) do
+	for i, pointer in pairs(self.AudioClipPointers) do -- AUDIO
         pointer:RefreshFrame(i)
     end
-end
-
--- AUDIO
-function PANEL:SortClipOrder()
-	table.sort(self.AudioClipPointers, function(a, b)
-		local aFrame = a:GetStartFrame()
-		local bFrame = b:GetStartFrame()
-		if aFrame == bFrame then
-			return a:GetDuration() > b:GetDuration()
-		else
-			return aFrame < bFrame
-		end
-	end)
-	self:RefreshFrames()
-end
-
--- AUDIO
-function PANEL:GetAudioClipAtFrame(frame)
-	--get all clips that exist at this frame
-	local clips = {}
-	for k,v in pairs(self.AudioClipPointers) do
-		local startFrame = v:GetFrame()
-		local endFrame = v:GetDuration()*SMH.State.PlaybackRate
-		
-		print(startFrame..", "..endFrame)
-		
-		if startFrame <= frame and endFrame >= frame then
-			table.insert(clips,v)
-		end
-	end
-	--return last clip
-	if not table.IsEmpty(clips) then
-		return clips[#clips]
-	end
 end
 
 function PANEL:SetScrollOffset(offset)
@@ -179,6 +144,36 @@ function PANEL:DeleteFramePointer(pointer)
     pointer:Remove()
 end
 
+-- AUDIO ======================================================
+function PANEL:SortClipOrder()
+	table.sort(self.AudioClipPointers, function(a, b)
+		local aFrame = a:GetStartFrame()
+		local bFrame = b:GetStartFrame()
+		if aFrame == bFrame then
+			return a:GetDuration() > b:GetDuration()
+		else
+			return aFrame < bFrame
+		end
+	end)
+	self:RefreshFrames()
+end
+
+function PANEL:GetAudioClipPointerAtFrame(frame)
+	--get all clips that exist at this frame
+	local clips = {}
+	for k,v in pairs(self.AudioClipPointers) do
+		local startFrame = v:GetFrame()
+		local endFrame = v:GetDuration()*SMH.State.PlaybackRate
+		if startFrame <= frame and endFrame >= frame then
+			table.insert(clips,v)
+		end
+	end
+	--return last clip
+	if not table.IsEmpty(clips) then
+		return clips[#clips]
+	end
+end
+
 function PANEL:CreateAudioClipPointer(audioClip)
     local pointer = vgui.Create("SMHAudioClipPointer", self)
 	pointer:Setup(audioClip)
@@ -192,6 +187,14 @@ function PANEL:DeleteAudioClipPointer(pointer)
     table.RemoveByValue(self.AudioClipPointers, pointer)
     pointer:Remove()
 end
+
+function PANEL:DeleteAllAudioClipPointers()
+	for k,v in pairs(self.AudioClipPointers) do
+		v:Remove()
+	end
+	table.Empty(self.AudioClipPointers)
+end
+-- ============================================================
 
 function PANEL:OnMousePressed(mousecode)
     if mousecode ~= MOUSE_LEFT then

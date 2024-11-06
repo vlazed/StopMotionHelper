@@ -98,9 +98,10 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     end
 end
 
--- AUDIO PLAYBACK CONTROL
-local playerAudio = {}
-local audioStopFrames = {}
+-- AUDIO PLAYBACK CONTROL ==========
+local playerAudio = {} //list of audio clips to play
+local audioStopFrames = {} //which frame to stop each audio clip at
+-- =================================
 
 function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
@@ -117,10 +118,10 @@ end
 
 function MGR.StopPlayback(player)
     ActivePlaybacks[player] = nil
-	table.Empty(audioStopFrames) --clear stop frames table when playback is stopped by user
+	table.Empty(audioStopFrames) -- AUDIO: clear stop frames table when playback is stopped by user
 end
 
--- AUDIO
+-- AUDIO ================================
 function MGR.UpdateServerAudio(len,ply)
 	if not playerAudio[ply] then
 		playerAudio[ply] = {
@@ -182,11 +183,11 @@ local function AudioPlayback(player, playback)
 		end
 	end
 end
+-- ======================================
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
-		--print("playback")
-		AudioPlayback(player,playback)
+		AudioPlayback(player,playback) -- AUDIO PLAYBACK
 		
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
 
