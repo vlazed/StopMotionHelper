@@ -12,6 +12,9 @@ local function GetAudioClipData(id)
 	end
 end
 
+
+// Audio channel start/stop
+
 function AUD.Play(id, startTime)
 	local audioChannel = GetAudioChannelByID(id)
 	local audioData = GetAudioClipData(id)
@@ -44,21 +47,9 @@ function AUD.StopAll()
 	end
 end
 
-function AUD.Destroy(id)
+/* function AUD.Destroy(id)
 	local audioChannel = GetAudioChannelByID(id)
 	audioChannel:Stop()
-end
-
-function AUD.TrimStart(id, frame)
-	//get time between start frame and target frame
-	//set start time
-	//subtract time from duration
-	//move start frame to target frame
-end
-
-function AUD.TrimEnd(id, frame)
-	//get time between start frame and target frame
-	//modify duration of clip based on frame input
-end
+end */
 
 SMH.AudioClip = AUD

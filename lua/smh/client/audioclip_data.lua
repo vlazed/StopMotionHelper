@@ -21,12 +21,18 @@ function META:New(station, path)
     return audioClip
 end
 
-function META:Delete(player, id)
+function META:Delete(id)
     if not self.AudioClips[id] then
         return
     end
 	self.AudioClips[id].AudioChannel:Stop()
     self.AudioClips[id] = nil
+end
+
+function META:DeleteAll()
+	for k,v in pairs(self.AudioClips) do
+		self:Delete(v.ID)
+	end
 end
 
 SMH.AudioClipData = {
