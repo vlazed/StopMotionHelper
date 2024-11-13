@@ -15,6 +15,7 @@ function PANEL:Init()
     self.PathLabel:SetMouseInputEnabled(true)
     self.PathLabel:SetText("smh/")
     self.PathLabel:SetTooltip("smh/")
+    self.PathLabel:SetDark(true)
 
     self.FileList = vgui.Create("DListView", self)
     self.FileList:AddColumn("Saved scenes")
@@ -56,15 +57,19 @@ function PANEL:Init()
 
     self.SaveEntity = vgui.Create("DLabel", self)
     self.SaveEntity:SetText("Save's model: " .. "nil")
+    self.SaveEntity:SetDark(true)
 
     self.SaveClass = vgui.Create("DLabel", self)
     self.SaveClass:SetText("Save's class: " .. "nil")
+    self.SaveClass:SetDark(true)
 
     self.SaveMap = vgui.Create("DLabel", self)
     self.SaveMap:SetText("Save's map: " .. "nil")
+    self.SaveMap:SetDark(true)
 
     self.SelectedEnt = vgui.Create("DLabel", self)
     self.SelectedEnt:SetText("Selected model: " .. "nil")
+    self.SelectedEnt:SetDark(true)
 
 end
 
