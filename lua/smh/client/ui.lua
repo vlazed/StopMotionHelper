@@ -490,6 +490,12 @@ function MGR.SetFrame(frame)
     end
 end
 
+function MGR.IsFrameKeyframe(frame)
+	if FrameToKeyframe[frame] then
+		return KeyframeEasingData[FrameToKeyframe[frame]]		
+	end
+end
+
 function MGR.SetKeyframes(keyframes, isreceiving)
     local propertymods = PropertiesMenu:GetCurrentModifiers()
 
