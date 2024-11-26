@@ -26,9 +26,17 @@ concommand.Add("-smh_menu", function()
     SMH.Controller.CloseMenu()
 end, nil, "Close the SMH Timeline")
 
-concommand.Add("smh_record", function()
-    SMH.Controller.Record()
+concommand.Add("smh_record", function(_, _, args)
+    local frame = tonumber(args[1]) or SMH.State.Frame
+    SMH.Controller.Record(frame)
 end, nil, "Record a keyframe on the SMH timeline")
+
+concommand.Add("smh_delete", function()
+	local frame = SMH.State.Frame
+	local ids = SMH.UI.GetKeyframesOnFrame(frame)
+	if not ids then return end
+    SMH.Controller.DeleteKeyframe(ids)
+end)
 
 do
     local function suggestFrames(command)
@@ -83,6 +91,24 @@ end, nil, "Stop SMH playback")
 concommand.Add("smh_quicksave", function()
     SMH.Controller.QuickSave()
 end)
+
+concommand.Add("smh_smooth", function(_, _, args)
+    if SMH.UI.IsFrameKeyframe(SMH.State.Frame) then
+        local passes = tonumber(args[1]) or 1
+        SMH.Controller.Smooth({SMH.State.Frame}, passes)
+    end
+end, nil, "Apply additional keyframes to produce a smoother result", nil)
+
+concommand.Add("smh_smoothall", function(_, _, args)
+    local passes = tonumber(args[1]) or 1
+    local keyframes = {}
+    for i = 0, SMH.State.PlaybackLength, 1 do
+        if SMH.UI.IsFrameKeyframe(i) then
+            table.insert(keyframes, i)
+        end
+    end
+    SMH.Controller.Smooth(keyframes, passes)
+end, nil, "Apply smoothing to all keyframes", nil)
 
 do
     local function suggestStartingFrame(command)
