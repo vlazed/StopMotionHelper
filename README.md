@@ -7,5 +7,6 @@ This unofficial version of SMH adds:
 - Bonemerged entity support
 - Frame jumping support
 - Smoothing trick concommand
+- Entity names when hovered over
 
 These changes are unlikely to be added into the official SMH version. If these changes happen to be included in the official version, I'd recommend migrating from my fork.

@@ -342,7 +342,7 @@ function PANEL:SetName(name)
     self:SetEntities(EntsTable)
 end
 
-function PANEL:GetName(entity)
+function PANEL:GetEntityName(entity)
     return EntsTable[entity] and EntsTable[entity].Name or GetModelName(entity)
 end
 
