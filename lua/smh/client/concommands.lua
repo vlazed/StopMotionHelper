@@ -56,7 +56,7 @@ concommand.Add("smh_nextframe", function()
     local pos = SMH.State.Frame
     for i=pos+1, SMH.State.PlaybackLength, 1 do
         if SMH.UI.IsFrameKeyframe(i) then
-            SMH.UI.SetFrame(i)
+            SMH.Controller.SetFrame(i)
             return
         end
     end
@@ -66,7 +66,7 @@ concommand.Add("smh_previousframe", function()
     local pos = SMH.State.Frame
     for i=pos-1, 0, -1 do
         if SMH.UI.IsFrameKeyframe(i) then
-            SMH.UI.SetFrame(i)
+            SMH.Controller.SetFrame(i)
             return
         end
     end
