@@ -88,6 +88,32 @@ function CTRL.Record()
     net.SendToServer()
 end
 
+function CTRL.Smooth(frames, maxPasses)
+    timer.Remove("SMH_Smoothing_Timer")
+    timer.Create("SMH_Smoothing_Timer", LocalPlayer():Ping() / 1000, maxPasses, function()
+        local smoothingFrames = {}
+
+        for i, keyframe in ipairs(frames) do
+            if keyframe >= 0 and not smoothingFrames[keyframe] then
+                SMH.Controller.SetFrame(keyframe-1)
+                SMH.Controller.Record()
+                SMH.Controller.SetFrame(keyframe+1)
+                SMH.Controller.Record()
+                SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
+                smoothingFrames[keyframe-1] = keyframe-1
+                smoothingFrames[keyframe+1] = keyframe+1
+
+                table.insert(frames, keyframe-1)
+                table.insert(frames, keyframe+1)
+                table.remove(frames, i)
+            end
+            table.sort(frames)
+        end
+    end)
+
+    timer.Start("SMH_Smoothing_Timer")
+end
+
 function CTRL.UpdateKeyframe(keyframeId, updateData, singledata)
     local keyframeAmount = #keyframeId
 
