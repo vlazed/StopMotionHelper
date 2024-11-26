@@ -68,8 +68,8 @@ function CTRL.SelectEntity(entity, enttable)
     net.SendToServer()
 end
 
-function CTRL.Record()
-    if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() then
+function CTRL.Record(frame)
+    if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then
         return
     end
     local count = 0
@@ -83,7 +83,7 @@ function CTRL.Record()
     for entity, _ in pairs(SMH.State.Entity) do
         net.WriteEntity(entity)
     end
-    net.WriteUInt(SMH.State.Frame, INT_BITCOUNT)
+    net.WriteUInt(frame or SMH.State.Frame, INT_BITCOUNT)
     net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
 end
@@ -96,9 +96,9 @@ function CTRL.Smooth(frames, maxPasses)
         for i, keyframe in ipairs(frames) do
             if keyframe >= 0 and not smoothingFrames[keyframe] then
                 SMH.Controller.SetFrame(keyframe-1)
-                SMH.Controller.Record()
+                SMH.Controller.Record(keyframe-1)
                 SMH.Controller.SetFrame(keyframe+1)
-                SMH.Controller.Record()
+                SMH.Controller.Record(keyframe+1)
                 SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
                 smoothingFrames[keyframe-1] = keyframe-1
                 smoothingFrames[keyframe+1] = keyframe+1
