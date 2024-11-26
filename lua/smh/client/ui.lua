@@ -215,7 +215,20 @@ end
 
 local function AddCallbacks()
 
+    local lastEntity = NULL
+    local entityCount = 1
     WorldClicker.OnEntitySelected = function(_, entity, multiselect)
+        -- Cycle through an entity's bonemerged items with the WorldClicker
+        if lastEntity == entity then
+            local n = #entity:GetChildren() + 1
+            local newEntity = entity:GetChildren()[entityCount]
+            entityCount = n > 0 and (entityCount + 1) % n or 1
+            entity = newEntity and newEntity:GetModel() and newEntity or entity
+        else
+            entityCount = 1
+            lastEntity = entity
+        end
+
         local enttable = table.Copy(SMH.State.Entity)
         if multiselect == 1 then
             enttable[entity] = true
