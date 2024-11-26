@@ -342,6 +342,10 @@ function PANEL:SetName(name)
     self:SetEntities(EntsTable)
 end
 
+function PANEL:GetName(entity)
+    return EntsTable[entity] and EntsTable[entity].Name or GetModelName(entity)
+end
+
 function PANEL:UpdateTimelineInfo(timelineinfo)
     PropertyTable = table.Copy(timelineinfo)
     self:BuildTimelineinfo()

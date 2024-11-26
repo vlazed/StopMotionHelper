@@ -22,6 +22,13 @@ function PANEL:SetVisible(visible)
     if visible then
         RestoreCursorPosition()
     end
+    self:OnVisibilityChange(visible)
+end
+
+function PANEL:Think()
+    local trace = util.TraceLine(util.GetPlayerTrace(LocalPlayer()))
+
+    self:OnEntityHovered(trace.HitNonWorld and trace.Entity)
 end
 
 function PANEL:OnMousePressed(mousecode)
@@ -39,5 +46,7 @@ function PANEL:OnMousePressed(mousecode)
 end
 
 function PANEL:OnEntitySelected(entity, setting) end
+function PANEL:OnEntityHovered(entity, setting) end
+function PANEL:OnVisibilityChange(visible) end
 
 vgui.Register("SMHWorldClicker", PANEL, "EditablePanel")

@@ -1,4 +1,5 @@
 local WorldClicker = nil
+local Tooltip = nil
 local SaveMenu = nil
 local LoadMenu = nil
 local PropertiesMenu = nil
@@ -242,6 +243,15 @@ local function AddCallbacks()
         SMH.Controller.SelectEntity(entity, enttable)
     end
 
+    WorldClicker.OnVisibilityChange = function(_, visible)
+        Tooltip:SetVisible(visible)
+    end
+
+    WorldClicker.OnEntityHovered = function(_, entity)
+        Tooltip:SetTooltip(entity and PropertiesMenu:GetName(entity) or "")
+        Tooltip:SetPos(input.GetCursorPos())
+    end
+
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
         SMH.Controller.UpdateState(newState)
     end
@@ -431,6 +441,7 @@ end)
 
 hook.Add("InitPostEntity", "SMHMenuSetup", function()
 
+    Tooltip = vgui.Create("SMHTooltip")
     WorldClicker = vgui.Create("SMHWorldClicker")
 
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
