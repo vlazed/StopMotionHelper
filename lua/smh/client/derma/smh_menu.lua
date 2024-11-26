@@ -19,7 +19,6 @@ function PANEL:Init()
     self.TimelinesBase = vgui.Create("Panel", self)
 
     self.PositionLabel = vgui.Create("DLabel", self)
-    self.PositionLabel:SetDark(true)
 
     self.PlaybackRateControl = vgui.Create("DNumberWang", self)
     self.PlaybackRateControl:SetMinMax(1, 216000)
@@ -30,7 +29,6 @@ function PANEL:Init()
     self.PlaybackRateControl.Label = vgui.Create("DLabel", self)
     self.PlaybackRateControl.Label:SetText("Framerate")
     self.PlaybackRateControl.Label:SizeToContents()
-    self.PlaybackRateControl.Label:SetDark(true)
 
     self.PlaybackLengthControl = vgui.Create("DNumberWang", self)
     self.PlaybackLengthControl:SetMinMax(1, 999)
@@ -41,7 +39,6 @@ function PANEL:Init()
     self.PlaybackLengthControl.Label = vgui.Create("DLabel", self)
     self.PlaybackLengthControl.Label:SetText("Frame count")
     self.PlaybackLengthControl.Label:SizeToContents()
-    self.PlaybackLengthControl.Label:SetDark(true)
 
     self.Easing = vgui.Create("Panel", self)
 
@@ -57,7 +54,6 @@ function PANEL:Init()
     self.EaseInControl.Label = vgui.Create("DLabel", self.Easing)
     self.EaseInControl.Label:SetText("Ease in")
     self.EaseInControl.Label:SizeToContents()
-    self.EaseInControl.Label:SetDark(true)
 
     self.EaseOutControl = vgui.Create("DNumberWang", self.Easing)
     self.EaseOutControl:SetNumberStep(0.1)
@@ -71,7 +67,6 @@ function PANEL:Init()
     self.EaseOutControl.Label = vgui.Create("DLabel", self.Easing)
     self.EaseOutControl.Label:SetText("Ease out")
     self.EaseOutControl.Label:SizeToContents()
-    self.EaseOutControl.Label:SetDark(true)
 
     self.RecordButton = vgui.Create("DButton", self)
     self.RecordButton:SetText("Record")
@@ -176,7 +171,6 @@ function PANEL:UpdateTimelines(timelineinfo)
         self.TimelinesBase.Timeline[i].Label:SetTextColor(Color(100, 100, 100))
         self.TimelinesBase.Timeline[i].Label:SizeToContents()
         self.TimelinesBase.Timeline[i].Label:Center()
-        self.TimelinesBase.Timeline[i].Label:SetDark(true)
 
         self.TimelinesBase.Timeline[i]._pressed = false
         self.TimelinesBase.Timeline[i].OnMousePressed = function(_, mousecode)

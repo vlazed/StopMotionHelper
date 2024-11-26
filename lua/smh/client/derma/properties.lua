@@ -95,7 +95,6 @@ function PANEL:Init()
         self.EntityNameEnter.Label = vgui.Create("DLabel", self.EntitiesPanel)
         self.EntityNameEnter.Label:SetText("Selected entity's name:")
         self.EntityNameEnter.Label:SizeToContents()
-        self.EntityNameEnter.Label:SetDark(true)
 
     self.EntityList = vgui.Create("DListView", self.EntitiesPanel)
     self.EntityList:AddColumn("Recorded Entities")
@@ -140,7 +139,6 @@ function PANEL:Init()
 
     self.SelectedEntityLabel = vgui.Create("DLabel", self.TimelinesPanel)
     self.SelectedEntityLabel:SetText("Selected model: " .. "none")
-    self.SelectedEntityLabel:SetDark(true)
 
     self.AddTimeButton = vgui.Create("DButton", self.TimelinesPanel)
     self.AddTimeButton:SetText("Add Timeline")
@@ -163,7 +161,6 @@ function PANEL:Init()
 
     self.ColorLabel = vgui.Create("DLabel", self.ColorPanel)
     self.ColorLabel:SetText("Keyframe Color for timeline: " .. "none")
-    self.ColorLabel:SetDark(true)
  
     self.ColorPicker = vgui.Create("DColorMixer", self.ColorPanel)
     self.ColorPicker:SetPalette(false)
@@ -196,7 +193,6 @@ function PANEL:Init()
         self.ConsoleEnter.Label = vgui.Create("DLabel", self.WorldParent)
         self.ConsoleEnter.Label:SetText("Console command:")
         self.ConsoleEnter.Label:SizeToContents()
-        self.ConsoleEnter.Label:SetDark(true)
 
     self.ButtonPressEnter = vgui.Create("DTextEntry", self.WorldParent)
     self.ButtonPressEnter.OnLoseFocus = function(sel)
@@ -205,7 +201,6 @@ function PANEL:Init()
         self.ButtonPressEnter.Label = vgui.Create("DLabel", self.WorldParent)
         self.ButtonPressEnter.Label:SetText("Keys to press:")
         self.ButtonPressEnter.Label:SizeToContents()
-        self.ButtonPressEnter.Label:SetDark(true)
 
     self.ButtonReleaseEnter = vgui.Create("DTextEntry", self.WorldParent)
     self.ButtonReleaseEnter.OnLoseFocus = function(sel)
@@ -214,7 +209,6 @@ function PANEL:Init()
         self.ButtonReleaseEnter.Label = vgui.Create("DLabel", self.WorldParent)
         self.ButtonReleaseEnter.Label:SetText("Keys to release:")
         self.ButtonReleaseEnter.Label:SizeToContents()
-        self.ButtonReleaseEnter.Label:SetDark(true)
 
     self.WorldParent:SetVisible(false)
 
@@ -393,7 +387,6 @@ function PANEL:BuildTimelineinfo()
         for mod, name in pairs(ModifierList) do
             self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
             self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
-            self.TimelinesUI[i].Contents.Checker[mod]:SetDark(true)
             self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check)
                 if UsingWorld then return end
                 self:OnUpdateModifierRequested(i, mod, check)
