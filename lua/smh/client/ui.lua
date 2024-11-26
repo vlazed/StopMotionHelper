@@ -248,7 +248,7 @@ local function AddCallbacks()
     end
 
     WorldClicker.OnEntityHovered = function(_, entity)
-        Tooltip:SetTooltip(entity and PropertiesMenu:GetName(entity) or "")
+        Tooltip:SetTooltip(entity and PropertiesMenu:GetEntityName(entity) or "")
         Tooltip:SetPos(input.GetCursorPos())
     end
 
