@@ -391,6 +391,7 @@ function PANEL:BuildTimelineinfo()
         for mod, name in pairs(ModifierList) do
             self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
             self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
+            self.TimelinesUI[i].Contents.Checker[mod]:SetDark(true)
             self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check)
                 if UsingWorld then return end
                 self:OnUpdateModifierRequested(i, mod, check)
