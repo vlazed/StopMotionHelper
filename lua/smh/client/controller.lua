@@ -68,6 +68,47 @@ function CTRL.SelectEntity(entity, enttable)
     net.SendToServer()
 end
 
+-- AUDIO =========================
+function CTRL.AddAudio(path)
+	local frame = SMH.State.Frame
+
+	print(path, frame)
+	
+	local audioclips = SMH.AudioClipManager.Create(path, frame)
+end
+
+function CTRL.DeleteAudio(id, pointer)
+	SMH.AudioClipData:Delete(id)
+	if pointer ~= nil then
+		SMH.UI.DeleteAudioClipPointer(pointer)
+	end
+	CTRL.UpdateServerAudio()
+end
+
+function CTRL.DeleteAllAudio()
+	SMH.AudioClipData:DeleteAll()
+	SMH.UI.DeleteAllAudioClipPointers()
+	CTRL.UpdateServerAudio()
+end
+
+function CTRL.UpdateServerAudio()
+	local audioTable = {}
+	for i,clip in pairs(SMH.AudioClipData.AudioClips) do
+		if audioTable[clip.Frame] == nil then
+			audioTable[clip.Frame] = {}
+		end
+		table.insert(audioTable[clip.Frame], {
+			ID = clip.ID,
+			Duration = clip.Duration
+		})
+	end
+	
+	net.Start(SMH.MessageTypes.UpdateServerAudio)
+	net.WriteTable(audioTable)
+	net.SendToServer()
+end
+-- ===============================
+
 function CTRL.Record(frame)
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then
         return
@@ -202,11 +243,27 @@ function CTRL.StartPlayback()
     net.WriteUInt(SMH.State.PlaybackRate, INT_BITCOUNT)
     net.WriteTable(SMH.Settings.GetAll())
     net.SendToServer()
+	
+	-- AUDIO =========================
+	//check for any clips that are partway through and play them from that point
+	for i,clip in pairs(SMH.AudioClipData.AudioClips) do
+		//calculate end frame
+		local endFrame = math.ceil(SMH.State.Frame + SMH.State.PlaybackRate * clip.Duration)
+		if SMH.State.Frame > clip.Frame and SMH.State.Frame < endFrame then
+			//calculate start point
+			local startTime = ((SMH.State.Frame-clip.Frame-0.5)/SMH.State.PlaybackRate)+clip.StartTime
+			SMH.AudioClip.Play(clip.ID, startTime)
+		end
+	end
+	-- AUDIO =========================
 end
 
 function CTRL.StopPlayback()
     net.Start(SMH.MessageTypes.StopPlayback)
     net.SendToServer()
+	
+	-- AUDIO
+	SMH.AudioClip.StopAll()
 end
 
 function CTRL.GetServerSaves()
@@ -329,6 +386,47 @@ function CTRL.DeleteSave(path, isFolder, deleteFromClient)
     end
 end
 
+-- AUDIO SAVES ====================================================
+function CTRL.SaveAudioSeq(path)
+	//all clientside
+	local keyframes = SMH.AudioClipData.AudioClips
+	local serializedClips = SMH.AudioSeqSaves.Serialize(keyframes)
+	SMH.AudioSeqSaves.Save(path, serializedClips)
+end
+
+function CTRL.DeleteAudioSeq(path)
+	SMH.AudioSeqSaves.Delete(path)
+end
+
+function CTRL.LoadAudioSeq(path, setFrameRate)
+	local setFrameRate = setFrameRate or false
+	
+	// Clear audio clips
+	CTRL.DeleteAllAudio()
+	
+	// Create new clips
+	local loadFile = SMH.AudioSeqSaves.Load(path)
+	local audioClipLoad = loadFile.Clips
+	for k,v in pairs(audioClipLoad) do
+		if v.Path and v.Frame and v.StartTime and v.Duration then
+			SMH.AudioClipManager.Create(v.Path, v.Frame, v.StartTime, v.Duration)
+		else
+			print("SMH Audio: Sequence file contains errors!")
+		end
+	end
+	
+	//Set frame rate if required
+	if setFrameRate then
+		local newState = {
+			Frame = SMH.State.Frame,
+			PlaybackRate = loadFile.PlaybackRate,
+			PlaybackLength = loadFile.PlaybackLength
+		}
+		CTRL.UpdateState(newState, true)
+	end
+end
+-- ================================================================
+
 function CTRL.ShouldHighlight()
     return SMH.UI.IsOpen()
 end
@@ -351,7 +449,9 @@ function CTRL.CloseMenu()
     SMH.UI.Close()
 end
 
-function CTRL.UpdateState(newState)
+function CTRL.UpdateState(newState, updatePlaybackControls)
+	local updatePlaybackControls = updatePlaybackControls or false
+	
     local allowedKeys = {
         Frame = true,
         Timeline = true,
@@ -366,7 +466,7 @@ function CTRL.UpdateState(newState)
         SMH.State[k] = v
     end
 
-    SMH.UI.UpdateState(SMH.State)
+    SMH.UI.UpdateState(SMH.State, updatePlaybackControls)
 end
 
 function CTRL.UpdateSettings(newSettings)
@@ -755,6 +855,25 @@ local function StopPhysicsRecordResponse(msgLength)
     SMH.PhysRecord.Stop()
 end
 
+-- AUDIO CONTROL =================
+local function PlayAudio()
+	//print("play audio")
+	local id = net.ReadUInt(INT_BITCOUNT)
+	SMH.AudioClip.Play(id)
+end
+
+local function StopAudio()
+	//print("stop audio")
+	local id = net.ReadUInt(INT_BITCOUNT)
+	SMH.AudioClip.Stop(id)
+end
+
+local function StopAllAudio()
+	//print("stop all audio")
+	SMH.AudioClip.StopAll()
+end
+-- ===============================
+
 local function Setup()
     net.Receive(SMH.MessageTypes.SetFrameResponse, SetFrameResponse)
 
@@ -787,6 +906,10 @@ local function Setup()
     net.Receive(SMH.MessageTypes.RequestWorldDataResponse, RequestWorldDataResponse)
 
     net.Receive(SMH.MessageTypes.StopPhysicsRecordResponse, StopPhysicsRecordResponse)
+	
+	net.Receive(SMH.MessageTypes.PlayAudio, PlayAudio)
+	net.Receive(SMH.MessageTypes.StopAudio, StopAudio)
+	net.Receive(SMH.MessageTypes.StopAllAudio, StopAllAudio)
 end
 
 Setup()

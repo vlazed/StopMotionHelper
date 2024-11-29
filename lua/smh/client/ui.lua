@@ -12,6 +12,8 @@ local SelectedPointers = {}
 local OffsetPointers = {}
 local LocalIDs = 0
 
+local AudioClipPointers = {}
+
 local LastSelectedKeyframe = nil
 local KeyColor = Color(0, 200, 0)
 
@@ -214,6 +216,20 @@ local function NewKeyframePointer(keyframeId)
     return pointer
 end
 
+-- AUDIO ===========================================
+local function NewAudioClipPointer(audioClip)
+
+    local pointer = WorldClicker.MainMenu.FramePanel:CreateAudioClipPointer(audioClip)
+	pointer.OnPointerReleased = function(_, frame)
+		--update start frame
+		audioClip.Frame = frame
+		SMH.Controller.UpdateServerAudio()
+	end
+	
+	return pointer
+end
+-- =================================================
+
 local function AddCallbacks()
 
     local lastEntity = NULL
@@ -254,6 +270,7 @@ local function AddCallbacks()
 
     WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
         SMH.Controller.UpdateState(newState)
+		WorldClicker.MainMenu.FramePanel:RefreshFrames()
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
         local keyframes = {}
@@ -283,7 +300,54 @@ local function AddCallbacks()
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
     end
-    WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
+	
+	-- AUDIO MENUS =======================================================
+	WorldClicker.MainMenu.OnRequestInsertAudioMenu = function()
+		InsertAudioMenu:SetVisible(true)
+    end
+	
+	InsertAudioMenu.OnInsertAudioRequested = function(_, path)
+		SMH.Controller.AddAudio(path)
+	end
+	
+	WorldClicker.MainMenu.OnRequestEditAudioTrack = function()
+		local bool = WorldClicker.MainMenu.EditAudioTrack:GetChecked()
+		WorldClicker.MainMenu:UpdateAudioTrackEditMode(bool)
+		WorldClicker.AudioClipToolsMenu:SetEnabled(bool)
+		SMH.State.EditAudioTrack = bool
+    end
+	
+	WorldClicker.MainMenu.OnRequestAudioClipTools = function()
+		if WorldClicker.AudioClipToolsMenu:IsVisible() then
+			WorldClicker.AudioClipToolsMenu:SetVis(false)
+		else
+			WorldClicker.AudioClipToolsMenu:SetVis(true)
+		end
+	end
+	
+	-- AUDIO TOOLS =======================================================
+	WorldClicker.AudioClipToolsMenu.OnRequestAudioClipDelete = function()
+		local pointer = WorldClicker.MainMenu.FramePanel:GetAudioClipPointerAtFrame(SMH.State.Frame)
+		if pointer then
+			SMH.Controller.DeleteAudio(pointer:GetID(), pointer)
+		end
+	end
+	WorldClicker.AudioClipToolsMenu.OnRequestAudioClipDeleteAll = function()
+		SMH.Controller.DeleteAllAudio()
+	end
+	
+	-- AUDIO SAVE ========================================================
+	WorldClicker.MainMenu.OnRequestOpenSaveAudioMenu = function()
+        SaveAudioMenu:SetVisible(true)
+        SaveAudioMenu:SetSaves(SMH.AudioSeqSaves.ListFiles())
+    end
+    WorldClicker.MainMenu.OnRequestOpenLoadAudioMenu = function()
+        LoadAudioMenu:SetVisible(true)
+        LoadAudioMenu:SetSaves(SMH.AudioSeqSaves.ListFiles())
+    end
+	-- ===================================================================
+	
+	WorldClicker.MainMenu.OnRequestOpenSaveMenu = function()
         SaveMenu:SetVisible(true)
         SMH.Controller.GetServerSaves()
     end
@@ -291,6 +355,7 @@ local function AddCallbacks()
         LoadMenu:SetVisible(true)
         SMH.Controller.GetServerSaves()
     end
+	
     WorldClicker.MainMenu.OnRequestOpenSettings = function()
         WorldClicker.Settings:ApplySettings(SMH.Settings.GetAll())
         WorldClicker.Settings:SetVisible(true)
@@ -373,6 +438,21 @@ local function AddCallbacks()
         WorldClicker.SpawnMenu:SetVisible(true)
         SMH.Controller.SetSpawnGhost(true)
     end
+	
+	-- AUDIO =============================================
+	SaveAudioMenu.OnSaveRequested = function(_, path)
+        SMH.Controller.SaveAudioSeq(path)
+		SaveAudioMenu:AddSave(path)
+    end
+    SaveAudioMenu.OnDeleteRequested = function(_, path)
+        SMH.Controller.DeleteAudioSeq(path)
+		SaveAudioMenu:RemoveSave(path)
+    end
+
+    LoadAudioMenu.OnLoadRequested = function(_, path, setFrameRate)
+        SMH.Controller.LoadAudioSeq(path, setFrameRate)
+    end
+	-- ===================================================
 
     WorldClicker.SpawnMenu.OnClose = function()
         SMH.Controller.SetSpawnGhost(false)
@@ -461,6 +541,22 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     LoadMenu = vgui.Create("SMHLoad")
     LoadMenu:MakePopup()
     LoadMenu:SetVisible(false)
+	
+	-- AUDIO =====================================
+	SaveAudioMenu = vgui.Create("SMHSaveAudio")
+    SaveAudioMenu:MakePopup()
+    SaveAudioMenu:SetVisible(false)
+	
+	LoadAudioMenu = vgui.Create("SMHLoadAudio")
+    LoadAudioMenu:MakePopup()
+    LoadAudioMenu:SetVisible(false)
+	
+	InsertAudioMenu = vgui.Create("SMHInsertAudio", WorldClicker)
+    InsertAudioMenu:SetVisible(false)
+	
+	WorldClicker.AudioClipToolsMenu = vgui.Create("SMHAudioClipTools", WorldClicker)
+    WorldClicker.AudioClipToolsMenu:SetPos(ScrW() - 458, ScrH() - 220)
+	-- ===========================================
 
     WorldClicker.SpawnMenu = vgui.Create("SMHSpawn", WorldClicker)
     WorldClicker.SpawnMenu:SetPos(0, ScrH() - 405 - 90)
@@ -847,9 +943,16 @@ function MGR.SetTimeline(timeline)
     end
 end
 
-function MGR.UpdateState(newState)
+//modified for loading playback length and rate from audio sequence save
+function MGR.UpdateState(newState, updatePlaybackControls)
+	local updatePlaybackControls = updatePlaybackControls or false
+	
     WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
     WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
+	
+	if updatePlaybackControls then
+		WorldClicker.MainMenu:SetInitialState(newState)
+	end
 end
 
 function MGR.UpdateModifier(timelineinfo, changed)
@@ -895,5 +998,19 @@ function MGR.GetKeyframesOnFrame(frame)
 
 	return ids
 end
+
+-- AUDIO =========================================
+function MGR.CreateAudioClipPointer(audioClip)
+	table.insert(AudioClipPointers, NewAudioClipPointer(audioClip))
+end
+
+function MGR.DeleteAudioClipPointer(pointer)
+	WorldClicker.MainMenu.FramePanel:DeleteAudioClipPointer(pointer)
+end
+
+function MGR.DeleteAllAudioClipPointers()
+	WorldClicker.MainMenu.FramePanel:DeleteAllAudioClipPointers()
+end
+-- ===============================================
 
 SMH.UI = MGR

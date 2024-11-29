@@ -17,6 +17,7 @@ function PANEL:Init()
 
     self:SetSize(8, 15)
     self.Color = Color(0, 200, 0)
+	self.ColorDisabled = ColorAlpha(self.Color, 100)
     self.OutlineColor = Color(0, 0, 0)
     self.OutlineColorDragged = Color(255, 255, 255)
     self.VerticalPosition = 0
@@ -60,7 +61,11 @@ function PANEL:Paint(width, height)
 
     else
 
-        surface.SetDrawColor(self.Color:Unpack())
+        if SMH.State.EditAudioTrack then
+			surface.SetDrawColor(self.ColorDisabled:Unpack())
+		else
+			surface.SetDrawColor(self.Color:Unpack())
+		end
         surface.DrawRect(1, 1, width - 1, height - 1)
 
         surface.SetDrawColor(outlineColor:Unpack())
@@ -125,6 +130,10 @@ function PANEL:AddID(id, mod)
 end
 
 function PANEL:OnMousePressed(mousecode)
+	if SMH.State.EditAudioTrack then
+		return
+	end
+	
     if mousecode ~= MOUSE_LEFT then
         self:MouseCapture(false)
         self._dragging = false

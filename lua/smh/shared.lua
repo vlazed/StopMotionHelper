@@ -8,6 +8,13 @@ SMH.MessageTypes = {
 
     "SelectEntity",
     "SelectEntityResponse",
+	
+	-- AUDIO ==============
+	"UpdateServerAudio",
+	"PlayAudio",
+	"StopAudio",
+	"StopAllAudio",
+	-- ====================
 
     "CreateKeyframe",
     "UpdateKeyframe",
@@ -95,3 +102,4 @@ CreateConVar("sbox_maxsmhentity", 20, FCVAR_NOTIFY)
 
 include("shared/saves.lua")
 include("shared/tablesplit.lua")
+include("shared/audioseq_saves.lua")

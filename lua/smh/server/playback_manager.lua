@@ -98,6 +98,11 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     end
 end
 
+-- AUDIO PLAYBACK CONTROL ==========
+local playerAudio = {} //list of audio clips to play
+local audioStopFrames = {} //which frame to stop each audio clip at
+-- =================================
+
 function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
         StartFrame = startFrame,
@@ -113,10 +118,77 @@ end
 
 function MGR.StopPlayback(player)
     ActivePlaybacks[player] = nil
+	table.Empty(audioStopFrames) -- AUDIO: clear stop frames table when playback is stopped by user
 end
+
+-- AUDIO ================================
+function MGR.UpdateServerAudio(len,ply)
+	if not playerAudio[ply] then
+		playerAudio[ply] = {
+			audioFrames = {}
+		}
+	end
+	local audioTable = net.ReadTable()
+	if audioTable ~= nil then
+		table.Empty(playerAudio[ply].audioFrames)
+		playerAudio[ply].audioFrames = audioTable
+		print("SMH Audio: Updated serverside list of audios")
+		print(table.ToString(playerAudio, "Player Audios", true))
+	else
+		print("SMH Audio: Error receiving audio list from client.")
+	end
+end
+
+local function AudioPlayback(player, playback)
+	--check for end of playback
+	if playback.CurrentFrame == playback.EndFrame then
+		SMH.Controller.StopAllAudio(player)
+		table.Empty(audioStopFrames) --clear stop frames table when playback reaches end of timeline
+		return
+	end
+	--check for end of clip
+	if audioStopFrames[playback.CurrentFrame] then
+		--stop audio
+		for k,v in pairs(audioStopFrames[playback.CurrentFrame]) do
+			SMH.Controller.StopAudio(v.ID, player)
+		end
+		table.remove(audioStopFrames,playback.CurrentFrame) --remove stop frames once playback has reached them
+	end
+	
+	--check for start of clip
+	if playerAudio[player] then
+		if playerAudio[player].audioFrames[playback.CurrentFrame] ~= nil then
+			for i,clip in pairs(playerAudio[player].audioFrames[playback.CurrentFrame]) do
+				local audioFrame = clip
+				
+				--calculate end point
+				local endFrame = math.ceil(playback.CurrentFrame + playback.PlaybackRate * audioFrame.Duration)
+				local audioStop = {
+					ID = audioFrame.ID,
+					Player = player
+				}
+				
+				--add stop frame
+				if not audioStopFrames[endFrame] then
+					audioStopFrames[endFrame] = {
+						audioStop
+					}
+				else
+					table.insert(audioStopFrames[endFrame], audioStop)
+				end
+				
+				--start audio
+				SMH.Controller.PlayAudio(audioFrame.ID, player)
+			end
+		end
+	end
+end
+-- ======================================
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
+		AudioPlayback(player,playback) -- AUDIO PLAYBACK
+		
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
 
             playback.Timer = playback.Timer + FrameTime()
