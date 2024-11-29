@@ -19,6 +19,12 @@ include("client/derma/audioclip_insert.lua")
 include("client/derma/audioseq_save.lua")
 include("client/derma/audioseq_load.lua")
 
+include("client/derma/audioclip_pointer.lua")
+include("client/derma/audioclip_tools.lua")
+include("client/derma/audioclip_insert.lua")
+include("client/derma/audioseq_save.lua")
+include("client/derma/audioseq_load.lua")
+
 include("client/concommands.lua")
 include("client/controller.lua")
 include("client/highlighter.lua")
