@@ -23,6 +23,10 @@ function PANEL:Init()
     self.PlaybackRateControl = vgui.Create("DNumberWang", self)
     self.PlaybackRateControl:SetMinMax(1, 216000)
     self.PlaybackRateControl:SetDecimals(0)
+    self.PlaybackRateControl:SetConVar("smh_fps")
+    self.PlaybackRateControl.Think = function(self)
+        self:ConVarNumberThink()
+    end
     self.PlaybackRateControl.OnValueChanged = function(_, value)
         self:OnRequestStateUpdate({ PlaybackRate = tonumber(value) })
     end
@@ -31,8 +35,12 @@ function PANEL:Init()
     self.PlaybackRateControl.Label:SizeToContents()
 
     self.PlaybackLengthControl = vgui.Create("DNumberWang", self)
-    self.PlaybackLengthControl:SetMinMax(1, 999)
+    self.PlaybackLengthControl:SetMinMax(1, 100000)
     self.PlaybackLengthControl:SetDecimals(0)
+    self.PlaybackLengthControl:SetConVar("smh_framecount")
+    self.PlaybackLengthControl.Think = function(self)
+        self:ConVarNumberThink()
+    end
     self.PlaybackLengthControl.OnValueChanged = function(_, value)
         self:OnRequestStateUpdate({ PlaybackLength = tonumber(value) })
     end
