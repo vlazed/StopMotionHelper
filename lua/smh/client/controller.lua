@@ -130,25 +130,45 @@ function CTRL.Record(frame)
 end
 
 function CTRL.Smooth(frames, maxPasses)
-    timer.Remove("SMH_Smoothing_Timer")
-    timer.Create("SMH_Smoothing_Timer", LocalPlayer():Ping() / 1000, maxPasses, function()
-        local smoothingFrames = {}
+    local done = false
+    local co = coroutine.wrap(function()
+        for p = 1, maxPasses do
+            local smoothingFrames = {}
 
-        for i, keyframe in ipairs(frames) do
-            if keyframe >= 0 and not smoothingFrames[keyframe] then
-                SMH.Controller.SetFrame(keyframe-1)
-                SMH.Controller.Record(keyframe-1)
-                SMH.Controller.SetFrame(keyframe+1)
-                SMH.Controller.Record(keyframe+1)
-                SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
-                smoothingFrames[keyframe-1] = keyframe-1
-                smoothingFrames[keyframe+1] = keyframe+1
+            for i, keyframe in ipairs(frames) do
+                if keyframe >= 0 and not smoothingFrames[keyframe] and SMH.UI.IsFrameKeyframe(keyframe) then
+                    SMH.Controller.SetFrame(keyframe-1)
+                    coroutine.wait(0)
+                    SMH.Controller.Record(keyframe-1)
+                    coroutine.wait(0)
+                    SMH.Controller.SetFrame(keyframe+1)
+                    coroutine.wait(0)
+                    SMH.Controller.Record(keyframe+1)
+                    coroutine.wait(0)
 
-                table.insert(frames, keyframe-1)
-                table.insert(frames, keyframe+1)
-                table.remove(frames, i)
+                    local exists = SMH.UI.GetKeyframesOnFrame(keyframe)
+                    if not exists then continue end
+                    SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
+                    smoothingFrames[keyframe-1] = keyframe-1
+                    smoothingFrames[keyframe+1] = keyframe+1
+
+                    table.insert(frames, keyframe-1)
+                    table.insert(frames, keyframe+1)
+                    table.remove(frames, i)
+                end
+                table.sort(frames)
             end
-            table.sort(frames)
+
+            coroutine.yield()
+        end
+        done = true
+    end)
+    timer.Remove("SMH_Smoothing_Timer")
+    timer.Create("SMH_Smoothing_Timer", 0, -1, function()
+        if done then
+            timer.Remove("SMH_Smoothing_Timer")
+        else
+            co()
         end
     end)
 
