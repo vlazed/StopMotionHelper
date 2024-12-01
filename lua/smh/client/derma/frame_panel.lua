@@ -1,5 +1,7 @@
 local PANEL = {}
 
+Derma_Install_Convar_Functions(PANEL)
+
 function PANEL:Init()
 
     self:SetBackgroundColor(Color(64, 64, 64, 64))
@@ -21,6 +23,7 @@ function PANEL:Init()
     self.ScrollButtonRight.DoClick = function() self:SetScrollOffset(self.ScrollOffset + 1) end
 
     self.Zoom = 100
+    self:SetConVar("smh_zoom")
     self.TotalFrames = 100
     self.ScrollOffset = 0
     self.FrameArea = {0, 1}
@@ -221,9 +224,8 @@ function PANEL:OnMouseWheeled(scrollDelta)
         newZoom = 30
     end
 
-    self.Zoom = newZoom
-    self:RefreshFrames()
-    self:RefreshScrollBar()
+    self:SetValue(newZoom)
+    self:ConVarChanged(newZoom)
 end
 
 function PANEL:OnScrollBarPressed(mousecode)
@@ -236,6 +238,18 @@ function PANEL:OnScrollBarPressed(mousecode)
 
     local cursorXOffset, _ = self.ScrollBar:CursorPos()
     self._scrollCursorOffset = cursorXOffset
+end
+
+function PANEL:SetValue(newValue)
+    self.Zoom = newValue
+    self:RefreshFrames()
+    
+    if not self.ScrollBarRect then return end
+    self:RefreshScrollBar()
+end
+
+function PANEL:Think()
+    self:ConVarNumberThink()
 end
 
 function PANEL:OnScrollBarReleased(mousecode)
