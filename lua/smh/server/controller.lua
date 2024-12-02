@@ -784,6 +784,17 @@ for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
 
+hook.Remove("ShutDown", "SMHExitSave")
+hook.Add("ShutDown", "SMHExitSave", function()
+    for _, player in pairs(player.GetAll()) do
+        local properties = SMH.PropertiesManager.GetAllProperties(player)
+        local keyframes = SMH.KeyframeManager.GetAll(player)
+        local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
+    
+        SMH.Saves.Save("!!!EXIT_SAVE", serializedKeyframes, player)
+    end
+end)
+
 net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 
 net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)

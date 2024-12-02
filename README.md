@@ -10,6 +10,7 @@ This unofficial version of SMH adds:
 - Frame jumping support
 - Smoothing trick concommand
 - FPS, framecount, and timeline length convars to save between sessions
+- Exit saves
 - Entity names when hovered over
 - Modifiers for environment editors and volumetric clouds
 - Quality-of-life physics-recording indicators
