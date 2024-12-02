@@ -44,6 +44,14 @@ local function CreateGhost(player, entity, color, frame, ghostable)
     g.Frame = frame
     g.Physbones = false
 
+    if entity.RagdollWeightData and class == "prop_ragdoll" then
+        timer.Simple(0, function()
+            for i = 0, g:GetPhysicsObjectCount() - 1 do
+                g:GetPhysicsObjectNum(i):SetMass(entity.RagdollWeightData[i])
+            end
+        end)
+    end
+
     table.insert(ghostable, g)
 
     return g
