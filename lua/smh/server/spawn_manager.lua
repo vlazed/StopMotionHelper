@@ -126,7 +126,7 @@ function MGR.Spawn(model, settings, player, serializedKeyframes)
             local offsetpos = MGR.OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = MGR.OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(data[name].Modifiers, MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, tracepos)
+            local offsetdata = mod:Offset(data[name].Modifiers, MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, tracepos)
             mod:Load(entity, offsetdata, settings)
         else
             mod:Load(entity, data[name].Modifiers, settings)
@@ -204,7 +204,7 @@ function MGR.Pack(entities, serializedKeyframes)
         local entity = entities[data.Properties.Name]
         if not IsValid(entity) or entity:IsPlayer() then continue end
 
-        duplicator.ClearEntityModifier(ent, "SMHPackage")
+        duplicator.ClearEntityModifier(entity, "SMHPackage")
         duplicator.StoreEntityModifier(entity, "SMHPackage", table.Copy(data))
     end
 end

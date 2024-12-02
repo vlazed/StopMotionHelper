@@ -259,7 +259,7 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
             local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(data[name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
+            local offsetdata = mod:Offset(data[name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
             mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
         elseif data[name] then
             mod:Load(SpawnGhost[player], data[name].Modifiers, settings)
@@ -277,7 +277,7 @@ function MGR.RefreshSpawnPreview(player, offseton)
             local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
+            local offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
             mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
         elseif SpawnGhostData[player][name] then
             mod:Load(SpawnGhost[player], SpawnGhostData[player][name].Modifiers, GhostSettings[player])
@@ -321,7 +321,7 @@ hook.Add("Think", "SMHGhostSpawnOffsetPreview", function()
                     local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
                     local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-                    offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, data[name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
+                    local offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, data[name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
                     mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
                 end
             end

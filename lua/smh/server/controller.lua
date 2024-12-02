@@ -476,8 +476,8 @@ local function PackageApply(player, entity, data)
 
     SMH.Spawner.DupeOffsetKeyframes(player, entity, serializedKeyframes)
 
-    duplicator.ClearEntityModifier(ent, "SMHPackage")
-    duplicator.StoreEntityModifier(ent, "SMHPackage", data)
+    duplicator.ClearEntityModifier(entity, "SMHPackage")
+    duplicator.StoreEntityModifier(entity, "SMHPackage", data)
 
 end
 

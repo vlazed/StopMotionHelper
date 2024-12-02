@@ -320,13 +320,13 @@ function MGR.SaveProperties(timeline, name)
         TimelineMods = table.Copy(timeline.TimelineMods),
     }
 
-    path = SettingsDir .. name .. ".txt"
+    local path = SettingsDir .. name .. ".txt"
     local json = util.TableToJSON(template)
     file.Write(path, json)
 end
 
 function MGR.GetPreferences(name)
-    path = SettingsDir .. name .. ".txt"
+    local path = SettingsDir .. name .. ".txt"
     if not file.Exists(path, "DATA") then return nil end
 
     local json = file.Read(path)

@@ -23,12 +23,13 @@ function MGR.Create(path, frame, startTime, duration)
 			
 			SMH.Controller.UpdateServerAudio()
 			SMH.UI.CreateAudioClipPointer(audioclip)
+
+			table.insert(audioclips, audioclip)
 		else
 			print( "SMH Audio: Error loading file!", errCode, errStr )
 		end
 	end )
 
-	table.insert(audioclips, audioclip)
     return audioclips
 end
 
