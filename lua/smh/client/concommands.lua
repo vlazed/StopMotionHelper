@@ -152,3 +152,4 @@ end
 CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
 CreateClientConVar("smh_currentpreset", "default", true, false)
 CreateClientConVar("smh_motionpathbone", "", true, true)
+CreateClientConVar("smh_motionpathrange", 0, true, true)

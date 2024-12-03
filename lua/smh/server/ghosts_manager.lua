@@ -358,8 +358,8 @@ function MGR.RequestNodes(player)
     table.Empty(nodes)
 
     local bone = entity:LookupBone(boneName)
-    local physBone = entity:TranslateBoneToPhysBone(bone)
-    local isPhysBone = bone == entity:TranslatePhysBoneToBone(physBone)
+    local physBone = bone and entity:TranslateBoneToPhysBone(bone)
+    local isPhysBone = bone and (bone == entity:TranslatePhysBoneToBone(physBone))
 
     for _, keyframe in pairs(keyframes) do
         local pos
@@ -367,6 +367,7 @@ function MGR.RequestNodes(player)
             pos = keyframe.Modifiers.physbones[physBone].Pos 
             table.insert(nodes, {keyframe.Frame, pos})
         elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] then
+            -- TODO: Get world pos of bone position
             pos = keyframe.Modifiers.bones[bone].Pos
             table.insert(nodes, {keyframe.Frame, pos})
         elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
