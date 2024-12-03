@@ -11,6 +11,7 @@ This unofficial version of SMH adds:
 - Smoothing trick concommand
 - FPS, framecount, and timeline length convars to save between sessions
 - Exit saves
+- Bone motion paths
 - Entity names when hovered over
 - Modifiers for environment editors and volumetric clouds
 - Quality-of-life physics-recording indicators
