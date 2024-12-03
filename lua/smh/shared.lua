@@ -91,6 +91,9 @@ SMH.MessageTypes = {
     "StartPhysicsRecord",
     "StopPhysicsRecord",
     "StopPhysicsRecordResponse",
+
+    "RequestNodes",
+    "RequestNodesResponse",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val

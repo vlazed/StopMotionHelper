@@ -140,6 +140,8 @@ local function CreateKeyframe(msgLength, player)
     net.Start(SMH.MessageTypes.UpdateKeyframeResponse)
     SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
+
+    SMH.GhostsManager.UpdateKeyframe(player)
 end
 
 local bufferData = {}
@@ -746,6 +748,19 @@ local function StopPhysicsRecord(msgLength, player)
     SMH.PhysRecord.RecordStop(player)
 end
 
+local function RequestNodes(msgLength, player)
+    local nodes = SMH.GhostsManager.RequestNodes(player)
+
+    if not nodes then return end
+    net.Start(SMH.MessageTypes.RequestNodesResponse)
+    net.WriteUInt(#nodes, 14)
+    for i = 1, #nodes do
+        net.WriteUInt(nodes[i][1], 14)
+        net.WriteVector(nodes[i][2])
+    end
+    net.Send(player)
+end
+
 local MGR = {}
 
 function MGR.StopPhysicsRecordResponse(player)
@@ -856,3 +871,5 @@ net.Receive(SMH.MessageTypes.UpdateWorld, UpdateWorld)
 
 net.Receive(SMH.MessageTypes.StartPhysicsRecord, StartPhysicsRecord)
 net.Receive(SMH.MessageTypes.StopPhysicsRecord, StopPhysicsRecord)
+
+net.Receive(SMH.MessageTypes.RequestNodes, RequestNodes)

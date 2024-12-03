@@ -39,16 +39,24 @@ local function ReceiveProperties()
     return SMH.TableSplit.GetProperties()
 end
 
+local function RequestNodes()
+    net.Start(SMH.MessageTypes.RequestNodes)
+    net.SendToServer()
+end
+
 local CTRL = {}
 
 function CTRL.SetFrame(frame)
     if SMH.PhysRecord.IsActive() then return end
 
+    local settings = SMH.Settings.GetAll()
     net.Start(SMH.MessageTypes.SetFrame)
     net.WriteUInt(frame, INT_BITCOUNT)
-    net.WriteTable(SMH.Settings.GetAll())
+    net.WriteTable(settings)
     net.WriteUInt(SMH.State.Timeline, INT_BITCOUNT)
     net.SendToServer()
+
+    RequestNodes()
 end
 
 function CTRL.SelectEntity(entity, enttable)
@@ -875,6 +883,16 @@ local function StopPhysicsRecordResponse(msgLength)
     SMH.PhysRecord.Stop()
 end
 
+local function RequestNodesResponse(msgLength)
+    local nodes = {}
+    local len = net.ReadUInt(14)
+    for i = 1, len do 
+        nodes[i] = {net.ReadUInt(14), net.ReadVector()}
+    end
+
+    SMH.Renderer.SetNodes(nodes)
+end
+
 -- AUDIO CONTROL =================
 local function PlayAudio()
 	//print("play audio")
@@ -926,6 +944,8 @@ local function Setup()
     net.Receive(SMH.MessageTypes.RequestWorldDataResponse, RequestWorldDataResponse)
 
     net.Receive(SMH.MessageTypes.StopPhysicsRecordResponse, StopPhysicsRecordResponse)
+
+    net.Receive(SMH.MessageTypes.RequestNodesResponse, RequestNodesResponse)
 	
 	net.Receive(SMH.MessageTypes.PlayAudio, PlayAudio)
 	net.Receive(SMH.MessageTypes.StopAudio, StopAudio)

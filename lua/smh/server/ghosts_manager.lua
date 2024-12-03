@@ -43,6 +43,8 @@ local function CreateGhost(player, entity, color, frame, ghostable)
     g.Entity = entity
     g.Frame = frame
     g.Physbones = false
+    g:SetNW2Bool("SMHGhost", true)
+    g:SetNW2Entity("Entity", entity)
 
     if entity.RagdollWeightData and class == "prop_ragdoll" then
         timer.Simple(0, function()
@@ -88,6 +90,10 @@ function MGR.SelectEntity(player, entities)
         GhostData[player] = {
             Entity = {},
             Ghosts = {},
+            Nodes = {},
+            PreviousName = "",
+            LastEntity = NULL,
+            Updated = false
         }
     end
 
@@ -308,6 +314,70 @@ end
 function MGR.SetAngleOffset(ang, player)
     OffsetAng[player] = ang
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])
+end
+
+function MGR.UpdateKeyframe(player)
+    if not GhostData[player] then return end
+
+    GhostData[player].Updated = true
+end
+
+function MGR.RequestNodes(player)
+    if not GhostData[player] then return end
+
+    local nodes = GhostData[player].Nodes
+    local selectedEntities = GhostData[player].Entity
+    local previousName = GhostData[player].PreviousName
+    local lastEntity = GhostData[player].LastEntity
+    local updated = GhostData[player].Updated
+
+    local entities = SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities
+
+    if not nodes or not entities or not selectedEntities then return {} end
+
+    local entity = selectedEntities[1]
+    local keyframes = entities[entity]
+    local boneName = player:GetInfo("smh_motionpathbone")
+
+    GhostData[player].LastEntity = entity
+
+    if not keyframes then return {} end
+    if #boneName == 0 then return {} end
+
+    local sameKeyframeCount = #keyframes == #nodes
+    local sameBoneName = previousName == boneName
+    local sameEntity = lastEntity == entity
+
+    -- Don't send any data back if the number of keyframes, the motion path bone, or the selected entity hasn't changed at all
+    if sameKeyframeCount and sameBoneName and sameEntity and not updated then
+        return
+    end
+
+    GhostData[player].Updated = false
+
+    table.Empty(nodes)
+
+    local bone = entity:LookupBone(boneName)
+    local physBone = entity:TranslateBoneToPhysBone(bone)
+    local isPhysBone = bone == entity:TranslatePhysBoneToBone(physBone)
+
+    for _, keyframe in pairs(keyframes) do
+        local pos
+        if isPhysBone and keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBone] then
+            pos = keyframe.Modifiers.physbones[physBone].Pos 
+            table.insert(nodes, {keyframe.Frame, pos})
+        elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] then
+            pos = keyframe.Modifiers.bones[bone].Pos
+            table.insert(nodes, {keyframe.Frame, pos})
+        elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
+            pos = keyframe.Modifiers.position and keyframe.Modifiers.position.Pos
+            table.insert(nodes, {keyframe.Frame, pos})
+        end
+    end
+
+    GhostData[player].PreviousName = boneName
+
+    return nodes
 end
 
 SMH.GhostsManager = MGR

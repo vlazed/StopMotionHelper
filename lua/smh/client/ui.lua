@@ -235,6 +235,8 @@ local function AddCallbacks()
     local lastEntity = NULL
     local entityCount = 1
     WorldClicker.OnEntitySelected = function(_, entity, multiselect)
+        if entity:GetNW2Bool("SMHGhost") and entity:GetNW2Entity("Entity") then entity = entity:GetNW2Entity("Entity") end
+        
         -- Cycle through an entity's bonemerged items with the WorldClicker
         if lastEntity == entity then
             local n = #entity:GetChildren() + 1
@@ -264,7 +266,7 @@ local function AddCallbacks()
     end
 
     WorldClicker.OnEntityHovered = function(_, entity)
-        Tooltip:SetTooltip(entity and PropertiesMenu:GetEntityName(entity) or "")
+        Tooltip:SetTooltip(entity and not entity:GetNW2Bool("SMHGhost") and PropertiesMenu:GetEntityName(entity) or "")
         Tooltip:SetPos(input.GetCursorPos())
     end
 
