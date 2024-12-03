@@ -804,12 +804,17 @@ hook.Add("ShutDown", "SMHExitSave", function()
     for _, player in player.Iterator() do
         local properties = SMH.PropertiesManager.GetAllProperties(player)
         local keyframes = SMH.KeyframeManager.GetAll(player)
+        -- Don't replace the exit save file if we don't have any entities
+        if #keyframes == 0 then return end
+
         local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
     
         -- Save to the root smh/ folder
         SMH.Saves.SetPath("", player)
 
-        local saveName = ("!!!_EXIT_SAVE_%s_%d"):format(player:Nick(), player:AccountID())
+        -- Remove spaces from player name
+        local playerName = string.gsub(player:Nick(), " ", "")
+        local saveName = ("EXIT_SAVE_%s_%d"):format(playerName, player:AccountID())
         SMH.Saves.Save(saveName, serializedKeyframes, player)
     end
 end)
