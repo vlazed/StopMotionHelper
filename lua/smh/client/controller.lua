@@ -174,6 +174,7 @@ function CTRL.Smooth(frames, maxPasses)
     timer.Remove("SMH_Smoothing_Timer")
     timer.Create("SMH_Smoothing_Timer", 0, -1, function()
         if done then
+            chat.AddText("SMH Smoothing stopped.")
             timer.Remove("SMH_Smoothing_Timer")
         else
             co()
