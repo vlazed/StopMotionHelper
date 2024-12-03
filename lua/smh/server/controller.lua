@@ -809,7 +809,7 @@ hook.Add("ShutDown", "SMHExitSave", function()
         -- Save to the root smh/ folder
         SMH.Saves.SetPath("", player)
 
-        local saveName = ("!!!_EXIT_SAVE_%s_%s"):format(player:Nick(), string.sub(player:SteamID(), 11))
+        local saveName = ("!!!_EXIT_SAVE_%s_%d"):format(player:Nick(), player:AccountID())
         SMH.Saves.Save(saveName, serializedKeyframes, player)
     end
 end)
