@@ -786,12 +786,16 @@ end
 
 hook.Remove("ShutDown", "SMHExitSave")
 hook.Add("ShutDown", "SMHExitSave", function()
-    for _, player in pairs(player.GetAll()) do
+    for _, player in player.Iterator() do
         local properties = SMH.PropertiesManager.GetAllProperties(player)
         local keyframes = SMH.KeyframeManager.GetAll(player)
         local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
     
-        SMH.Saves.Save("!!!EXIT_SAVE", serializedKeyframes, player)
+        -- Save to the root smh/ folder
+        SMH.Saves.SetPath("", player)
+
+        local saveName = ("!!!_EXIT_SAVE_%s_%s"):format(player:Nick(), string.sub(player:SteamID(), 11))
+        SMH.Saves.Save(saveName, serializedKeyframes, player)
     end
 end)
 
