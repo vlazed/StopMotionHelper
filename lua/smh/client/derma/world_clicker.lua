@@ -2,7 +2,7 @@ local BaseClass = baseclass.Get("EditablePanel")
 local PANEL = {}
 
 -- https://github.com/penolakushari/RagdollMover/blob/eefbda5c3b27e193b1c3e113b258f7a1d4334cad/lua/autorun/ragdollmover.lua#L72
-local function GetViewTrace()
+local function GetViewTrace(output)
     local player = LocalPlayer()
     local viewEntity = player:GetViewEntity()
 
@@ -17,7 +17,8 @@ local function GetViewTrace()
     return {
         start = eyePos,
         endpos = eyePos + player:GetAimVector() * 32678,
-        filter = viewEntity
+        filter = viewEntity,
+        output = output
     }
 end
 
@@ -32,6 +33,7 @@ function PANEL:Init()
     self:MakePopup()
     self:SetVisible(false)
 
+    self.TraceResult = {}
 end
 
 function PANEL:SetVisible(visible)
@@ -46,9 +48,11 @@ function PANEL:SetVisible(visible)
 end
 
 function PANEL:Think()
-    local trace = util.TraceLine(GetViewTrace())
+    if not self:IsVisible() then return end
+    
+    util.TraceLine(GetViewTrace(self.TraceResult))
 
-    self:OnEntityHovered(trace.HitNonWorld and trace.Entity)
+    self:OnEntityHovered(self.TraceResult.HitNonWorld and self.TraceResult.Entity)
 end
 
 function PANEL:OnMousePressed(mousecode)
@@ -56,13 +60,12 @@ function PANEL:OnMousePressed(mousecode)
         return
     end
 
-    local trace = util.TraceLine(GetViewTrace())
-    if not IsValid(trace.Entity) then return end
+    if not IsValid(self.TraceResult.Entity) then return end
 
     local setting = 0
     if input.IsKeyDown(KEY_LSHIFT) then setting = 1 end
 
-    self:OnEntitySelected(trace.Entity, setting)
+    self:OnEntitySelected(self.TraceResult.Entity, setting)
 end
 
 function PANEL:OnEntitySelected(entity, setting) end
