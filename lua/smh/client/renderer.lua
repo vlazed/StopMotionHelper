@@ -79,11 +79,13 @@ do
     local GREEN = Color(0, 200, 0)
     local YELLOW = Color(200, 200, 0)
     local nodeRange = GetConVar("smh_motionpathrange")
+    local sphereSize = GetConVar("smh_motionpathsize")
     local currentFrameIndex = 1 
 
     hook.Remove("PreDrawEffects", "SMHRenderMotionPath")
     hook.Add("PreDrawEffects", "SMHRenderMotionPath", function()
         nodeRange = nodeRange or GetConVar("smh_motionpathrange")
+        sphereSize = sphereSize or GetConVar("smh_motionpathsize")
 
         if #Nodes == 0 or IsRendering then return end
         if not next(SMH.State.Entity) then Nodes = {} return end
@@ -100,9 +102,9 @@ do
 
         for i = 1, #Nodes do 
             local currentFrame = SMH.State.Frame == Nodes[i].Frame
-            local sphereSize = 1 + 0.125 * math.sin(1.5 * CurTime() + i / 2)
+            local size = sphereSize:GetFloat() + 0.125 * math.sin(1.5 * CurTime() + i / 2)
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
-            render.DrawSphere(Nodes[i].Pos, sphereSize, 10, 10, currentFrame and YELLOW or GREEN)
+            render.DrawSphere(Nodes[i].Pos, size, 10, 10, currentFrame and YELLOW or GREEN)
         end
         for i = 1, #Nodes - 1 do 
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end

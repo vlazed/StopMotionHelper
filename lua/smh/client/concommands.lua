@@ -149,7 +149,8 @@ do
     end, suggestStartingFrame, "Generate a tga sequence containing all the frames in the SMH Timeline. Accepts a whole number between 0 and the current frame count to offset the jpeg sequence")
 end
 
-CreateClientConVar("smh_startatone", 0, true, false, nil, 0, 1)
-CreateClientConVar("smh_currentpreset", "default", true, false)
-CreateClientConVar("smh_motionpathbone", "", true, true)
-CreateClientConVar("smh_motionpathrange", 0, true, true)
+CreateClientConVar("smh_startatone", "0", true, false, "Whether the starting frame should start at 0 or 1", 0, 1)
+CreateClientConVar("smh_currentpreset", "default", true, false, "Use the timeline setting that defines the number of timelines and what modifier each timeline controls")
+CreateClientConVar("smh_motionpathbone", "", true, true, "Set the bone that the motion path will track")
+CreateClientConVar("smh_motionpathrange", "0", true, true, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
+CreateClientConVar("smh_motionpathsize", "1", true, true, "Set the size of the nodes in the motion path", 0)
