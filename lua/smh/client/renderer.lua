@@ -100,9 +100,10 @@ do
             end
         end
 
+        local baseSize = sphereSize:GetFloat()
         for i = 1, #Nodes do 
             local currentFrame = SMH.State.Frame == Nodes[i].Frame
-            local size = sphereSize:GetFloat() + 0.125 * math.sin(1.5 * CurTime() + i / 2)
+            local size = baseSize + baseSize * 0.125 * math.sin(1.5 * CurTime() + i / 2)
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
             render.DrawSphere(Nodes[i].Pos, size, 10, 10, currentFrame and YELLOW or GREEN)
         end
