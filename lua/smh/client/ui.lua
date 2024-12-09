@@ -371,6 +371,16 @@ local function AddCallbacks()
         SMH.Controller.SetFrame(newFrame)
     end
 
+    WorldClicker.KeyframeSettings.OnRequestSelectAllFrames = function(_)
+        for _, kpointer in pairs(KeyframePointers) do
+            SMH.UI.ToggleSelect(kpointer)
+        end
+    end
+
+    WorldClicker.KeyframeSettings.OnRequestSmooth = function(_)
+        RunConsoleCommand("smh_smooth", tostring(WorldClicker.KeyframeSettings.Smoothing))
+    end
+
     WorldClicker.Settings.OnSettingsUpdated = function(_, newSettings)
         SMH.Controller.UpdateSettings(newSettings)
         local ghoststuff = {
@@ -519,6 +529,9 @@ local function setupUI()
     WorldClicker = vgui.Create("SMHWorldClicker")
 
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
+
+    WorldClicker.KeyframeSettings = vgui.Create("SMHKeyframeSettings", WorldClicker)
+    WorldClicker.KeyframeSettings:SetPos(ScrW() * 0.5 - WorldClicker.KeyframeSettings.Width * 0.5, ScrH() - 90 - WorldClicker.KeyframeSettings.Height)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
     WorldClicker.Settings:SetPos(ScrW() - WorldClicker.Settings.Width, ScrH() - 90 - WorldClicker.Settings.Height)
@@ -859,6 +872,13 @@ function MGR.ShiftSelect(pointer)
     end
 
     LastSelectedKeyframe = pointer
+end
+
+function MGR.SelectAll()
+    for id, kpointer in pairs(KeyframePointers) do
+        kpointer:SetSelected(not kpointer:GetSelected())
+        SelectedPointers[id] = kpointer:GetSelected() and kpointer or nil
+    end
 end
 
 function MGR.ToggleSelect(pointer)
