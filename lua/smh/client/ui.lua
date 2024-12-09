@@ -891,6 +891,10 @@ function MGR.ToggleSelect(pointer)
     end
 end
 
+function MGR.GetSelected()
+    return SelectedPointers
+end
+
 function MGR.SetSelectedEntity(entities)
     local entity = next(entities)
     LoadMenu:UpdateSelectedEnt(entity)

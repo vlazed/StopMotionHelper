@@ -93,10 +93,22 @@ concommand.Add("smh_quicksave", function()
 end)
 
 concommand.Add("smh_smooth", function(_, _, args)
-    if SMH.UI.IsFrameKeyframe(SMH.State.Frame) then
-        local passes = tonumber(args[1]) or 1
-        SMH.Controller.Smooth({SMH.State.Frame}, passes)
+    local passes = tonumber(args[1]) or 1
+
+    local selected = SMH.UI.GetSelected()
+    local frames = {}
+    if next(selected) then
+        for _, panel in pairs(selected) do
+            table.insert(frames, panel:GetFrame())
+            SMH.UI.ToggleSelect(panel)
+        end
+        table.sort(frames)
+    elseif SMH.UI.IsFrameKeyframe(SMH.State.Frame) then
+        frames = {SMH.State.Frame}
     end
+
+    SMH.Controller.Smooth(frames, passes)
+    
 end, nil, "Apply additional keyframes to produce a smoother result", nil)
 
 concommand.Add("smh_smoothall", function(_, _, args)
