@@ -390,6 +390,9 @@ local function AddCallbacks()
     WorldClicker.Settings.OnRequestOpenPhysRecorder = function()
         WorldClicker.PhysRecorder:SetVisible(true)
     end
+    WorldClicker.Settings.OnRequestOpenMotionPaths = function()
+        WorldClicker.MotionPaths:SetVisible(true)
+    end
     WorldClicker.Settings.OnRequestOpenHelp = function()
         SMH.Controller.OpenHelp()
     end
@@ -510,31 +513,24 @@ local function AddCallbacks()
 
 end
 
-hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
 
-    for centity, _ in pairs(ClickerEntity) do
-        if entity == centity then
-            SMH.State.Entity[entity] = nil
-            WorldClicker:OnEntitySelected(entity, 2)
-        end
-    end
-
-end)
-
-hook.Add("InitPostEntity", "SMHMenuSetup", function()
-
+local function setupUI()
     Tooltip = vgui.Create("SMHTooltip")
     WorldClicker = vgui.Create("SMHWorldClicker")
 
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
-    WorldClicker.Settings:SetPos(ScrW() - 250, ScrH() - 90 - 290)
+    WorldClicker.Settings:SetPos(ScrW() - WorldClicker.Settings.Width, ScrH() - 90 - WorldClicker.Settings.Height)
     WorldClicker.Settings:SetVisible(false)
 
     WorldClicker.PhysRecorder = vgui.Create("SMHPhysRecord", WorldClicker)
     WorldClicker.PhysRecorder:SetPos(ScrW() - 250 - 250, ScrH() - 90 - 170)
     WorldClicker.PhysRecorder:SetVisible(false)
+
+    WorldClicker.MotionPaths = vgui.Create("SMHMotionPaths", WorldClicker)
+    WorldClicker.MotionPaths:SetPos(ScrW() - 250 - WorldClicker.MotionPaths.Width, ScrH() - 90 - WorldClicker.MotionPaths.Height)
+    WorldClicker.MotionPaths:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
     SaveMenu:MakePopup()
@@ -574,7 +570,21 @@ hook.Add("InitPostEntity", "SMHMenuSetup", function()
     PropertiesMenu:InitTimelineSettings()
 
     WorldClicker.MainMenu:SetInitialState(SMH.State)
+end
 
+hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
+
+    for centity, _ in pairs(ClickerEntity) do
+        if entity == centity then
+            SMH.State.Entity[entity] = nil
+            WorldClicker:OnEntitySelected(entity, 2)
+        end
+    end
+
+end)
+
+hook.Add("InitPostEntity", "SMHMenuSetup", function()
+    setupUI()
 end)
 
 local MGR = {}
@@ -584,6 +594,10 @@ function MGR.IsOpen()
 end
 
 function MGR.Open()
+    if not WorldClicker then
+        setupUI()
+    end
+
     WorldClicker:SetVisible(true)
 end
 
