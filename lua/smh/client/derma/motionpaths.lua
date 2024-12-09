@@ -2,7 +2,7 @@ local PANEL = {}
 
 function PANEL:Init()
 
-    local function CreateSlider(label, min, max, default, func)
+    local function CreateSlider(label, min, max, default, decimals)
         local slider = vgui.Create("DNumSlider", self)
 
         -- overriding default functions as it used to clamp result between mix and max, and we kinda want to go over the max if need be
@@ -29,7 +29,7 @@ function PANEL:Init()
         end
 
         slider:SetMinMax(min, max)
-        slider:SetDecimals(0)
+        slider:SetDecimals(decimals)
         slider:SetDefaultValue(default)
         slider:SetValue(default)
         slider:SetText(label)
@@ -44,12 +44,16 @@ function PANEL:Init()
     self.BoneName.Label = vgui.Create("DLabel", self)
     self.BoneName.Label:SetText("Bone Name")
 
-    local convarValue = GetConVar("smh_motionpathrange")
-    self.PathRange = CreateSlider("Path Range", 0, 10, convarValue and convarValue:GetInt() or 0)
+    local motionPathValue = GetConVar("smh_motionpathrange")
+    self.PathRange = CreateSlider("Path Range", 0, 10, motionPathValue and motionPathValue:GetInt() or 0, 0)
     self.PathRange:SetConVar("smh_motionpathrange")
 
+    local sizeValue = GetConVar("smh_motionpathSize")
+    self.NodeSize = CreateSlider("Node Size", 0, 10, sizeValue and sizeValue:GetInt() or 0, 2)
+    self.NodeSize:SetConVar("smh_motionpathsize")
+
     self.Width = 250
-    self.Height = 75
+    self.Height = 95
 
     self:SetSize(self.Width, self.Height)
 
@@ -75,6 +79,9 @@ function PANEL:PerformLayout(width, height)
 
     setPos(self.PathRange)
     self.PathRange:SetSize(width, 20)
+
+    setPos(self.NodeSize)
+    self.NodeSize:SetSize(width, 20)
 
     setPos(self.BoneName)
     self.BoneName:SetX(120)
