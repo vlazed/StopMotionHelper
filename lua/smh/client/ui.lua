@@ -1070,6 +1070,8 @@ function MGR.SetWorldData(console, push, release)
     PropertiesMenu:ShowWorldSettings(console, push, release)
 end
 
+---@param frame integer
+---@return table?
 function MGR.GetKeyframesOnFrame(frame)
 	if not FrameToKeyframe[frame] then return nil end
 	local ids = {}

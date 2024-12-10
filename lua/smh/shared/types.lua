@@ -40,6 +40,7 @@
 ---@field AttachedEntity Entity
 ---@field Frame integer
 ---@field Physbones boolean
+---@field RagdollWeightData number[]
 
 ---@alias Modifiers
 ---| "advcamera"
@@ -141,6 +142,10 @@
 ---@alias Entities table<integer, SMHEntity|Player>
 
 -- UI
+
+---@class Node
+---@field Pos Vector
+---@field Frame integer
 
 ---@class SMHWorldClicker: SMHWorldClickerPanel
 ---@field MainMenu SMHMenu

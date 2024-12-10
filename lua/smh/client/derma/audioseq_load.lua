@@ -1,3 +1,5 @@
+---@class SMHLoadAudio: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()

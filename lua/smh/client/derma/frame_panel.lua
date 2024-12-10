@@ -226,7 +226,7 @@ function PANEL:OnMouseWheeled(scrollDelta)
     end
 
     self:SetValue(newZoom)
-    self:ConVarChanged(newZoom)
+    self:ConVarChanged(tostring(newZoom))
 end
 
 function PANEL:OnScrollBarPressed(mousecode)

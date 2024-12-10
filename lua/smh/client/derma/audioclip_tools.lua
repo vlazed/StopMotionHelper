@@ -1,3 +1,5 @@
+---@class SMHAudioClipTools: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 local deleteConfirmColour = Color(255,0,0)
 

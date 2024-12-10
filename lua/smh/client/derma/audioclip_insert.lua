@@ -1,3 +1,4 @@
+---@class SMHInsertAudio: DFrame
 local PANEL = {}
 
 function PANEL:Init()

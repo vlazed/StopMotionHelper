@@ -1,6 +1,7 @@
 local UseScreenshot = false
 local IsRendering = false
 
+---@type Node[]
 local Nodes = {}
 
 local MGR = {}

@@ -31,6 +31,7 @@ function PANEL:Init()
 
 end
 
+---@param entityName string
 function PANEL:SetTooltip(entityName)
     self:SetVisible(#entityName > 0)
     self:SetText(entityName)

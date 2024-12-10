@@ -1,3 +1,5 @@
+---@class SMHMotionPaths: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
