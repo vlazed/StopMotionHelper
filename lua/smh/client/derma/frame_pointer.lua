@@ -11,6 +11,8 @@
         :filter(function(mousecode) return mousecode == MOUSE_MIDDLE or (mousecode == MOUSE_RIGHT and input.IsKeyDown(KEY_LCONTROL)) end);
 ]]
 
+---@class SMHFramePointer: DPanel
+---@field GetParent fun(self: SMHFramePointer): SMHFramePanel
 local PANEL = {}
 
 function PANEL:Init()

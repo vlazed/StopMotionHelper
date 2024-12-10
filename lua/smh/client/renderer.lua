@@ -3,6 +3,7 @@ local IsRendering = false
 
 local MGR = {}
 
+---@return boolean
 function MGR.IsRendering()
     return IsRendering
 end
@@ -43,6 +44,8 @@ local function RenderTick()
 
 end
 
+---@param useScreenshot boolean
+---@param StartFrame integer
 function MGR.Start(useScreenshot, StartFrame)
     UseScreenshot = useScreenshot
 

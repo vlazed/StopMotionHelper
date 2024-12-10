@@ -79,6 +79,7 @@ local ConVars = {
 
 local MGR = {}
 
+---@return Settings
 function MGR.GetAll()
     local settings = {}
 

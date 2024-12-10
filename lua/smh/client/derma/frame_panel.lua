@@ -1,3 +1,4 @@
+---@class SMHFramePanel: DPanel
 local PANEL = {}
 
 function PANEL:Init()

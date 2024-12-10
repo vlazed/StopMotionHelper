@@ -1,3 +1,5 @@
+---@class SMHLoad: DFrame
+---@field BaseClass DFrame|Panel
 local PANEL = {}
 
 function PANEL:Init()

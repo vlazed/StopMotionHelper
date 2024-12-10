@@ -1,3 +1,4 @@
+---@type State
 SMH.State = {
     Entity = {},
     Frame = 0,

@@ -4,6 +4,8 @@ SMH.Properties = {
 
 local usednames = {}
 
+---@param entity Entity
+---@return string
 local function GetModelName(entity)
     local mdl = string.Split(entity:GetModel(), "/")
     mdl = mdl[#mdl]
@@ -11,6 +13,10 @@ local function GetModelName(entity)
     return mdl
 end
 
+---@param player Player
+---@param entity Entity
+---@param name string
+---@return string uniqueName
 local function SetUniqueName(player, entity, name)
     if SMH.Properties.Players[player].Entities[entity] then
         usednames[player][SMH.Properties.Players[player].Entities[entity].Name] = nil -- so we won't consider our own name when sorting
@@ -38,6 +44,8 @@ local function SetUniqueName(player, entity, name)
     return name
 end
 
+---@param player Player
+---@return any
 local function FindEntity(player) -- I use this to find entity that doesn't have recorded frames
     local sorting = {}
 
@@ -82,6 +90,8 @@ end)
 
 local MGR = {}
 
+---@param player Player
+---@return table
 function MGR.GetTimelinesInfo(player)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].TimelineSetting then return {} end
 
@@ -92,6 +102,8 @@ function MGR.GetTimelinesInfo(player)
     return info
 end
 
+---@param player Player
+---@return table
 function MGR.GetAllProperties(player)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities then return {} end
 
@@ -108,6 +120,8 @@ function MGR.GetAllProperties(player)
     return info
 end
 
+---@param player Player
+---@return table
 function MGR.GetAllEntitiesNames(player)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities then return {} end
 
@@ -122,6 +136,7 @@ function MGR.GetAllEntitiesNames(player)
     return info
 end
 
+---@param player Player
 function MGR.RemoveEntity(player)
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities or not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities then return end
     local entity = FindEntity(player)
@@ -131,6 +146,8 @@ function MGR.RemoveEntity(player)
     end
 end
 
+---@param player Player
+---@param entities Entities
 function MGR.AddEntity(player, entities)
     if not SMH.Properties.Players[player] then
         SMH.Properties.Players[player] = { Entities = {}, TimelineSetting = {} }
@@ -163,6 +180,10 @@ function MGR.AddEntity(player, entities)
     end
 end
 
+---@param player Player
+---@param entity Entity
+---@param newname string
+---@return string?
 function MGR.SetName(player, entity, newname)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities[entity] then return end
     if not newname then return end
@@ -173,6 +194,8 @@ function MGR.SetName(player, entity, newname)
     return newname
 end
 
+---@param player Player
+---@param timelineInfo TimelineSetting
 function MGR.InitTimelineSetting(player, timelineInfo)
     if not SMH.Properties.Players[player] then
         SMH.Properties.Players[player] = { Entities = {}, TimelineSetting = {} }
@@ -200,6 +223,8 @@ function MGR.InitTimelineSetting(player, timelineInfo)
     }
 end
 
+---@param player Player
+---@param add boolean
 function MGR.SetTimelines(player, add)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].TimelineSetting then return end
 
@@ -222,6 +247,11 @@ function MGR.SetTimelines(player, add)
     SMH.Properties.Players[player].TimelineSetting.Timelines = count
 end
 
+---@param player Player
+---@param itimeline integer
+---@param name string
+---@param state any
+---@return string?
 function MGR.UpdateModifier(player, itimeline, name, state)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].TimelineSetting then return end
 
@@ -238,17 +268,25 @@ function MGR.UpdateModifier(player, itimeline, name, state)
     return name
 end
 
+---@param player Player
+---@param color Color
+---@param timeline integer
 function MGR.UpdateKeyframeColor(player, color, timeline)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].TimelineSetting then return end
 
     SMH.Properties.Players[player].TimelineSetting.TimelineMods[timeline].KeyColor = color
 end
 
+---@param player Player
+---@return integer
 function MGR.GetTimelines(player)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].TimelineSetting then return 1 end
     return SMH.Properties.Players[player].TimelineSetting.Timelines
 end
 
+---@param player Player
+---@param entity Entity
+---@param properties Properties
 function MGR.SetProperties(player, entity, properties)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities[entity] then return end
 

@@ -1,3 +1,11 @@
+
+---@param keyframes FrameData[]
+---@param frame integer
+---@param ignoreCurrentFrame boolean
+---@param modname Modifiers
+---@return FrameData? prevKeyframe
+---@return FrameData? nextKeyframe
+---@return integer
 function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     if ignoreCurrentFrame == nil then
         ignoreCurrentFrame = false
@@ -26,6 +34,9 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     elseif not nextKeyframe then
         nextKeyframe = prevKeyframe
     end
+
+    ---@cast prevKeyframe FrameData
+    ---@cast nextKeyframe FrameData
 
     local lerpMultiplier = 0
     if prevKeyframe.Frame ~= nextKeyframe.Frame then

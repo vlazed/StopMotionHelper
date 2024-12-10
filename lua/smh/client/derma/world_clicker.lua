@@ -1,4 +1,5 @@
 local BaseClass = baseclass.Get("EditablePanel")
+---@class SMHWorldClickerPanel: EditablePanel
 local PANEL = {}
 
 function PANEL:Init()

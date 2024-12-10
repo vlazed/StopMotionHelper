@@ -1,7 +1,11 @@
+---@type table<Player, Playback>
 local ActivePlaybacks = {}
 
 local MGR = {}
 
+---@param player Player
+---@param playback any
+---@param settings Settings
 local function PlaybackSmooth(player, playback, settings)
     if not SMH.KeyframeData.Players[player] then
         return
@@ -21,6 +25,8 @@ local function PlaybackSmooth(player, playback, settings)
         if entity ~= player then
             for name, mod in pairs(SMH.Modifiers) do
                 local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
+                ---@cast prevKeyframe FrameData
+                ---@cast nextKeyframe FrameData
 
                 if not prevKeyframe then continue end
 
@@ -45,6 +51,9 @@ local function PlaybackSmooth(player, playback, settings)
     end
 end
 
+---@param player Player
+---@param newFrame integer
+---@param settings Settings
 function MGR.SetFrame(player, newFrame, settings)
     if not SMH.KeyframeData.Players[player] then
         return
@@ -57,6 +66,8 @@ function MGR.SetFrame(player, newFrame, settings)
                 if not prevKeyframe then
                     continue
                 end
+                ---@cast prevKeyframe FrameData
+                ---@cast nextKeyframe FrameData
 
                 if lerpMultiplier <= 0 or settings.TweenDisable then
                     mod:Load(entity, prevKeyframe.Modifiers[name], settings);
@@ -74,6 +85,10 @@ function MGR.SetFrame(player, newFrame, settings)
     end
 end
 
+---@param player Player
+---@param newFrame integer
+---@param settings Settings
+---@param ignored Set<Entity>
 function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     if not SMH.KeyframeData.Players[player] then
         return
@@ -86,6 +101,8 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
             if not prevKeyframe then
                 continue
             end
+            ---@cast prevKeyframe FrameData
+            ---@cast nextKeyframe FrameData
 
             if lerpMultiplier <= 0 or settings.TweenDisable then
                 mod:Load(entity, prevKeyframe.Modifiers[name], settings);
@@ -98,6 +115,11 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     end
 end
 
+---@param player Player
+---@param startFrame integer
+---@param endFrame integer
+---@param playbackRate integer
+---@param settings Settings
 function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     ActivePlaybacks[player] = {
         StartFrame = startFrame,
@@ -111,6 +133,7 @@ function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
     MGR.SetFrame(player, startFrame, settings)
 end
 
+---@param player Player
 function MGR.StopPlayback(player)
     ActivePlaybacks[player] = nil
 end
