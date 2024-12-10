@@ -226,7 +226,7 @@ function CTRL.Smooth(frames, maxPasses)
 
                     local exists = SMH.UI.GetKeyframesOnFrame(keyframe)
                     if not exists then continue end
-                    SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
+                    SMH.Controller.DeleteKeyframe(exists)
                     smoothingFrames[keyframe-1] = keyframe-1
                     smoothingFrames[keyframe+1] = keyframe+1
 
