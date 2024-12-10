@@ -44,6 +44,67 @@ local function RequestNodes()
     net.SendToServer()
 end
 
+---Source: https://github.com/NO-LOAFING/AnimpropOverhaul/blob/a3a6268a5d57655611a8b8ed43dcf43051ecd93a/lua/entities/prop_animated.lua#L3550
+---@param ent Entity Entity in reference pose
+---@return table defaultPose Array consisting of a bones offsets from the entity, and offsets from its parent bones
+function GetDefaultPoseTree(ent)
+	local defaultPose = {}
+	local entPos = ent:GetPos()
+	local entAngles = ent:GetAngles()
+	for b = 0, ent:GetBoneCount() - 1 do
+		local parent = ent:GetBoneParent(b)
+        local isPhysBone = b == ent:TranslatePhysBoneToBone(ent:TranslateBoneToPhysBone(b))
+		local bMatrix = ent:GetBoneMatrix(b)
+		if bMatrix then
+			local pos1, ang1 = WorldToLocal(bMatrix:GetTranslation(), bMatrix:GetAngles(), entPos, entAngles)
+			local pos2, ang2 = pos1 * 1, ang1 * 1
+			if parent > -1 then
+				local pMatrix = ent:GetBoneMatrix(parent)
+				pos2, ang2 = WorldToLocal(
+					bMatrix:GetTranslation(),
+					bMatrix:GetAngles(),
+					pMatrix:GetTranslation(),
+					pMatrix:GetAngles()
+				)
+			end
+
+			defaultPose[b + 1] = { pos1, ang1, pos2, ang2, parent, isPhysBone }
+		else
+			defaultPose[b + 1] = { vector_origin, angle_zero, vector_origin, angle_zero, -1, false }
+		end
+	end
+
+	return defaultPose
+end
+
+local function RequestDefaultPose()
+    local entity = net.ReadEntity()
+
+    if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
+        entity = entity.AttachedEntity
+    end
+
+    local csModel = ClientsideModel(entity:GetModel())
+    csModel:DrawModel()
+	csModel:SetupBones()
+	csModel:InvalidateBoneCache()
+    local tree = GetDefaultPoseTree(csModel)
+    csModel:Remove()
+
+    net.Start(SMH.MessageTypes.RequestDefaultPoseResponse)
+    net.WriteString(entity:GetModel())
+    net.WriteUInt(#tree, 8)
+    for i = 1, #tree do
+        net.WriteVector(tree[i][1])
+        net.WriteAngle(tree[i][2])
+        net.WriteVector(tree[i][3])
+        net.WriteAngle(tree[i][4])
+        net.WriteInt(tree[i][5], 9)
+        net.WriteBool(tree[i][6])
+    end
+    net.SendToServer()
+end
+
 local CTRL = {}
 
 function CTRL.SetFrame(frame)
@@ -951,6 +1012,8 @@ local function Setup()
 	net.Receive(SMH.MessageTypes.PlayAudio, PlayAudio)
 	net.Receive(SMH.MessageTypes.StopAudio, StopAudio)
 	net.Receive(SMH.MessageTypes.StopAllAudio, StopAllAudio)
+
+    net.Receive(SMH.MessageTypes.RequestDefaultPose, RequestDefaultPose)
 end
 
 Setup()

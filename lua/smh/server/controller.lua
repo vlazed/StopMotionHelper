@@ -88,12 +88,43 @@ local function SetFrame(msgLength, player)
     net.Send(player)
 end
 
+local function RequestDefaultPoseResponse(msgLength, player)
+    local modelPath = net.ReadString()
+    local tree = {}
+    local nodeCount = net.ReadUInt(8)
+    for i = 0, nodeCount - 1 do
+        local pos = net.ReadVector()
+        local ang = net.ReadAngle()
+        local lpos = net.ReadVector()
+        local lang = net.ReadAngle()
+        local parent = net.ReadInt(9)
+        local isPhysBone = net.ReadBool()
+        tree[i] = {
+            Pos = pos,
+            Ang = ang,
+            LocalPos = lpos,
+            LocalAng = lang,
+            Parent = parent,
+            IsPhysBone = isPhysBone
+        }
+    end
+
+    PrintTable(tree)
+    SMH.GhostsManager.SetTree(modelPath, tree)
+end
+
 local function SelectEntity(msgLength, player)
     local entity = net.ReadEntity()
     local entities = {}
 
     if entity.SMHGhost then
         entity = entity.Entity
+    end
+
+    if not SMH.GhostsManager.GetTree(entity:GetModel()) then
+        net.Start(SMH.MessageTypes.RequestDefaultPose)
+        net.WriteEntity(entity)
+        net.Send(player)
     end
 
     for i = 1, net.ReadUInt(INT_BITCOUNT) do
@@ -878,3 +909,4 @@ net.Receive(SMH.MessageTypes.StartPhysicsRecord, StartPhysicsRecord)
 net.Receive(SMH.MessageTypes.StopPhysicsRecord, StopPhysicsRecord)
 
 net.Receive(SMH.MessageTypes.RequestNodes, RequestNodes)
+net.Receive(SMH.MessageTypes.RequestDefaultPoseResponse, RequestDefaultPoseResponse)

@@ -3,6 +3,7 @@ local LastFrame = 0
 local LastTimeline = 1
 local SpawnGhost, SpawnGhostData, GhostSettings = {}, {}, {}
 local SpawnOffsetOn, SpawnOriginData, OffsetPos, OffsetAng = {}, {}, {}, {}
+local DefaultPoseTrees = {}
 
 local function CreateGhost(player, entity, color, frame, ghostable)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
@@ -226,6 +227,14 @@ function MGR.UpdateSettings(player, timeline, settings)
     MGR.UpdateState(player, LastFrame, settings, timeline, LastTimeline)
 end
 
+function MGR.SetTree(modelName, tree)
+    DefaultPoseTrees[modelName] = tree
+end
+
+function MGR.GetTree(modelName)
+    return DefaultPoseTrees[modelName]
+end
+
 function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -322,6 +331,9 @@ function MGR.UpdateKeyframe(player)
     GhostData[player].Updated = true
 end
 
+function MGR.RequestDefaultPose()
+end
+
 function MGR.RequestNodes(player)
     if not GhostData[player] then return end
 
@@ -338,6 +350,10 @@ function MGR.RequestNodes(player)
     local entity = selectedEntities[1]
     local keyframes = entities[entity]
     local boneName = player:GetInfo("smh_motionpathbone")
+
+    if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
+        entity = entity.AttachedEntity
+    end
 
     GhostData[player].LastEntity = entity
 
@@ -362,18 +378,40 @@ function MGR.RequestNodes(player)
     local isPhysBone = bone and (bone == entity:TranslatePhysBoneToBone(physBone))
 
     for _, keyframe in pairs(keyframes) do
-        local pos
+        local pos = vector_origin
         if isPhysBone and keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBone] then
             pos = keyframe.Modifiers.physbones[physBone].Pos 
-            table.insert(nodes, {keyframe.Frame, pos})
-        elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] then
-            -- TODO: Get world pos of bone position
-            pos = keyframe.Modifiers.bones[bone].Pos
-            table.insert(nodes, {keyframe.Frame, pos})
+        elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] and DefaultPoseTrees[entity:GetModel()] then
+            local defaultPoseTree = DefaultPoseTrees[entity:GetModel()]
+            local branch = {}
+            do
+                local id = bone
+                local pose = defaultPoseTree[bone]
+                while pose and not pose.IsPhysBone do
+                    table.insert(branch, id)
+                    id = pose.Parent
+                    pose = defaultPoseTree[id]
+                end
+            end
+
+            local ang = angle_zero
+            for i = 1, #branch do
+                local lPos, lAng = defaultPoseTree[branch[i]].LocalPos, defaultPoseTree[branch[i]].LocalAng
+                local dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
+                local finalPos, finalAng = LocalToWorld(dataPos, dataAng, lPos, lAng)
+                pos, ang = LocalToWorld(pos, ang, finalPos, finalAng)
+            end
+            
+            if keyframe.Modifiers.physbones then
+                pos = LocalToWorld(pos, ang, keyframe.Modifiers.physbones[physBone].Pos, keyframe.Modifiers.physbones[physBone].Ang)
+            elseif keyframe.Modifiers.position then
+                pos = LocalToWorld(pos, ang, keyframe.Modifiers.position.Pos, angle_zero)
+            end
         elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
             pos = keyframe.Modifiers.position and keyframe.Modifiers.position.Pos
-            table.insert(nodes, {keyframe.Frame, pos})
         end
+
+        table.insert(nodes, {keyframe.Frame, pos})
     end
 
     GhostData[player].PreviousName = boneName
