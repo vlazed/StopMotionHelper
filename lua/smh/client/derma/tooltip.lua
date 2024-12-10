@@ -1,3 +1,4 @@
+---@class SMHTooltip: DLabel
 local PANEL = {}
 
 surface.CreateFont( "smh_tooltip", {
