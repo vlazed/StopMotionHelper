@@ -47,9 +47,9 @@ function AUD.StopAll()
 	end
 end
 
-/* function AUD.Destroy(id)
-	local audioChannel = GetAudioChannelByID(id)
-	audioChannel:Stop()
-end */
+-- function AUD.Destroy(id)
+-- 	local audioChannel = GetAudioChannelByID(id)
+-- 	audioChannel:Stop()
+-- end
 
 SMH.AudioClip = AUD

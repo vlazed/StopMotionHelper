@@ -88,7 +88,7 @@ function PANEL:DoSave()
     end
 
     self:SetVisible(false)
-    self:OnSaveRequested(path, false)
+    self:OnSaveRequested(path)
 end
 
 function PANEL:DoDelete()

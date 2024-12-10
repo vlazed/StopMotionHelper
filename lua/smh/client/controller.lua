@@ -187,7 +187,7 @@ function CTRL.UpdateServerAudio()
 end
 -- ===============================
 
----@param frame integer
+---@param frame integer?
 function CTRL.Record(frame)
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then
         return

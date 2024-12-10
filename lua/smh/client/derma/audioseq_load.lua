@@ -65,7 +65,7 @@ function PANEL:LoadSelected()
     end
 	
 	self:SetVisible(false)
-    self:OnLoadRequested(selectedSave:GetValue(1), self.LoadFrameRate:GetChecked())
+    self:OnLoadRequested(selectedSave:GetValue(1))
 end
 
 function PANEL:OnLoadRequested(path) end
