@@ -187,6 +187,7 @@ function CTRL.UpdateServerAudio()
 end
 -- ===============================
 
+---@param frame integer
 function CTRL.Record(frame)
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then
         return
@@ -207,6 +208,8 @@ function CTRL.Record(frame)
     net.SendToServer()
 end
 
+---@param frames integer[]
+---@param maxPasses integer
 function CTRL.Smooth(frames, maxPasses)
     local done = false
     local co = coroutine.wrap(function()
@@ -226,7 +229,7 @@ function CTRL.Smooth(frames, maxPasses)
 
                     local exists = SMH.UI.GetKeyframesOnFrame(keyframe)
                     if not exists then continue end
-                    SMH.Controller.DeleteKeyframe(SMH.UI.GetKeyframesOnFrame(keyframe))
+                    SMH.Controller.DeleteKeyframe(exists)
                     smoothingFrames[keyframe-1] = keyframe-1
                     smoothingFrames[keyframe+1] = keyframe+1
 

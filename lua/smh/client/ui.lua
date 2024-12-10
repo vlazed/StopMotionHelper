@@ -648,6 +648,8 @@ function MGR.SetFrame(frame)
     end
 end
 
+---@param frame integer
+---@return any?
 function MGR.IsFrameKeyframe(frame)
 	if FrameToKeyframe[frame] then
 		return KeyframeEasingData[FrameToKeyframe[frame]]		

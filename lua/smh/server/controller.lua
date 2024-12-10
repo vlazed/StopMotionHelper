@@ -136,7 +136,6 @@ local function RequestDefaultPoseResponse(msgLength, player)
         }
     end
 
-    PrintTable(tree)
     SMH.GhostsManager.SetTree(modelPath, tree)
 end
 
