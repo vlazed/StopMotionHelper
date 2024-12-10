@@ -1,3 +1,5 @@
+---@param entity Entity
+---@return string
 local function GetModelName(entity)
     local mdl = string.Split(entity:GetModel(), "/");
     mdl = mdl[#mdl];
@@ -5,6 +7,9 @@ local function GetModelName(entity)
     return mdl
 end
 
+---@param name string
+---@param usedModelNames Set<string>
+---@return string uniqueName
 local function SetUniqueName(name, usedModelNames)
     local namebase = name
     local num = 1
@@ -21,6 +26,10 @@ local function SetUniqueName(name, usedModelNames)
     return name
 end
 
+---@param keyframes FrameData[]
+---@param entityMappedKeyframes table<Entity, Data>
+---@param properties any
+---@param player any
 local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player)
     for _, keyframe in pairs(keyframes) do
         local entity = keyframe.Entity
@@ -58,8 +67,8 @@ local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, pl
         end
         table.insert(entityMappedKeyframes[entity].Frames, {
             Position = keyframe.Frame,
-            EaseIn = table.Copy(keyframe.EaseIn),
-            EaseOut = table.Copy(keyframe.EaseOut),
+            EaseIn = table.Copy(keyframe.EaseIn), ---@diagnostic disable-line
+            EaseOut = table.Copy(keyframe.EaseOut), ---@diagnostic disable-line
             EntityData = table.Copy(keyframe.Modifiers),
         })
     end
@@ -71,6 +80,10 @@ local PlayerPath = {}
 
 local MGR = {}
 
+---@param player Player
+---@return string[]
+---@return string[]
+---@return string
 function MGR.ListFiles(player)
     local path = SaveDir .. (PlayerPath[player] or "")
     local files, _ = file.Find(path .. "*.txt", "DATA")
@@ -84,6 +97,7 @@ function MGR.ListFiles(player)
     return dirs, saves, path
 end
 
+---@return string[]
 function MGR.ListSettings()
     local files, dirs = file.Find(SettingsDir .. "*.txt", "DATA")
 
@@ -95,6 +109,9 @@ function MGR.ListSettings()
     return settings
 end
 
+---@param path string
+---@param player Player
+---@return SMHFile
 function MGR.Load(path, player)
     path = SaveDir .. (PlayerPath[player] or "") .. path .. ".txt"
     if not file.Exists(path, "DATA") then
@@ -110,6 +127,10 @@ function MGR.Load(path, player)
     return serializedKeyframes
 end
 
+---@param path string
+---@param player Player
+---@return string[]
+---@return string
 function MGR.ListModels(path, player)
     local serializedKeyframes = MGR.Load(path, player)
     local models = {}
@@ -126,6 +147,11 @@ function MGR.ListModels(path, player)
     return models, map
 end
 
+---@param path string
+---@param modelName string
+---@param player Player
+---@return string?
+---@return string?
 function MGR.GetModelName(path, modelName, player)
     local serializedKeyframes = MGR.Load(path, player)
 
@@ -151,6 +177,12 @@ function MGR.GetModelName(path, modelName, player)
     return "Error: No model found", "Error: No class found"
 end
 
+---@param path string
+---@param modelName string
+---@param player Player
+---@return SMHFile?
+---@return Properties?
+---@return boolean?
 function MGR.LoadForEntity(path, modelName, player)
     local serializedKeyframes = MGR.Load(path, player)
     for _, sEntity in pairs(serializedKeyframes.Entities) do
@@ -172,6 +204,10 @@ function MGR.LoadForEntity(path, modelName, player)
     return nil
 end
 
+---@param keyframes FrameData[]
+---@param properties Properties
+---@param player Player
+---@return SerializedFrameData[]
 function MGR.Serialize(keyframes, properties, player)
     local entityMappedKeyframes = {}
 
@@ -189,6 +225,9 @@ function MGR.Serialize(keyframes, properties, player)
     return serializedKeyframes
 end
 
+---@param path string
+---@param player Player
+---@return boolean
 function MGR.CheckIfExists(path, player)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
@@ -200,6 +239,10 @@ function MGR.CheckIfExists(path, player)
     return false
 end
 
+---@param path string
+---@param properties Properties
+---@param player Player
+---@return Set<string> entityNames
 function MGR.GetUnusedNames(path, properties, player)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
@@ -223,6 +266,13 @@ function MGR.GetUnusedNames(path, properties, player)
     return entityNames
 end
 
+---@param path string
+---@param keyframes FrameData[]
+---@param properties Properties
+---@param player Player
+---@param saveNames Set<string>
+---@param gameNames Set<string>
+---@return SerializedFrameData[]
 function MGR.SerializeAndAppend(path, keyframes, properties, player, saveNames, gameNames)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
@@ -263,6 +313,9 @@ function MGR.SerializeAndAppend(path, keyframes, properties, player, saveNames, 
     return serializedKeyframes
 end
 
+---@param path string
+---@param serializedKeyframes SerializedFrameData[]
+---@param player Player
 function MGR.Save(path, serializedKeyframes, player)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
@@ -273,6 +326,9 @@ function MGR.Save(path, serializedKeyframes, player)
     file.Write(path, json)
 end
 
+---@param path string
+---@param player Player
+---@return string?
 function MGR.AddFolder(path, player)
     local fullpath = SaveDir .. (PlayerPath[player] or "") .. path
 
@@ -282,6 +338,9 @@ function MGR.AddFolder(path, player)
     return path
 end
 
+---@param pathFrom string
+---@param pathTo string
+---@param player Player
 function MGR.CopyIfExists(pathFrom, pathTo, player)
     pathFrom = SaveDir .. (PlayerPath[player] or "") .. pathFrom .. ".txt"
     pathTo = SaveDir .. (PlayerPath[player] or "") .. pathTo .. ".txt"
@@ -291,6 +350,8 @@ function MGR.CopyIfExists(pathFrom, pathTo, player)
     end
 end
 
+---@param path string
+---@param player Player
 function MGR.Delete(path, player)
     path = SaveDir .. (PlayerPath[player] or "") .. path .. ".txt"
     if file.Exists(path, "DATA") then
@@ -298,6 +359,9 @@ function MGR.Delete(path, player)
     end
 end
 
+---@param path string
+---@param player Player
+---@return boolean
 function MGR.DeleteFolder(path, player)
     path = SaveDir .. (PlayerPath[player] or "") .. path
     if file.Exists(path, "DATA") and file.IsDir(path, "DATA") then
@@ -308,6 +372,8 @@ function MGR.DeleteFolder(path, player)
     return true
 end
 
+---@param timeline TimelineSetting
+---@param name string
 function MGR.SaveProperties(timeline, name)
     if next(timeline) == nil then return end
 
@@ -325,6 +391,8 @@ function MGR.SaveProperties(timeline, name)
     file.Write(path, json)
 end
 
+---@param name string
+---@return Properties?
 function MGR.GetPreferences(name)
     local path = SettingsDir .. name .. ".txt"
     if not file.Exists(path, "DATA") then return nil end
@@ -342,6 +410,8 @@ function MGR.GetPreferences(name)
     return template
 end
 
+---@param player Player
+---@return string
 function MGR.GetPath(player)
     if not PlayerPath[player] then
         PlayerPath[player] = ""
@@ -350,6 +420,7 @@ function MGR.GetPath(player)
     return PlayerPath[player]
 end
 
+---@param player Player
 function MGR.GoBackPath(player)
     if not PlayerPath[player] or PlayerPath[player] == "" then
         return
@@ -364,6 +435,8 @@ function MGR.GoBackPath(player)
     end
 end
 
+---@param path string
+---@param player Player
 function MGR.SetPath(path, player)
     PlayerPath[player] = path
 end

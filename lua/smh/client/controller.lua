@@ -5,6 +5,7 @@ local function ReceiveKeyframes()
     local framecount = net.ReadUInt(INT_BITCOUNT)
     for i = 1, framecount do
         local ID, entity, Frame, ModCount = net.ReadUInt(INT_BITCOUNT), net.ReadEntity(), net.ReadUInt(INT_BITCOUNT), net.ReadUInt(INT_BITCOUNT)
+        ---@cast entity SMHEntity
         local Modifiers, In, Out = {}, {}, {}
         for j = 1, ModCount do
             local name = net.ReadString()
@@ -17,6 +18,10 @@ local function ReceiveKeyframes()
     return SMH.TableSplit.GetKeyframes()
 end
 
+---@param Timelines integer
+---@param KeyColor Color[]
+---@param ModCount integer[]
+---@param Modifiers table
 local function SendProperties(Timelines, KeyColor, ModCount, Modifiers)
     net.WriteUInt(Timelines, INT_BITCOUNT)
     for i=1, Timelines do
@@ -79,6 +84,7 @@ end
 
 local function RequestDefaultPose()
     local entity = net.ReadEntity()
+    ---@cast entity SMHEntity
 
     if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
         entity = entity.AttachedEntity
@@ -107,6 +113,7 @@ end
 
 local CTRL = {}
 
+---@param frame integer
 function CTRL.SetFrame(frame)
     if SMH.PhysRecord.IsActive() then return end
 
@@ -120,6 +127,8 @@ function CTRL.SetFrame(frame)
     RequestNodes()
 end
 
+---@param entity SMHEntity|Player
+---@param enttable Set<Entity>
 function CTRL.SelectEntity(entity, enttable)
     if SMH.PhysRecord.IsActive() then return end
     local count = 0
@@ -245,6 +254,9 @@ function CTRL.Smooth(frames, maxPasses)
     timer.Start("SMH_Smoothing_Timer")
 end
 
+---@param keyframeId integer[]
+---@param updateData any
+---@param singledata any
 function CTRL.UpdateKeyframe(keyframeId, updateData, singledata)
     local keyframeAmount = #keyframeId
 
@@ -285,6 +297,8 @@ function CTRL.UpdateKeyframe(keyframeId, updateData, singledata)
     net.SendToServer()
 end
 
+---@param keyframeId integer[]
+---@param frame table
 function CTRL.CopyKeyframe(keyframeId, frame)
     local keyframeAmount = #keyframeId
 
@@ -306,6 +320,7 @@ function CTRL.CopyKeyframe(keyframeId, frame)
     net.SendToServer()
 end
 
+---@param keyframeId integer[]
 function CTRL.DeleteKeyframe(keyframeId)
     local keyframeAmount = #keyframeId
 
@@ -361,6 +376,8 @@ function CTRL.GetServerSaves()
     net.SendToServer()
 end
 
+---@param path string
+---@param loadFromClient boolean?
 function CTRL.GetModelList(path, loadFromClient)
     if loadFromClient then
         local models = SMH.Saves.ListModels(path, LocalPlayer())
@@ -377,6 +394,9 @@ function CTRL.GetServerEntities()
     net.SendToServer()
 end
 
+---@param path string
+---@param modelName string
+---@param loadFromClient boolean
 function CTRL.Load(path, modelName, loadFromClient)
     if not next(SMH.State.Entity) then
         return
@@ -390,6 +410,7 @@ function CTRL.Load(path, modelName, loadFromClient)
 
     if loadFromClient then
         local serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName, LocalPlayer())
+        ---@cast serializedKeyframes SMHFile
         net.WriteTable(serializedKeyframes)
     else
         net.WriteString(path)
@@ -399,6 +420,9 @@ function CTRL.Load(path, modelName, loadFromClient)
     net.SendToServer()
 end
 
+---@param path string
+---@param modelName string
+---@param loadFromClient boolean
 function CTRL.GetModelInfo(path, modelName, loadFromClient)
     net.Start(SMH.MessageTypes.GetModelInfo)
     net.WriteString(path)
@@ -406,6 +430,9 @@ function CTRL.GetModelInfo(path, modelName, loadFromClient)
     net.SendToServer()
 end
 
+---@param path string
+---@param saveToClient boolean
+---@param isFolder boolean
 function CTRL.RequestSave(path, saveToClient, isFolder)
     net.Start(SMH.MessageTypes.RequestSave)
     net.WriteBool(saveToClient)
@@ -414,12 +441,15 @@ function CTRL.RequestSave(path, saveToClient, isFolder)
     net.SendToServer()
 end
 
+---@param path string
 function CTRL.Save(path)
     net.Start(SMH.MessageTypes.Save)
     net.WriteString(path)
     net.SendToServer()
 end
 
+---@param path string
+---@param toClient boolean
 function CTRL.RequestGoToFolder(path, toClient)
     net.Start(SMH.MessageTypes.RequestGoToFolder)
     net.WriteBool(toClient)
@@ -427,12 +457,16 @@ function CTRL.RequestGoToFolder(path, toClient)
     net.SendToServer()
 end
 
+---@param path string
 function CTRL.RequestAppend(path)
     net.Start(SMH.MessageTypes.RequestAppend)
     net.WriteString(path)
     net.SendToServer()
 end
 
+---@param path string
+---@param savenames string[]
+---@param gamenames string[]
 function CTRL.Append(path, savenames, gamenames)
     net.Start(SMH.MessageTypes.Append)
     local count = #savenames
@@ -457,7 +491,7 @@ function CTRL.QuickSave()
     local qs2 = "quicksave_" .. nick .. "_backup"
 
     SMH.Saves.CopyIfExists(qs1, qs2, LocalPlayer())
-    CTRL.Save(qs1, false)
+    CTRL.Save(qs1)
 end
 
 function CTRL.RequestPack()
@@ -465,6 +499,9 @@ function CTRL.RequestPack()
     net.SendToServer()
 end
 
+---@param path string
+---@param isFolder boolean
+---@param deleteFromClient boolean
 function CTRL.DeleteSave(path, isFolder, deleteFromClient)
     if deleteFromClient then
         SMH.Saves.Delete(path, LocalPlayer())
@@ -521,6 +558,8 @@ function CTRL.ShouldHighlight()
     return SMH.UI.IsOpen()
 end
 
+---@param useScreenshot boolean
+---@param StartFrame integer
 function CTRL.ToggleRendering(useScreenshot, StartFrame)
     if SMH.PhysRecord.IsActive() then return end
 
@@ -539,6 +578,8 @@ function CTRL.CloseMenu()
     SMH.UI.Close()
 end
 
+---@param newState State
+---@param updatePlaybackControls any
 function CTRL.UpdateState(newState, updatePlaybackControls)
 	local updatePlaybackControls = updatePlaybackControls or false
 	
@@ -559,6 +600,7 @@ function CTRL.UpdateState(newState, updatePlaybackControls)
     SMH.UI.UpdateState(SMH.State, updatePlaybackControls)
 end
 
+---@param newSettings any
 function CTRL.UpdateSettings(newSettings)
     SMH.Settings.Update(newSettings)
 end
@@ -571,6 +613,7 @@ function CTRL.OpenHelp()
     gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
 end
 
+---@param rendering boolean
 function CTRL.SetRendering(rendering)
     net.Start(SMH.MessageTypes.SetRendering)
     net.WriteBool(rendering)
@@ -583,6 +626,8 @@ function CTRL.UpdateGhostState()
     net.SendToServer()
 end
 
+---@param ent Entity
+---@param name string
 function CTRL.ApplyEntityName(ent, name)
     net.Start(SMH.MessageTypes.ApplyEntityName)
     net.WriteEntity(ent)
@@ -620,6 +665,9 @@ function CTRL.RemoveTimeline()
     net.SendToServer()
 end
 
+---@param i integer
+---@param mod string
+---@param check boolean
 function CTRL.UpdateModifier(i, mod, check)
     net.Start(SMH.MessageTypes.UpdateModifier)
     net.WriteUInt(i, INT_BITCOUNT)
@@ -628,6 +676,8 @@ function CTRL.UpdateModifier(i, mod, check)
     net.SendToServer()
 end
 
+---@param color Color
+---@param timeline integer
 function CTRL.UpdateKeyframeColor(color, timeline)
     net.Start(SMH.MessageTypes.UpdateKeyframeColor)
     net.WriteUInt(timeline, INT_BITCOUNT)
@@ -635,6 +685,9 @@ function CTRL.UpdateKeyframeColor(color, timeline)
     net.SendToServer()
 end
 
+---@param path string
+---@param model string
+---@param loadFromClient boolean
 function CTRL.SetPreviewEntity(path, model, loadFromClient)
     net.Start(SMH.MessageTypes.SetPreviewEntity)
     net.WriteString(path)
@@ -643,12 +696,16 @@ function CTRL.SetPreviewEntity(path, model, loadFromClient)
     net.SendToServer()
 end
 
+---@param state boolean
 function CTRL.SetSpawnGhost(state)
     net.Start(SMH.MessageTypes.SetSpawnGhost)
     net.WriteBool(state)
     net.SendToServer()
 end
 
+---@param path string
+---@param model string
+---@param loadFromClient boolean
 function CTRL.SpawnEntity(path, model, loadFromClient)
     if SMH.PhysRecord.IsActive() then return end
 
@@ -664,12 +721,16 @@ function CTRL.SpawnReset()
     net.SendToServer()
 end
 
+---@param set boolean
 function CTRL.SetSpawnOffsetMode(set)
     net.Start(SMH.MessageTypes.SetSpawnOffsetMode)
     net.WriteBool(set)
     net.SendToServer()
 end
 
+---@param path string
+---@param model string
+---@param loadFromClient boolean
 function CTRL.SetSpawnOrigin(path, model, loadFromClient)
     net.Start(SMH.MessageTypes.SetSpawnOrigin)
     net.WriteString(path)
@@ -677,40 +738,52 @@ function CTRL.SetSpawnOrigin(path, model, loadFromClient)
     net.SendToServer()
 end
 
+---@param Pos Vector
 function CTRL.OffsetPos(Pos)
     net.Start(SMH.MessageTypes.OffsetPos)
     net.WriteVector(Pos)
     net.SendToServer()
 end
 
+---@param Ang Angle
 function CTRL.OffsetAng(Ang)
     net.Start(SMH.MessageTypes.OffsetAng)
     net.WriteAngle(Ang)
     net.SendToServer()
 end
 
+---@param settings Properties
+---@param presetname string
 function CTRL.SetTimeline(settings, presetname)
     net.Start(SMH.MessageTypes.SetTimeline)
     net.WriteBool(presetname == "default")
     if not (presetname == "default") then
         local Timelines, KeyColor, ModCount, Modifiers = SMH.TableSplit.DProperties(settings)
+        ---@cast Timelines integer
+        ---@cast KeyColor Color
+        ---@cast ModCount integer[]
+        ---@cast Modifiers table
         SendProperties(Timelines, KeyColor, ModCount, Modifiers)
     end
     net.SendToServer()
 end
 
+---@param name string
 function CTRL.RequestTimelineInfo(name)
     net.Start(SMH.MessageTypes.RequestTimelineInfo)
     net.WriteString(name)
     net.SendToServer()
 end
 
+---@param frame integer
 function CTRL.RequestWorldData(frame)
     net.Start(SMH.MessageTypes.RequestWorldData)
     net.WriteUInt(frame, INT_BITCOUNT)
     net.SendToServer()
 end
 
+---@param str string
+---@param key string
 function CTRL.UpdateWorld(str, key)
     net.Start(SMH.MessageTypes.UpdateWorld)
     net.WriteString(str)
@@ -719,6 +792,9 @@ function CTRL.UpdateWorld(str, key)
     net.SendToServer()
 end
 
+---@param framecount integer
+---@param interval integer
+---@param entities table<Entity, integer>
 function CTRL.StartPhysicsRecord(framecount, interval, entities)
     if not next(entities) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 then
         return
@@ -746,12 +822,14 @@ end
 
 SMH.Controller = CTRL
 
+---@type Receiver
 local function SetFrameResponse(msgLength)
     local frame = net.ReadUInt(INT_BITCOUNT)
     SMH.State.Frame = frame
     SMH.UI.SetFrame(frame)
 end
 
+---@type Receiver
 local function SelectEntityResponse(msgLength)
     local keyframes = ReceiveKeyframes()
     local entities = {}
@@ -767,6 +845,7 @@ local function SelectEntityResponse(msgLength)
     SMH.UI.SetKeyframes(keyframes)
 end
 
+---@type Receiver
 local function UpdateKeyframeResponse(msgLength)
     local keyframes = ReceiveKeyframes()
 
@@ -777,17 +856,20 @@ local function UpdateKeyframeResponse(msgLength)
     end
 end
 
+---@type Receiver
 local function DeleteKeyframeResponse(msgLength)
     local keyframeId = net.ReadUInt(INT_BITCOUNT)
     SMH.UI.DeleteKeyframe(keyframeId)
 end
 
+---@type Receiver
 local function GetAllKeyframes(msgLength)
     local keyframes = ReceiveKeyframes()
 
     SMH.UI.SetKeyframes(keyframes, true)
 end
 
+---@type Receiver
 local function GetServerSavesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
         SMH.TableSplit.ATable(i, net.ReadString())
@@ -803,6 +885,7 @@ local function GetServerSavesResponse(msgLength)
     SMH.UI.SetServerSaves(folders, saves, path)
 end
 
+---@type Receiver
 local function GetModelListResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
         SMH.TableSplit.ATable(i, net.ReadString())
@@ -812,6 +895,7 @@ local function GetModelListResponse(msgLength)
     SMH.UI.SetModelList(models, map)
 end
 
+---@type Receiver
 local function GetServerEntitiesResponse(msgLength)
     for i=1, net.ReadUInt(INT_BITCOUNT) do
         SMH.TableSplit.ATable(net.ReadEntity(), {Name = net.ReadString()})
@@ -820,6 +904,7 @@ local function GetServerEntitiesResponse(msgLength)
     SMH.UI.SetEntityList(entities)
 end
 
+---@type Receiver
 local function LoadResponse(msgLength)
     local keyframes = ReceiveKeyframes()
     local entity = net.ReadEntity()
@@ -829,11 +914,13 @@ local function LoadResponse(msgLength)
     end
 end
 
+---@type Receiver
 local function GetModelInfoResponse(msgLength)
     local name, class = net.ReadString(), net.ReadString()
     SMH.UI.SetModelName(name, class)
 end
 
+---@type Receiver
 local function SaveExists(msgLength)
     local names = {}
 
@@ -844,6 +931,7 @@ local function SaveExists(msgLength)
     SMH.UI.SaveExistsWarning(names)
 end
 
+---@type Receiver
 local function SaveResponse(msgLength)
     local saveToClient = net.ReadBool()
     local path = net.ReadString()
@@ -857,6 +945,7 @@ local function SaveResponse(msgLength)
     SMH.UI.AddSaveFile(path)
 end
 
+---@type Receiver
 local function AddFolderResponse(msgLength)
     local saveToClient = net.ReadBool()
     local folder = net.ReadString()
@@ -868,6 +957,7 @@ local function AddFolderResponse(msgLength)
     SMH.UI.AddFolder(folder, LocalPlayer())
 end
 
+---@type Receiver
 local function RequestAppendResponse(msgLength)
     local savenames, gamenames = {}, {}
 
@@ -881,6 +971,7 @@ local function RequestAppendResponse(msgLength)
     SMH.UI.AppendWindow(savenames, gamenames)
 end
 
+---@type Receiver
 local function DeleteSaveResponse(msgLength)
     local isFolder = net.ReadBool()
     local path = net.ReadString()
@@ -888,30 +979,35 @@ local function DeleteSaveResponse(msgLength)
     SMH.UI.RemoveSaveFile(path, isFolder)
 end
 
+---@type Receiver
 local function ApplyEntityNameResponse(msgLength)
     local name = net.ReadString()
 
     SMH.UI.UpdateName(name)
 end
 
+---@type Receiver
 local function UpdateTimelineResponse(msgLength)
     local keyframes = ReceiveKeyframes()
 
     SMH.UI.SetKeyframes(keyframes)
 end
 
+---@type Receiver
 local function RequestModifiersResponse(msgLength)
     local list = net.ReadTable()
 
     SMH.UI.InitModifiers(list)
 end
 
+---@type Receiver
 local function UpdateTimelineInfoResponse(msgLength)
     local timeline = ReceiveProperties()
 
     SMH.UI.SetTimeline(timeline)
 end
 
+---@type Receiver
 local function UpdateModifierResponse(msgLength)
     local changed = net.ReadString()
     local timeline = ReceiveProperties()
@@ -919,12 +1015,14 @@ local function UpdateModifierResponse(msgLength)
     SMH.UI.UpdateModifier(timeline, changed)
 end
 
+---@type Receiver
 local function UpdateKeyframeColorResponse(msgLength)
     local timelineinfo = ReceiveProperties()
 
     SMH.UI.UpdateKeyColor(timelineinfo)
 end
 
+---@type Receiver
 local function RequestTimelineInfoResponse(msgLength)
     local name = net.ReadString()
     local timeline = ReceiveProperties()
@@ -933,6 +1031,7 @@ local function RequestTimelineInfoResponse(msgLength)
     SMH.UI.RefreshTimelineSettings()
 end
 
+---@type Receiver
 local function RequestWorldDataResponse(msgLength)
     local console = net.ReadString()
     local push = net.ReadString()
@@ -941,6 +1040,7 @@ local function RequestWorldDataResponse(msgLength)
     SMH.UI.SetWorldData(console, push, release)
 end
 
+---@type Receiver
 local function StopPhysicsRecordResponse(msgLength)
     SMH.PhysRecord.Stop()
 end

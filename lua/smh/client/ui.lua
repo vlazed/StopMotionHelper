@@ -1,7 +1,12 @@
+---@type SMHWorldClicker
 local WorldClicker = nil
+---@type SMHTooltip
 local Tooltip = nil
+---@type SMHSave
 local SaveMenu = nil
+---@type SMHLoad
 local LoadMenu = nil
+---@type SMHProperties
 local PropertiesMenu = nil
 
 local FrameToKeyframe = {}
@@ -19,6 +24,7 @@ local KeyColor = Color(0, 200, 0)
 
 local ClickerEntity = {}
 
+---@param pointer integer
 local function DeleteEmptyKeyframe(pointer)
     for id, kpointer in pairs(KeyframePointers) do
         if pointer == kpointer then
@@ -39,6 +45,7 @@ local function DeleteEmptyKeyframe(pointer)
     end
 end
 
+---@param keyframeId integer
 local function CreateCopyPointer(keyframeId)
     OffsetPointers = {}
     local KeysToDelete, KeysToCopy, FramesToSend = {}, {}, {}
@@ -130,6 +137,8 @@ local function CreateCopyPointer(keyframeId)
     end
 end
 
+---@param keyframeId integer
+---@return unknown
 local function NewKeyframePointer(keyframeId)
 
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
@@ -769,6 +778,7 @@ function MGR.UpdateKeyframe(keyframe)
     end
 end
 
+---@param keyframeId integer
 function MGR.DeleteKeyframe(keyframeId)
     if not KeyframeIDs[keyframeId] then return end
 
@@ -810,6 +820,8 @@ function MGR.SetOffsets(pointer)
     pointer:SetOffsets(minimum, maximum)
 end
 
+---@param pointer any
+---@param frame integer
 function MGR.MoveChildren(pointer, frame)
     if next(OffsetPointers) then
         for _, kpointer in ipairs(OffsetPointers) do
@@ -915,6 +927,7 @@ function MGR.GetSelected()
     return SelectedPointers
 end
 
+---@param entities Entities
 function MGR.SetSelectedEntity(entities)
     local entity = next(entities)
     LoadMenu:UpdateSelectedEnt(entity)
@@ -923,44 +936,60 @@ function MGR.SetSelectedEntity(entities)
     ClickerEntity = entities
 end
 
+---@param folders string[]
+---@param saves string[]
+---@param path string
 function MGR.SetServerSaves(folders, saves, path)
     LoadMenu:SetSaves(folders, saves, path)
     SaveMenu:SetSaves(folders, saves, path)
 end
 
+---@param models string[]
+---@param map string
 function MGR.SetModelList(models, map)
     LoadMenu:SetEntities(models, map)
     WorldClicker.SpawnMenu:SetEntities(models)
 end
 
+---@param entities Entities
 function MGR.SetEntityList(entities)
     PropertiesMenu:SetEntities(entities)
 end
 
+---@param name string
+---@param class string
 function MGR.SetModelName(name, class)
     LoadMenu:SetModelName(name, class)
 end
 
+---@param name string
 function MGR.UpdateName(name)
     PropertiesMenu:SetName(name)
 end
 
+---@param names string[]
 function MGR.SaveExistsWarning(names)
     SaveMenu:SaveExists(names)
 end
 
+---@param savenames string[]
+---@param gamenames string[]
 function MGR.AppendWindow(savenames, gamenames)
     SaveMenu:AppendWindow(savenames, gamenames)
 end
 
+---@param path string
 function MGR.AddSaveFile(path)
     SaveMenu:AddSave(path)
 end
 
+---@param path string
+---@param isFolder boolean
 function MGR.RemoveSaveFile(path, isFolder)
     SaveMenu:RemoveSave(path, isFolder)
 end
 
+---@param list any
 function MGR.InitModifiers(list)
     PropertiesMenu:InitModifiers(list)
 end
@@ -969,12 +998,15 @@ function MGR.RefreshTimelineSettings()
     PropertiesMenu:UpdateTimelineSettings()
 end
 
+---@param setting string
+---@param value any
 function MGR.UpdateUISetting(setting, value)
     local settings = {}
     settings[setting] = value
     WorldClicker.Settings:ApplySettings(settings)
 end
 
+---@param timeline TimelineSetting
 function MGR.SetTimeline(timeline)
     WorldClicker.MainMenu:UpdateTimelines(timeline)
     PropertiesMenu:UpdateTimelineInfo(timeline)
@@ -983,7 +1015,9 @@ function MGR.SetTimeline(timeline)
     end
 end
 
-//modified for loading playback length and rate from audio sequence save
+---modified for loading playback length and rate from audio sequence save
+---@param newState State
+---@param updatePlaybackControls boolean?
 function MGR.UpdateState(newState, updatePlaybackControls)
 	local updatePlaybackControls = updatePlaybackControls or false
 	
@@ -995,14 +1029,18 @@ function MGR.UpdateState(newState, updatePlaybackControls)
 	end
 end
 
+---@param timelineinfo TimelineSetting
+---@param changed string
 function MGR.UpdateModifier(timelineinfo, changed)
     PropertiesMenu:UpdateModifiersInfo(timelineinfo, changed)
 end
 
+---@param timelineinfo TimelineSetting
 function MGR.UpdateKeyColor(timelineinfo)
     PropertiesMenu:UpdateColor(timelineinfo)
 end
 
+---@param color Color
 function MGR.PaintKeyframes(color)
     KeyColor = color
 
@@ -1015,6 +1053,7 @@ function MGR.GetModifiers()
     return PropertiesMenu:GetModifiers()
 end
 
+---@param set any
 function MGR.SetUsingWorld(set)
     PropertiesMenu:SetUsingWorld(set)
     if set then
@@ -1024,6 +1063,9 @@ function MGR.SetUsingWorld(set)
     end
 end
 
+---@param console string
+---@param push string
+---@param release string
 function MGR.SetWorldData(console, push, release)
     PropertiesMenu:ShowWorldSettings(console, push, release)
 end

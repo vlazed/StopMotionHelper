@@ -1,4 +1,5 @@
 local BaseClass = baseclass.Get("EditablePanel")
+---@class SMHWorldClickerPanel: EditablePanel
 local PANEL = {}
 
 -- https://github.com/penolakushari/RagdollMover/blob/eefbda5c3b27e193b1c3e113b258f7a1d4334cad/lua/autorun/ragdollmover.lua#L72

@@ -4,6 +4,15 @@ local listAssembling = {}
 
 local MGR = {} -- btw D stands for "deconstruct", A for "Assemble"
 
+---@param keyframes FrameData[]
+---@return integer IDCount
+---@return table IDs
+---@return table Entities
+---@return table<integer, integer> Frame
+---@return table<integer, number> In
+---@return table<integer, number> Out
+---@return table<integer, integer> ModCount
+---@return ModifierNames Modifiers
 function MGR.DKeyframes(keyframes)
     local IDs, ents, Frame, In, Out, ModCount, Modifiers = {}, {}, {}, {}, {}, {}, {}
     local i = 0
@@ -26,6 +35,12 @@ function MGR.DKeyframes(keyframes)
     return i, IDs, ents, Frame, In, Out, ModCount, Modifiers
 end
 
+---@param ID integer
+---@param entity SMHEntity
+---@param Frame integer
+---@param In table<integer, number>
+---@param Out table<integer, number>
+---@param Modifiers ModifierNames
 function MGR.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
     local keyframe = {}
     keyframe.ID = ID
@@ -38,12 +53,18 @@ function MGR.AKeyframes(ID, entity, Frame, In, Out, Modifiers)
     table.insert(keyframesAssembling, keyframe)
 end
 
+---@return FrameData[]
 function MGR.GetKeyframes()
     local keyframes = table.Copy(keyframesAssembling)
     keyframesAssembling = {}
     return keyframes
 end
 
+---@param timeline Properties
+---@return integer? Timelines
+---@return table<any, Color>? KeyColor
+---@return table<integer, integer>? ModCount
+---@return table? Modifiers
 function MGR.DProperties(timeline)
     if not next(timeline) then return end
     local Timelines = timeline.Timelines
@@ -65,12 +86,17 @@ function MGR.DProperties(timeline)
     return Timelines, KeyColor, ModCount, Modifiers
 end
 
+---@param Timelines integer
+---@return integer Timelines
 function MGR.StartAProperties(Timelines)
     timelineAssembling.Timelines = Timelines
     timelineAssembling.TimelineMods = {}
     return Timelines
 end
 
+---@param Timeline integer
+---@param Modifier string?
+---@param KeyColor Color?
 function MGR.AProperties(Timeline, Modifier, KeyColor)
     if not timelineAssembling.TimelineMods[Timeline] then
         timelineAssembling.TimelineMods[Timeline] = {}
@@ -83,6 +109,7 @@ function MGR.AProperties(Timeline, Modifier, KeyColor)
     end
 end
 
+---@return TimelineSetting
 function MGR.GetProperties()
     local timeline = table.Copy(timelineAssembling)
     timelineAssembling = {}

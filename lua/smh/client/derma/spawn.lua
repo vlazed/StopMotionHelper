@@ -1,5 +1,7 @@
 local SaveFile = nil
 
+---@class SMHSpawn: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()

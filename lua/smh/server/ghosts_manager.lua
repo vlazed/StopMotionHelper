@@ -5,6 +5,12 @@ local SpawnGhost, SpawnGhostData, GhostSettings = {}, {}, {}
 local SpawnOffsetOn, SpawnOriginData, OffsetPos, OffsetAng = {}, {}, {}, {}
 local DefaultPoseTrees = {}
 
+---@param player Player
+---@param entity SMHEntity
+---@param color Color
+---@param frame integer
+---@param ghostable SMHEntity[]
+---@return SMHEntity
 local function CreateGhost(player, entity, color, frame, ghostable)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
         if ghost.Entity == entity and ghost.Frame == frame then return ghost end -- we already have a ghost on this entity for this frame, just return it.
@@ -17,9 +23,9 @@ local function CreateGhost(player, entity, color, frame, ghostable)
     if class == "prop_ragdoll" then
         g = ents.Create("prop_ragdoll")
 
-        local flags = entity:GetSaveTable().spawnflags or 0
+        local flags = entity:GetSaveTable(false).spawnflags or 0
         if flags % (2 * 32768) >= 32768 then
-            g:SetKeyValue("spawnflags",32768)
+            g:SetKeyValue("spawnflags", "32768")
             g:SetSaveValue("m_ragdoll.allowStretch", true)
         end
     else
@@ -29,6 +35,8 @@ local function CreateGhost(player, entity, color, frame, ghostable)
             model = entity.AttachedEntity:GetModel()
         end
     end
+
+    ---@cast g SMHEntity
 
     g:SetModel(model)
     g:SetRenderMode(RENDERMODE_TRANSCOLOR)
@@ -101,6 +109,11 @@ function MGR.SelectEntity(player, entities)
     GhostData[player].Entity = table.Copy(entities)
 end
 
+---@param player Player
+---@param frame integer
+---@param settings Settings
+---@param timeline Properties
+---@param settimeline integer
 function MGR.UpdateState(player, frame, settings, timeline, settimeline)
     LastFrame = frame
     LastTimeline = settimeline
@@ -157,6 +170,8 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
             if not prevKeyframe and not nextKeyframe then
                 continue
             end
+            ---@cast prevKeyframe FrameData
+            ---@cast nextKeyframe FrameData
 
             if lerpMultiplier == 0 then
                 if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
@@ -207,6 +222,8 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
                     if not prevKeyframe then
                         continue
                     end
+                    ---@cast prevKeyframe FrameData
+                    ---@cast nextKeyframe FrameData
 
                     if lerpMultiplier <= 0 or settings.TweenDisable then
                         SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
@@ -223,6 +240,9 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
     end
 end
 
+---@param player Player
+---@param timeline Properties
+---@param settings Settings
 function MGR.UpdateSettings(player, timeline, settings)
     MGR.UpdateState(player, LastFrame, settings, timeline, LastTimeline)
 end
@@ -235,6 +255,11 @@ function MGR.GetTree(modelName)
     return DefaultPoseTrees[modelName]
 end
 
+---@param class string
+---@param modelpath string
+---@param data any
+---@param settings Settings
+---@param player Player
 function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -282,6 +307,8 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     end
 end
 
+---@param player Player
+---@param offseton any
 function MGR.RefreshSpawnPreview(player, offseton)
     SpawnOffsetOn[player] = offseton
     if not IsValid(SpawnGhost[player]) then return end
@@ -300,6 +327,7 @@ function MGR.RefreshSpawnPreview(player, offseton)
     end
 end
 
+---@param player Player
 function MGR.SpawnClear(player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -307,19 +335,26 @@ function MGR.SpawnClear(player)
     end
 end
 
+---@param data any
+---@param player Player
 function MGR.SetSpawnOrigin(data, player)
     SpawnOriginData[player] = data
 end
 
+---@param player Player
 function MGR.ClearSpawnOrigin(player)
     SpawnOriginData[player] = nil
 end
 
+---@param pos Vector
+---@param player Player
 function MGR.SetPosOffset(pos, player)
     OffsetPos[player] = pos
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])
 end
 
+---@param ang Angle
+---@param player Player
 function MGR.SetAngleOffset(ang, player)
     OffsetAng[player] = ang
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])

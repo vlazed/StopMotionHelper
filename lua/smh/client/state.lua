@@ -2,6 +2,7 @@ local playbackRateConVar = CreateClientConVar("smh_fps", "30", true, false, "Set
 local playbackLengthConVar = CreateClientConVar("smh_framecount", "100", true, false, "Set the length of the timeline, which makes the animation loop.", 1)
 CreateClientConVar("smh_zoom", "100", true, false, "Set the visual length of the timeline.", 1)
 
+---@type State
 SMH.State = {
     Entity = {},
     Frame = 0,

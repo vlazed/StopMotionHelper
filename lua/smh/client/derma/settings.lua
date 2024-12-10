@@ -1,3 +1,5 @@
+---@class SMHSettings: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
@@ -116,6 +118,7 @@ function PANEL:PerformLayout(width, height)
 
 end
 
+---@param settings Settings
 function PANEL:ApplySettings(settings)
     self._changingSettings = true
 
@@ -144,6 +147,7 @@ function PANEL:ApplySettings(settings)
     self._changingSettings = false
 end
 
+---@param settings Settings
 function PANEL:OnSettingsUpdated(settings) end
 function PANEL:OnRequestOpenHelp() end
 function PANEL:OnRequestOpenPhysRecorder() end

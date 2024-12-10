@@ -1,3 +1,5 @@
+---@class SMHPhysRecord: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()

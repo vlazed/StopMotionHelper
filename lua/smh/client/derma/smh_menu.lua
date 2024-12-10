@@ -1,3 +1,5 @@
+---@class SMHMenu: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
@@ -196,6 +198,7 @@ function PANEL:PerformLayout(width, height)
 
 end
 
+---@param timelineinfo TimelineSetting
 function PANEL:UpdateTimelines(timelineinfo)
     self.TimelinesBase:Clear()
 
@@ -238,12 +241,15 @@ function PANEL:UpdateTimelines(timelineinfo)
     end
 end
 
+---@param state State
 function PANEL:SetInitialState(state)
     self.PlaybackRateControl:SetValue(state.PlaybackRate)
     self.PlaybackLengthControl:SetValue(state.PlaybackLength)
     self:UpdatePositionLabel(state.Frame, state.PlaybackLength)
 end
 
+---@param frame integer
+---@param totalFrames integer
 function PANEL:UpdatePositionLabel(frame, totalFrames)
     local offset = GetConVar("smh_startatone"):GetInt()
     self.PositionLabel:SetText("Position: " .. frame + offset .. " / " .. totalFrames - (1 - offset))
@@ -255,6 +261,8 @@ function PANEL:UpdateAudioTrackEditMode(edit)
 	self.AudioClipTools:SetEnabled(edit)
 end
 
+---@param easeIn number
+---@param easeOut number
 function PANEL:ShowEasingControls(easeIn, easeOut)
     self._sendKeyframeChanges = false
     self.EaseInControl:SetValue(easeIn)
@@ -267,7 +275,9 @@ function PANEL:HideEasingControls()
     self.Easing:SetVisible(false)
 end
 
+---@param newState State
 function PANEL:OnRequestStateUpdate(newState) end
+---@param newKeyframeData any
 function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
 function PANEL:OnRequestOpenPropertiesMenu() end
 function PANEL:OnRequestRecord() end

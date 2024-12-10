@@ -1,3 +1,9 @@
+
+---@param player Player
+---@param entity SMHEntity | Player
+---@param frame integer
+---@param modnames ModifierNames?
+---@return FrameData?
 local function GetExistingKeyframe(player, entity, frame, modnames)
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Entities[entity] then
         return nil
@@ -21,6 +27,11 @@ local function GetExistingKeyframe(player, entity, frame, modnames)
     return nil
 end
 
+---@param keyframe FrameData
+---@param player Player
+---@param entity SMHEntity|Player
+---@param modnames ModifierNames
+---@return boolean
 local function Record(keyframe, player, entity, modnames)
     local recorded = false
     for _, name in ipairs(modnames) do
@@ -35,6 +46,8 @@ local function Record(keyframe, player, entity, modnames)
     return recorded
 end
 
+---@param keyframe FrameData
+---@param modname Modifiers
 local function ClearModifier(keyframe, modname)
     keyframe.Modifiers[modname] = nil
     keyframe.EaseIn[modname] = nil
@@ -62,6 +75,8 @@ end)
 
 local MGR = {}
 
+---@param player Player
+---@return FrameData[]
 function MGR.GetAll(player)
     if not SMH.KeyframeData.Players[player] then
         return {}
@@ -75,6 +90,9 @@ function MGR.GetAll(player)
     return result
 end
 
+---@param player Player
+---@param entities Entities
+---@return FrameData[]
 function MGR.GetAllForEntity(player, entities)
     local keyframes = {}
 
@@ -91,6 +109,11 @@ function MGR.GetAllForEntity(player, entities)
     return keyframes
 end
 
+---@param player Player
+---@param entities Entities
+---@param frame integer
+---@param timeline any
+---@return FrameData[]
 function MGR.Create(player, entities, frame, timeline)
     local keyframes = {}
 
@@ -133,6 +156,11 @@ function MGR.Create(player, entities, frame, timeline)
     return keyframes
 end
 
+---@param player Player
+---@param keyframeIds any
+---@param updateData any
+---@param timeline any
+---@return table
 function MGR.Update(player, keyframeIds, updateData, timeline)
     local keyframes, movingkeyframes = {}, {}
 
@@ -204,6 +232,11 @@ function MGR.Update(player, keyframeIds, updateData, timeline)
     return keyframes
 end
 
+---@param player Player
+---@param keyframeIds any
+---@param frame integer
+---@param timeline any
+---@return table
 function MGR.Copy(player, keyframeIds, frame, timeline)
     local copiedKeyframes, movingkeyframes = {}, {}
 
@@ -256,6 +289,10 @@ function MGR.Copy(player, keyframeIds, frame, timeline)
     return copiedKeyframes
 end
 
+---@param player Player
+---@param keyframeId integer
+---@param timeline any
+---@return unknown
 function MGR.Delete(player, keyframeId, timeline)
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
@@ -276,6 +313,10 @@ function MGR.Delete(player, keyframeId, timeline)
     return entity
 end
 
+---@param player Player
+---@param entity SMHEntity|Player
+---@param serializedKeyframes SMHFile
+---@param entityProperties Properties
 function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
     if SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities[entity] then
         local deletethis = table.Copy(SMH.KeyframeData.Players[player].Entities[entity])
@@ -307,13 +348,23 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
     end
 end
 
+---@param player Player
+---@param frame integer
+---@return string
+---@return string
+---@return string
 function MGR.GetWorldData(player, frame)
     local keyframe = GetExistingKeyframe(player, player, frame, {"world"})
+    ---@cast keyframe FrameData
     local modifiers = keyframe.Modifiers["world"]
 
     return modifiers.Console, modifiers.Push, modifiers.Release
 end
 
+---@param player Player
+---@param frame integer
+---@param str string
+---@param key any
 function MGR.UpdateWorldKeyframe(player, frame, str, key)
     local keyframe = GetExistingKeyframe(player, player, frame, {"world"})
     if not keyframe then return end

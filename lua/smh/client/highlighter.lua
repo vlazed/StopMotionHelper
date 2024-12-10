@@ -5,6 +5,7 @@ local mat_Add    = Material( "pp/add" )
 local mat_Sub    = Material( "pp/sub" )
 local rt_Stencil    = render.GetBloomTex0()
 local rt_Store        = render.GetScreenEffectTexture( 0 )
+---@param entities Set<Entity>
 local function RenderHalo(entities)
 
     local OldRT = render.GetRenderTarget()

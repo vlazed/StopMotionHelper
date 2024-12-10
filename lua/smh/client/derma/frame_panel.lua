@@ -1,3 +1,4 @@
+---@class SMHFramePanel: DPanel
 local PANEL = {}
 
 Derma_Install_Convar_Functions(PANEL)

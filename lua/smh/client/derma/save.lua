@@ -3,6 +3,8 @@ local AppendWindowActive = false
 local DeletePromptActive = false
 local FolderSelected = false
 
+---@class SMHSave: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()

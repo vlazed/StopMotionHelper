@@ -1,3 +1,5 @@
+---@class SMHProperties: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 local EntsTable = {}
 local BonemergedEntsTable = {}
