@@ -113,6 +113,8 @@ do
             surface.SetTextColor( 255, 0, 0 )
             surface.SetTextPos( 128, 128 )
             surface.DrawText( "Starting physics recording in: " .. Waiting )
+        elseif Waiting == 0 and not Active then
+            currentFrame = SMH.State.Frame
         elseif Active then
             local now = CurTime()
             if (now - lastTime) > ((MGR.RecordInterval + 1) / SMH.State.PlaybackRate) then

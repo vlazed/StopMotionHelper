@@ -947,7 +947,7 @@ function MGR.SetServerSaves(folders, saves, path)
 end
 
 ---@param models string[]
----@param map string
+---@param map string?
 function MGR.SetModelList(models, map)
     LoadMenu:SetEntities(models, map)
     WorldClicker.SpawnMenu:SetEntities(models)
