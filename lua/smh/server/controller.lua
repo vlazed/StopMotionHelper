@@ -117,6 +117,7 @@ end
 ---@type Receiver
 local function RequestDefaultPoseResponse(msgLength, player)
     local modelPath = net.ReadString()
+    ---@type PoseTree
     local tree = {}
     local nodeCount = net.ReadUInt(8)
     for i = 0, nodeCount - 1 do

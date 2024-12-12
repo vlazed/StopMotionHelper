@@ -1,8 +1,10 @@
+---@type GhostData
 local GhostData = {}
 local LastFrame = 0
 local LastTimeline = 1
 local SpawnGhost, SpawnGhostData, GhostSettings = {}, {}, {}
 local SpawnOffsetOn, SpawnOriginData, OffsetPos, OffsetAng = {}, {}, {}, {}
+---@type PoseTrees
 local DefaultPoseTrees = {}
 
 ---@param player Player
@@ -172,6 +174,7 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
             end
             ---@cast prevKeyframe FrameData
             ---@cast nextKeyframe FrameData
+            ---@cast entity SMHEntity
 
             if lerpMultiplier == 0 then
                 if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
@@ -247,6 +250,8 @@ function MGR.UpdateSettings(player, timeline, settings)
     MGR.UpdateState(player, LastFrame, settings, timeline, LastTimeline)
 end
 
+---@param modelName string
+---@param tree PoseTree
 function MGR.SetTree(modelName, tree)
     DefaultPoseTrees[modelName] = tree
 end
@@ -360,15 +365,15 @@ function MGR.SetAngleOffset(ang, player)
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])
 end
 
+---@param player Player
 function MGR.UpdateKeyframe(player)
     if not GhostData[player] then return end
 
     GhostData[player].Updated = true
 end
 
-function MGR.RequestDefaultPose()
-end
-
+---@param player Player
+---@return table?
 function MGR.RequestNodes(player)
     if not GhostData[player] then return end
 
@@ -443,7 +448,7 @@ function MGR.RequestNodes(player)
                 pos = LocalToWorld(pos, ang, keyframe.Modifiers.position.Pos, angle_zero)
             end
         elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
-            pos = keyframe.Modifiers.position and keyframe.Modifiers.position.Pos
+            pos = keyframe.Modifiers.position.Pos
         end
 
         table.insert(nodes, {keyframe.Frame, pos})

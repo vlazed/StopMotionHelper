@@ -99,6 +99,8 @@
 ---@field Console string?
 ---@field Push string?
 ---@field Release string?
+---@field Pos Vector?
+---@field Ang Angle?
 
 ---@class SerializedFrameData The data shown in the SMH Timeline for the selected entity
 ---@field EntityData Modifier
@@ -140,6 +142,35 @@
 ---@field Entities Data[] The animation data for each entity
 
 ---@alias Entities table<integer, SMHEntity|Player>
+
+---@class GhostDatum
+---@field Entity table<SMHEntity>
+---@field Ghosts table<SMHEntity>
+---@field Nodes table
+---@field PreviousName string
+---@field LastEntity Entity
+---@field Updated boolean
+
+---@alias GhostData table<Player, GhostDatum>
+
+---@class Pose
+---@field Pos Vector
+---@field Ang Angle
+---@field LocalPos Vector
+---@field LocalAng Angle
+---@field Parent integer
+---@field IsPhysBone boolean
+
+---@alias PoseTree {[integer]: Pose}
+---@alias PoseTrees {[string]: PoseTree}
+
+---@class PlayerData
+---@field Keyframes FrameData[]
+---@field Entities {[Entity]: FrameData[]}
+
+---@class KeyframeData
+---@field Players {[Player]: PlayerData}
+---@field NextKeyframeId integer
 
 -- UI
 

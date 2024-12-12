@@ -91,6 +91,7 @@ function META:Delete(player, id)
     self.Players[player].Keyframes[id] = nil
 end
 
+---@type KeyframeData
 SMH.KeyframeData = {
     NextKeyframeId = 0,
     Players = {},

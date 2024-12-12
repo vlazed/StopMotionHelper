@@ -1,4 +1,6 @@
 -- Helper functions for incrementing the playhead position on the timeline
+
+---@param n integer|false
 local function nextFrame(n)
 	n = n or 1
 	local pos = SMH.State.Frame + n
@@ -8,6 +10,7 @@ local function nextFrame(n)
     SMH.Controller.SetFrame(pos)
 end
 
+---@param n integer|false
 local function previousFrame(n)
 	n = n or 1
 	local pos = SMH.State.Frame - n
@@ -39,6 +42,8 @@ concommand.Add("smh_delete", function()
 end)
 
 do
+    ---@param command string
+    ---@return string[]
     local function suggestFrames(command)
         local options = {
             command
