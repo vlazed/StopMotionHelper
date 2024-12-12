@@ -150,7 +150,7 @@ local function SelectEntity(msgLength, player)
         entity = entity.Entity
     end
 
-    if not SMH.GhostsManager.GetTree(entity:GetModel()) then
+    if not SMH.GhostsManager.GetTree(entity:GetModel()) and entity:GetBoneCount() > 1 then
         net.Start(SMH.MessageTypes.RequestDefaultPose)
         net.WriteEntity(entity)
         net.Send(player)
