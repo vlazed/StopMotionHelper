@@ -42,7 +42,7 @@ do
 
         beep(1)
         if not Active then
-            SMH.Controller.SelectEntity(nil, {})
+            SMH.Controller.SelectEntity(NULL, {})
             Active = true
             local wait = MGR.StartDelay
             Waiting = wait
