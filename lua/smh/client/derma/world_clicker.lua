@@ -2,18 +2,17 @@ local BaseClass = baseclass.Get("EditablePanel")
 ---@class SMHWorldClickerPanel: EditablePanel
 local PANEL = {}
 
--- https://github.com/penolakushari/RagdollMover/blob/eefbda5c3b27e193b1c3e113b258f7a1d4334cad/lua/autorun/ragdollmover.lua#L72
+---@source https://github.com/penolakushari/RagdollMover/blob/eefbda5c3b27e193b1c3e113b258f7a1d4334cad/lua/autorun/ragdollmover.lua#L72
+---@param output TraceResult
+---@return Trace
 local function GetViewTrace(output)
     local player = LocalPlayer()
-    local viewEntity = player:GetViewEntity()
+    local viewEntity = GetViewEntity()
 
-    local eyePos = player:EyePos()
-    if IsValid(viewEntity) and viewEntity ~= player then
-        eyePos = viewEntity:EyePos()
-        if viewEntity:GetClass() == "hl_camera" then -- adding support for Advanced Camera's view offset https://steamcommunity.com/sharedfiles/filedetails/?id=881605937&searchtext=advanced+camera
-            ---@diagnostic disable-next-line
-			eyePos = viewEntity:LocalToWorld(viewEntity:GetViewOffset())
-		end
+    local eyePos = EyePos()
+    if IsValid(viewEntity) and viewEntity:GetClass() == "hl_camera" then -- adding support for Advanced Camera's view offset https://steamcommunity.com/sharedfiles/filedetails/?id=881605937&searchtext=advanced+camera
+        ---@diagnostic disable-next-line
+        eyePos = viewEntity:LocalToWorld(viewEntity:GetViewOffset())
     end
 
     return {
