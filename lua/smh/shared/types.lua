@@ -1,7 +1,13 @@
 ---@meta
 
+-- Miscellaneous Types
+
 ---@alias Set<T> {[T]: boolean}
 ---@alias Receiver fun(msgLength: integer, player: Player)
+---@generic T
+---@alias Falsy<T> T|false
+
+-- SMH Types
 
 ---@class NewState
 ---@field Entity {[Entity]: boolean}?
