@@ -92,6 +92,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.Origins:SetPos(5, 30)
@@ -138,6 +139,7 @@ end
 function PANEL:SpawnSelected()
     local _, selectedEntity = self.EntityList:GetSelectedLine()
     if not SaveFile or not selectedEntity then return end
+    ---@cast selectedEntity DListView_Line
     self:OnSpawnRequested(SaveFile, selectedEntity:GetValue(1), false)
 end
 

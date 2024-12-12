@@ -11,6 +11,7 @@ local function GetViewTrace(output)
     if IsValid(viewEntity) and viewEntity ~= player then
         eyePos = viewEntity:EyePos()
         if viewEntity:GetClass() == "hl_camera" then -- adding support for Advanced Camera's view offset https://steamcommunity.com/sharedfiles/filedetails/?id=881605937&searchtext=advanced+camera
+            ---@diagnostic disable-next-line
 			eyePos = viewEntity:LocalToWorld(viewEntity:GetViewOffset())
 		end
     end

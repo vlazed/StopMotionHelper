@@ -44,6 +44,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.FileName:SetPos(5, 45)

@@ -79,6 +79,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 	
 	self.Label:SetPos(25, 25)
@@ -145,7 +146,7 @@ function PANEL:DoDelete()
 		self.Delete:SetText("Delete")
 		self.Delete:SetColor(self.DeleteDefaultColour)
 		self.DeleteConfirm = false
-		self.OnRequestAudioClipDelete()
+		self:OnRequestAudioClipDelete()
 	end
 end
 
@@ -163,7 +164,7 @@ function PANEL:DoDeleteAll()
 		self.DeleteAll:SetText("Delete All")
 		self.DeleteAll:SetColor(self.DeleteDefaultColour)
 		self.DeleteAllConfirm = false
-		self.OnRequestAudioClipDeleteAll()
+		self:OnRequestAudioClipDeleteAll()
 	end
 end
 

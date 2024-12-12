@@ -127,6 +127,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self:SetTitle("Stop Motion Helper")
@@ -275,7 +276,7 @@ function PANEL:HideEasingControls()
     self.Easing:SetVisible(false)
 end
 
----@param newState State
+---@param newState NewState
 function PANEL:OnRequestStateUpdate(newState) end
 ---@param newKeyframeData any
 function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
@@ -288,6 +289,7 @@ function PANEL:OnRequestOpenSettings() end
 -- AUDIO =========================================
 function PANEL:OnRequestInsertAudioMenu() end
 function PANEL:OnRequestEditAudioTrack(bool) end
+function PANEL:OnRequestAudioClipTools() end
 function PANEL:OnRequestOpenSaveAudioMenu() end
 function PANEL:OnRequestOpenLoadAudioMenu() end
 -- ===============================================

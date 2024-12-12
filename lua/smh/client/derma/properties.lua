@@ -109,6 +109,7 @@ function PANEL:Init()
     self.EntityList.OnRowSelected = function(_, rowIndex, row)
         local _, selectedName = self.EntityList:GetSelectedLine()
         if not IsValid(selectedName) then return end
+        ---@cast selectedName DListView_Line
         local selectedEntity = FindEntity(selectedName:GetValue(1))
         if not IsValid(selectedEntity) then return end
         self:SelectEntity(selectedEntity)
@@ -117,6 +118,7 @@ function PANEL:Init()
     self.BonemergedList.OnRowSelected = function(_, rowIndex, row)
         local _, selectedName = self.BonemergedList:GetSelectedLine()
         if not IsValid(selectedName) then return end
+        ---@cast selectedName DListView_Line
         local selectedEntity = FindBonemergedEntity(selectedName:GetValue(1))
         if not IsValid(selectedEntity) then return end
         self:SelectEntity(selectedEntity)
@@ -218,6 +220,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.EntitiesPanel:SetPos(4, 30)

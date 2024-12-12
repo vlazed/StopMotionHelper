@@ -581,7 +581,7 @@ function CTRL.CloseMenu()
     SMH.UI.Close()
 end
 
----@param newState State
+---@param newState NewState
 ---@param updatePlaybackControls any
 function CTRL.UpdateState(newState, updatePlaybackControls)
 	local updatePlaybackControls = updatePlaybackControls or false

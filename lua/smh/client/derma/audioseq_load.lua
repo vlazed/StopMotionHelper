@@ -36,6 +36,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     //self.FileName:SetPos(5, 45)
@@ -59,6 +60,8 @@ end
 
 function PANEL:LoadSelected()
     local _, selectedSave = self.FileList:GetSelectedLine()
+
+    ---@cast selectedSave DListView_Line
 
     if not IsValid(selectedSave) then
         return

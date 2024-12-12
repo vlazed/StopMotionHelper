@@ -1,3 +1,5 @@
+---@diagnostic disable
+
 -- Most taken from lua/includes/modules/halo.lua
 local matColor    = Material( "model_color" )
 local mat_Copy    = Material( "pp/copy" )

@@ -96,6 +96,7 @@ function PANEL:PerformLayout(width, height)
     local buttonWidth = 60
     local setButtonPos = setPosition(width * 0.48 - buttonWidth, height * 0.45, 70)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     setButtonPos(self.SelectAllButton)

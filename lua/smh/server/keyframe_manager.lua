@@ -180,6 +180,7 @@ function MGR.Update(player, keyframeIds, updateData, timeline)
             if updateData[id][field] then
                 if field == "Frame" then
                     if updateData[id][field] == keyframe.Frame then continue end
+                    ---@diagnostic disable-next-line
                     local remainmods, EaseIn, EaseOut, frame = table.Copy(keyframe.Modifiers), table.Copy(keyframe.EaseIn), table.Copy(keyframe.EaseOut), updateData[id][field]
                     for _, name in ipairs(modnames) do
                         remainmods[name] = nil

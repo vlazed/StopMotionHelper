@@ -77,6 +77,7 @@ function PANEL:PerformLayout(width, height)
 
     local setPos = setPosition(25, 20)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     setPos(self.PathRange)

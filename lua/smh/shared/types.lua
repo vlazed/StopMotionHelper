@@ -3,6 +3,13 @@
 ---@alias Set<T> {[T]: boolean}
 ---@alias Receiver fun(msgLength: integer, player: Player)
 
+---@class NewState
+---@field Entity {[Entity]: boolean}?
+---@field Frame integer?
+---@field Timeline integer?
+---@field PlaybackRate integer?
+---@field PlaybackLength integer?
+
 ---@class State
 ---@field Entity {[Entity]: boolean}
 ---@field Frame integer
@@ -183,3 +190,8 @@
 ---@field PhysRecorder SMHPhysRecord
 ---@field Settings SMHSettings
 ---@field SpawnMenu SMHSpawn
+
+---@class SMHNumberWang: DNumberWang Extension of DNumberWang with customizable step and increment or decrement fields
+---@field Step number
+---@field Up number
+---@field Down number

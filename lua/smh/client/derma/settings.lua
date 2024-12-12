@@ -90,6 +90,7 @@ function PANEL:PerformLayout(width, height)
 
     local setCheckboxPos = setPosition(25, 20)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     setCheckboxPos(self.FreezeAll)

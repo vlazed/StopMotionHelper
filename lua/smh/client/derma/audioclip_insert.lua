@@ -26,25 +26,31 @@ function PANEL:Init()
 	self.FileList:SetOpen( true )
 	self.FileList:SetFileTypes( "*.wav *.mp3" )
 	self.FileList.OnDoubleClick = function()
-		self.LoadSelected()
+		self:LoadSelected()
 	end
 	
 	self.Form = vgui.Create("DForm", self)
-	self.Form:SetName("File Name:")
-	self.TextBox = self.Form:TextEntry("", nil)
-	self.Button = self.Form:Button("Load", nil, nil)
+	self.Form:SetLabel("File Name:")
+	---@type DTextEntry
+	---@diagnostic disable-next-line
+	self.TextBox = self.Form:TextEntry("", "")
+	---@type DButton
+	---@diagnostic disable-next-line
+	self.Button = self.Form:Button("Load", "")
 	self.Button.DoClick = function()
 		self:LoadSelected()
 	end
 	
 	self.FileList.OnSelect = function(_, path, panel)
-		self.TextBox:SetValue(table.GetLastValue(string.Split(path,"/")))
+		local split = string.Split(path,"/")
+		self.TextBox:SetValue(split[#split])
 	end
 
 end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 	
 	self.FileList:Dock( FILL )

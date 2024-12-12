@@ -1,5 +1,5 @@
 ---@class SMHAudioClipPointer: DPanel
----@field GetParent fun(self: SMHFramePointer): SMHFramePanel
+---@field GetParent fun(self: SMHAudioClipPointer): SMHFramePanel
 local PANEL = {}
 
 local lockedHeight = 5

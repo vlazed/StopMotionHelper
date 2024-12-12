@@ -81,6 +81,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     local xOffset, yOffset = (self:GetWide()*0.2 - 50), (self:GetTall()*0.1 - 25)

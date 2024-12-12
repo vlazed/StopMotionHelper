@@ -47,9 +47,13 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     return prevKeyframe, nextKeyframe, lerpMultiplier
 end
 
+---@class KeyframeData
 local META = {}
 META.__index = META
 
+---@param player Player
+---@param entity Entity
+---@return FrameData
 function META:New(player, entity)
     local keyframe = {
         ID = self.NextKeyframeId,
@@ -79,6 +83,8 @@ function META:New(player, entity)
     return keyframe
 end
 
+---@param player Player
+---@param id integer
 function META:Delete(player, id)
     if not self.Players[player] or not self.Players[player].Keyframes[id] then
         return
@@ -92,6 +98,7 @@ function META:Delete(player, id)
 end
 
 ---@type KeyframeData
+---@diagnostic disable-next-line
 SMH.KeyframeData = {
     NextKeyframeId = 0,
     Players = {},
