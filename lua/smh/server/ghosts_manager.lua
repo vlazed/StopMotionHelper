@@ -385,7 +385,7 @@ function MGR.RequestNodes(player)
 
     local entities = SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities
 
-    if not nodes or not entities or not selectedEntities then return {} end
+    if not nodes or not entities or not selectedEntities or #selectedEntities == 0 then return {} end
 
     local entity = selectedEntities[1]
     local keyframes = entities[entity]
