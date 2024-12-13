@@ -7,6 +7,11 @@
 ---@generic T
 ---@alias Falsy<T> T|false
 
+---@class Wave
+---@field Fraction number
+---@field Left number
+---@field Right number
+
 -- SMH Types
 
 ---@class NewState

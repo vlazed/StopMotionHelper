@@ -1,6 +1,45 @@
 local MGR = {}
 
+---@type {[string]: Wave[]}
+local Waveforms = {}
 
+local SAMPLE_INTERVAL = 0.01
+
+---@param audioChannel IGModAudioChannel
+local function GenerateWaveform(audioChannel, startTime)
+	if not audioChannel then return end 
+	if Waveforms[audioChannel:GetFileName()] then
+		return Waveforms[audioChannel:GetFileName()]
+	end
+
+	local name = audioChannel:GetFileName()
+	Waveforms[name] = {}
+
+	audioChannel:SetVolume(0)
+	audioChannel:Play()
+	local timerId = "SMH_WaveformGenerator_" .. name
+	timer.Create(timerId, SAMPLE_INTERVAL, audioChannel:GetLength() / SAMPLE_INTERVAL, function()
+		local left, right = audioChannel:GetLevel()
+		local fraction = audioChannel:GetTime() / audioChannel:GetLength()
+		table.insert(Waveforms[name], {
+			Left = left,
+			Right = right,
+			Fraction = fraction
+		})
+	end)
+	timer.Start(timerId)
+	timer.Simple(audioChannel:GetLength() + 0.1, function()
+		audioChannel:SetVolume(1)
+		audioChannel:SetTime(startTime)
+		timer.Remove(timerId)
+	end)
+
+	return Waveforms[name]
+end
+
+function MGR.GetWaveforms()
+	return Waveforms
+end
 
 function MGR.Create(path, frame, startTime, duration)
 	
@@ -18,6 +57,7 @@ function MGR.Create(path, frame, startTime, duration)
 			
 			station:SetTime(startTime)
 			station:EnableLooping(false)
+			audioclip.Waveform = GenerateWaveform(station, startTime)
 			
 			print( "SMH Audio: Loaded from '"..path.."'")
 			

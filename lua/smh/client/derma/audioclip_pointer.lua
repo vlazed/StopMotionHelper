@@ -2,6 +2,8 @@
 ---@field GetParent fun(self: SMHAudioClipPointer): SMHFramePanel
 local PANEL = {}
 
+local SAMPLE_INTERVAL = 0.01
+
 local lockedHeight = 5
 local editHeight = 15
 
@@ -26,15 +28,17 @@ function PANEL:Init()
     self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
-
+    self._waveform = {}
 end
 
 function PANEL:Setup(audioClip)
+    PrintTable(audioClip.Waveform or {})
 	self._audioClip = audioClip
 	self._id = audioClip.ID
 	local splitName = string.Split(audioClip.AudioChannel:GetFileName(),"/")
 	self._fileName = splitName[#splitName]
 	self._startFrame = audioClip.Frame
+    self._waveform = audioClip.Waveform
 	self:SetFrame(self._startFrame)
 end
 
@@ -66,6 +70,15 @@ function PANEL:PaintOverride()
 		surface.SetTextColor(Color(255,255,255))
 		surface.SetFont("DefaultSmall")
 		surface.DrawText(self._fileName)
+	end
+
+    if not self._waveform or #self._waveform == 0 then return end    
+    for i = 1, #self._waveform do
+		local wave = self._waveform[i]
+		local avg = (wave.Left + wave.Right) * 0.5
+		surface.SetDrawColor(color_white:Unpack())
+        local height = avg * self:GetTall()
+		surface.DrawRect(self.PosX + self:GetWide() * wave.Fraction, self.PosY + self:GetTall() - height, 5, height)
 	end
 end
 
