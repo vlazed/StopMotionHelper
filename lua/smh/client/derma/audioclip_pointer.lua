@@ -2,10 +2,23 @@
 ---@field GetParent fun(self: SMHAudioClipPointer): SMHFramePanel
 local PANEL = {}
 
-local SAMPLE_INTERVAL = 0.01
-
 local lockedHeight = 5
 local editHeight = 15
+local barWidth = 15 * 100
+
+local COLOR_TRANSPARENT = Color(255, 255, 255, 200)
+
+---@param color Color
+---@returns Color darkerColor
+local function Darken(color, offset)
+    if offset > 1 then
+        offset = offset / 100
+    end
+
+    local h,s,v = color:ToHSV()
+    v = math.max(0, v - offset)
+    return HSVToColor(h,s,v)
+end
 
 function PANEL:Init()
 
@@ -14,6 +27,7 @@ function PANEL:Init()
 	self:SetBackgroundColor(self.Color)
 	self:SetPaintBackground(true)
     self.OutlineColor = Color(0, 0, 0)
+    self.DarkColor = Darken(self.Color, 40)
     self.OutlineColorDragged = Color(255, 255, 255)
     self.VerticalPosition = 32
 	self.CursorOffsetX = 0
@@ -64,21 +78,21 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX+width, self.PosY, self.PosX+width, self.PosY+height)
 	surface.DrawLine(self.PosX+width, self.PosY+height, self.PosX, self.PosY+height)
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
-	
-	if SMH.State.EditAudioTrack then
-		surface.SetTextPos(self.PosX+2, self.PosY+2)
-		surface.SetTextColor(Color(255,255,255))
-		surface.SetFont("DefaultSmall")
-		surface.DrawText(self._fileName)
-	end
 
-    if not self._waveform or #self._waveform == 0 then return end    
-    for i = 1, #self._waveform do
-		local wave = self._waveform[i]
-		local avg = (wave.Left + wave.Right) * 0.5
-		surface.SetDrawColor(color_white:Unpack())
-        local height = avg * self:GetTall()
-		surface.DrawRect(self.PosX + self:GetWide() * wave.Fraction, self.PosY + self:GetTall() - height, 5, height)
+    if self._waveform and #self._waveform > 0 then
+        local zoom = GetConVar("smh_zoom"):GetFloat()
+        for i = 1, #self._waveform do
+            local wave = self._waveform[i]
+            local avg = (wave.Left + wave.Right) * 0.5
+            surface.SetDrawColor(COLOR_TRANSPARENT:Unpack())
+            local y = (1 - avg) * self:GetTall()
+            local x = self:GetWide() * wave.Fraction
+            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth / zoom, self:GetTall() - y)
+        end
+    end
+
+	if SMH.State.EditAudioTrack then
+        draw.SimpleTextOutlined(self._fileName, "DefaultSmall", self.PosX+2, self.PosY+2, color_white, nil, nil, 1, self.DarkColor)
 	end
 end
 
