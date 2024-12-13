@@ -4,7 +4,7 @@ local PANEL = {}
 
 local lockedHeight = 5
 local editHeight = 15
-local barWidth = 15 * 100
+local barWidth = 4 / 1000
 
 local COLOR_TRANSPARENT = Color(255, 255, 255, 200)
 
@@ -80,14 +80,13 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
 
     if self._waveform and #self._waveform > 0 then
-        local zoom = GetConVar("smh_zoom"):GetFloat()
         for i = 1, #self._waveform do
             local wave = self._waveform[i]
             local avg = (wave.Left + wave.Right) * 0.5
             surface.SetDrawColor(COLOR_TRANSPARENT:Unpack())
             local y = (1 - avg) * self:GetTall()
             local x = self:GetWide() * wave.Fraction
-            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth / zoom, self:GetTall() - y)
+            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth * self:GetWide(), self:GetTall() - y)
         end
     end
 
