@@ -3,7 +3,7 @@
 This is the second part of the tutorial, which goes over the new features added for the unofficial Stop Motion Helper (SMH) 4.0. To summarize, these new features are the following:
 
 - Animatable bonemerged entities (from the regular Bonemerger to the Composite Bonemerger to the Advanced Bonemerger),
-- Audio playback to enable sound synchronization queues
+- Audio playback to enable sound synchronization cues
 - Motion paths to trace out the trajectory of a bone's path over time
 - Additional modifiers for the entity editors and volume clouds
 - New concommands to improve navigation over the timeline
