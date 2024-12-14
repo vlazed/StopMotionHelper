@@ -78,18 +78,16 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX+width, self.PosY+height, self.PosX, self.PosY+height)
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
 
-    local lastWidth = 0
     if self._waveform and #self._waveform > 0 then
         for i = 1, #self._waveform-1 do
             local wave1 = self._waveform[i]
             local wave2 = self._waveform[i+1]
             local avg = math.max((wave1.Left + wave1.Right) * 0.5, 0.1)
-            local width = (wave2.Fraction - wave1.Fraction) * self:GetWide()
+            local barWidth = (wave2.Fraction - wave1.Fraction) * self:GetWide()
             surface.SetDrawColor(COLOR_TRANSPARENT:Unpack())
-            local y = (1 - avg) * self:GetTall()
+            local y = (1 - avg) * height
             local x = self:GetWide() * wave1.Fraction
-            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, width, self:GetTall() - y)
-            lastWidth = wave1.Fraction - lastWidth
+            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth, height - y)
         end
     end
 

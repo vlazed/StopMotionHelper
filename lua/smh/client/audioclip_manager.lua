@@ -2,23 +2,25 @@ local MGR = {}
 
 ---@type {[string]: Wave[]}
 local Waveforms = {}
-
+local WAVEGENERATOR_ID = "SMH_WaveformGenerator_"
 local SAMPLE_INTERVAL = 0.001
 
 ---@param path string
----@param startTime number
-local function GenerateWaveform(path, startTime)
+local function GenerateWaveform(path)
 	if Waveforms[path] then
 		return Waveforms[path]
 	end
 
 	Waveforms[path] = {}
 	sound.PlayFile(path, "noplay noblock", function(audioChannel)
+		-- We can sample the levels from an audio clip even if the volume is set to low
 		audioChannel:SetVolume(0)
+		audioChannel:EnableLooping(false)
 		audioChannel:Play()
-		local timerId = "SMH_WaveformGenerator_" .. path
-		timer.Create(timerId, 0, audioChannel:GetLength() / SAMPLE_INTERVAL, function()
+		local timerId = WAVEGENERATOR_ID .. path
+		timer.Create(timerId, SAMPLE_INTERVAL, audioChannel:GetLength() / SAMPLE_INTERVAL, function()
 			local left, right = audioChannel:GetLevel()
+			-- The fraction decouples from the time unit, allowing the waveform to fit the width of an audioclip_pointer
 			local fraction = audioChannel:GetTime() / audioChannel:GetLength()
 			table.insert(Waveforms[path], {
 				Left = left,
@@ -27,6 +29,7 @@ local function GenerateWaveform(path, startTime)
 			})
 		end)
 		timer.Start(timerId)
+		-- Stop sampling at the end of the audio track
 		timer.Simple(audioChannel:GetLength() + 0.1, function()
 			timer.Remove(timerId)
 		end)
@@ -52,10 +55,10 @@ function MGR.Create(path, frame, startTime, duration)
 			audioclip.Frame = frame
 			audioclip.Duration = duration
 			audioclip.StartTime = startTime
+			audioclip.Waveform = GenerateWaveform(path)
 			
 			station:SetTime(startTime)
 			station:EnableLooping(false)
-			audioclip.Waveform = GenerateWaveform(path, startTime)
 			
 			print( "SMH Audio: Loaded from '"..path.."'")
 			
