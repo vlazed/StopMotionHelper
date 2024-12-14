@@ -1,6 +1,44 @@
 local MGR = {}
 
+local Waveforms = {}
+local WAVE_GENERATOR_ID = "SMH_WaveformGenerator_"
+local SAMPLE_INTERVAL = 0.001
 
+local function GenerateWaveform(path)
+	if Waveforms[path] then
+		return Waveforms[path]
+	end
+
+	Waveforms[path] = {}
+	sound.PlayFile(path, "noplay noblock", function(audioChannel)
+		-- We can sample the levels from an audio clip even if the volume is set to low
+		audioChannel:SetVolume(0)
+		audioChannel:EnableLooping(false)
+		audioChannel:Play()
+		local timerId = WAVE_GENERATOR_ID .. path
+		timer.Create(timerId, SAMPLE_INTERVAL, audioChannel:GetLength() / SAMPLE_INTERVAL, function()
+			local left, right = audioChannel:GetLevel()
+			-- The fraction decouples from the time unit, allowing the waveform to fit the width of an audioclip_pointer
+			local fraction = audioChannel:GetTime() / audioChannel:GetLength()
+			table.insert(Waveforms[path], {
+				Left = left,
+				Right = right,
+				Fraction = fraction
+			})
+		end)
+		timer.Start(timerId)
+		-- Stop sampling at the end of the audio track
+		timer.Simple(audioChannel:GetLength() + 0.1, function()
+			timer.Remove(timerId)
+		end)
+	end)
+
+	return Waveforms[path]
+end
+
+function MGR.GetWaveforms()
+	return Waveforms
+end
 
 function MGR.Create(path, frame, startTime, duration)
 	
@@ -15,6 +53,7 @@ function MGR.Create(path, frame, startTime, duration)
 			audioclip.Frame = frame
 			audioclip.Duration = duration
 			audioclip.StartTime = startTime
+			audioclip.Waveform = GenerateWaveform(path)
 			
 			station:SetTime(startTime)
 			station:EnableLooping(false)
@@ -23,12 +62,12 @@ function MGR.Create(path, frame, startTime, duration)
 			
 			SMH.Controller.UpdateServerAudio()
 			SMH.UI.CreateAudioClipPointer(audioclip)
+			table.insert(audioclips, audioclip)
 		else
 			print( "SMH Audio: Error loading file!", errCode, errStr )
 		end
 	end )
 
-	table.insert(audioclips, audioclip)
     return audioclips
 end
 

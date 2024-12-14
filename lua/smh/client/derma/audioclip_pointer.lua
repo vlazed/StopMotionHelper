@@ -3,6 +3,20 @@ local PANEL = {}
 local lockedHeight = 5
 local editHeight = 15
 
+local transparent = Color(255, 255, 255, 200)
+
+local function Darken(color, offset)
+
+    if offset > 1 then
+        offset = offset / 100
+    end
+
+    local h,s,v = color:ToHSV()
+    v = math.max(0, v - offset)
+    return HSVToColor(h,s,v)
+
+end
+
 function PANEL:Init()
 
     self:SetSize(8, 15)
@@ -11,6 +25,7 @@ function PANEL:Init()
 	self:SetPaintBackground(true)
     self.OutlineColor = Color(0, 0, 0)
     self.OutlineColorDragged = Color(255, 255, 255)
+    self.DarkColor = Darken(self.Color, 40)
     self.VerticalPosition = 32
 	self.CursorOffsetX = 0
 	
@@ -24,6 +39,7 @@ function PANEL:Init()
     self._selected = false
     self._maxoffset = 0
     self._minoffset = 0
+    self._waveform = {}
 
 end
 
@@ -33,6 +49,7 @@ function PANEL:Setup(audioClip)
 	local splitName = string.Split(audioClip.AudioChannel:GetFileName(),"/")
 	self._fileName = splitName[#splitName]
 	self._startFrame = audioClip.Frame
+    self._waveform = audioClip.Waveform
 	self:SetFrame(self._startFrame)
 end
 
@@ -59,11 +76,21 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX+width, self.PosY+height, self.PosX, self.PosY+height)
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
 	
+    if self._waveform and #self._waveform > 0 then
+        for i = 1, #self._waveform-1 do
+            local wave1 = self._waveform[i]
+            local wave2 = self._waveform[i+1]
+            local avg = math.max((wave1.Left + wave1.Right) * 0.5, 0.1)
+            local barWidth = (wave2.Fraction - wave1.Fraction) * width
+            surface.SetDrawColor(transparent:Unpack())
+            local y = (1 - avg) * height
+            local x = width * wave1.Fraction
+            surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth, height - y)
+        end
+    end
+
 	if SMH.State.EditAudioTrack then
-		surface.SetTextPos(self.PosX+2, self.PosY+2)
-		surface.SetTextColor(Color(255,255,255))
-		surface.SetFont("DefaultSmall")
-		surface.DrawText(self._fileName)
+        draw.SimpleTextOutlined(self._fileName, "DefaultSmall", self.PosX+2, self.PosY+2, color_white, nil, nil, 1, self.DarkColor)
 	end
 end
 
