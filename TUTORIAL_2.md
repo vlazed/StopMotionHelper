@@ -114,7 +114,7 @@ There are more features in this version that value an explanation. However, we h
 
 ## Other Resources
 
-The features above were built to introduce workflows involving audio and animation synchronization, bonemerged entity animations, and arc-ed movements. The links take you to additional resources to help improve how your animation process.
+The features above were built to introduce workflows involving audio and animation synchronization, bonemerged entity animations, and arc-ed movements. The links take you to additional resources to help improve your animation process.
 
 - [Precise Aim Vector](https://gist.github.com/vlazed/ae9e30bbecec14062689aeced6ea034d): This script increases the precision of your mouse cursor as seen by the server, which fixes jittering when you use the Ragdoll Mover gizmos with an unlocked cursor.
 - [Sync SMH Path Bone with RGM](https://gist.github.com/vlazed/72426266ef290773ecfbd97d164b8802): This script interfaces Ragdoll Mover with my fork of Stop Motion Helper to automatically rename the `smh_motionpathbone` when one selects a bone with Ragdoll Mover.
