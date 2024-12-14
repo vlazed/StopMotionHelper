@@ -46,7 +46,6 @@ function PANEL:Init()
 end
 
 function PANEL:Setup(audioClip)
-    PrintTable(audioClip.Waveform or {})
 	self._audioClip = audioClip
 	self._id = audioClip.ID
 	local splitName = string.Split(audioClip.AudioChannel:GetFileName(),"/")
@@ -84,7 +83,6 @@ function PANEL:PaintOverride()
         for i = 1, #self._waveform-1 do
             local wave1 = self._waveform[i]
             local wave2 = self._waveform[i+1]
-            -- print(i, lastWidth)
             local avg = math.max((wave1.Left + wave1.Right) * 0.5, 0.1)
             local width = (wave2.Fraction - wave1.Fraction) * self:GetWide()
             surface.SetDrawColor(COLOR_TRANSPARENT:Unpack())
