@@ -36,17 +36,17 @@ The first option is "Select All." As expected, this option will select all keyfr
 
 In addition, the "Select All" feature acts as an invert operator. To explain, press "Select All" twice, and the keyframes will be deselected. The following video will illustrate another use case, which involves selecting a subsequence of keyframes in the timeline and the other keyframes.
 
-[VIDEO]
+https://github.com/user-attachments/assets/c9ace8da-7e25-4515-95a1-b4e99509e205
 
 We mentioned earlier that we can **smooth** keyframes. This keyframe manipulation goes by different names, two of which I know: the arc method, and the Eltorro trick (see [this video](https://youtu.be/1DFOjr399Pk?t=45) for more information). We can perform this keyframe manipulation in two ways: the user interface, or with the concommand `smh_smooth n`, where `n` is a whole number indicating how much should be smoothed. This is known as the arc method because the output after performing the smoothing command is an arc, as seen in the following video. Notice the green motion paths in the smoothing trick has transformed from two straight lines into an arc. Also note the chat message indicating that smoothing has completed.
 
-[VIDEO]
+https://github.com/user-attachments/assets/de86fbd5-e1cb-4228-99dc-c4a901da08ac
 
 In the video, we use the "Smoothness" slider to vary how much of an arc that we want. Smoothing adds an additional frame to the animation. If one starts off with one frame, smoothing will add an additional frame for a total of two frames: in general, if one begins with `n` frames, they end up with `n + 1` frames after a smoothing operation.
 
 Smoothing can also be done with multiple selected frames, as seen in the next video.
 
-[VIDEO]
+https://github.com/user-attachments/assets/a8d6ac48-3177-4288-bb4b-5f11cfce5e88
 
 The video also demonstrates some new navigation features in SMH. Like any console command, they can be binded them to a key or input button. They are summarized in the following table. Note that `n` is a whole number.
 
@@ -81,7 +81,7 @@ By default, Stop Motion Helper is capable of animating any entity, but it is not
 1. Right-click on the entity multiple times to cycle through an entity's bonemerged items, or
 2. Select the bonemerged item through the properties menu.
 
-[VIDEO]
+https://github.com/user-attachments/assets/5c1edcf8-916c-46ff-8e18-1179492778d6
 
 Once you have selected the bonemerged entity, you can start animating the bonemerged entity through a tool such as the Ragdoll Mover (RGM).
 
