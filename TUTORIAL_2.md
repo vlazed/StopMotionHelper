@@ -84,13 +84,18 @@ The video also demonstrates some new navigation features in SMH. Like any consol
 
 The next set of UI enables audio playback. The four buttons on the timeline tab each open a window, where one can 1) explore the sound directory, 2) load an audio sequence, 3) save an audio sequence, and 4) manipulate the audio. In 4), grayed out buttons indicate that they will be implemented in the future. Also notice that audio sequences will also save the framerate and frame count, preserving them as they were at some point in the past.
 
+To add your own audio to use, you must do the following:
+- Add them into the `garrysmod/sound` directory or in an addon folder in `garrysmod/addons/your-sounds/sound/` (addon folder name can be whatever).
+- Ensure they are in .mp3 or .wav (I recommend .mp3 to save on file size).
+- Ensure they do not contain unicode characters.
+
 ![Stop Motion Helper Audio Windows](./docs/smh_audioplayback_3.png)
 
 If we insert an audio clip into the timeline in 1), and check "Edit Audio Track", we will be able to see the clip on the timeline. This clip gives us the length of the clip, and its waveform, indicating where in the clip is it the loudest. The length of the clip on the timeline is influenced by the framerate and how much the timeline has zoomed in or out (after importing engineer_taunts12.mp3, I executed `smh_zoom 500`). We can play the audio clip through `+smh_playback`, given that we disable smooth playback to ensure consistent audio playback.
 
 We can then use 4) the Audio Clip Tools to manipulate this audio clip. To delete an audio clip, the playhead must be adjusted to the *beginning* of the audio clip (not somewhere in the middle, or at the end). We click on it twice to delete the audio clip (the first click will confirm if one is sure to delete the audio clip). Alternatively, if we wanted to delete all audio clips, we use "Delete All."
 
-Audio clips are saved in the `garrysmod/data/smh/audio` folder. It is recommended to keep audio in this directory and animation files elsewhere.
+Audio sequence placements on the timeline are saved in the `garrysmod/data/smh/audio` folder. It is recommended to keep audio in this directory and animation files elsewhere.
 
 ### Selecting Bonemerged Entities
 
