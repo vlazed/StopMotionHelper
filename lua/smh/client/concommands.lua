@@ -169,5 +169,23 @@ end
 CreateClientConVar("smh_startatone", "0", true, false, "Whether the starting frame should start at 0 or 1", 0, 1)
 CreateClientConVar("smh_currentpreset", "default", true, false, "Use the timeline setting that defines the number of timelines and what modifier each timeline controls")
 CreateClientConVar("smh_motionpathbone", "", true, true, "Set the bone that the motion path will track")
-CreateClientConVar("smh_motionpathrange", "0", true, true, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
-CreateClientConVar("smh_motionpathsize", "1", true, true, "Set the size of the nodes in the motion path", 0)
+CreateClientConVar("smh_motionpathrange", "0", true, false, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
+CreateClientConVar("smh_motionpathsize", "1", true, false, "Set the size of the nodes in the motion path", 0)
+local autosaveTime = CreateClientConVar("smh_autosavetime", "5", true, false, "Set the autosave interval in minutes. Set to 0 to disable", 0)
+cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue)
+    newValue = tonumber(newValue)
+    if not newValue or not isnumber(newValue) then
+        local val = tonumber(oldValue)
+        ---@cast val number
+        autosaveTime:SetFloat(val)
+        return
+    end
+
+    if timer.Exists("SMH_Autosave_Timer") then
+        timer.Pause("SMH_Autosave_Timer")
+        if newValue > 0 then
+            timer.Adjust("SMH_Autosave_Timer", newValue * 60)
+            timer.UnPause("SMH_Autosave_Timer")
+        end
+    end
+end)

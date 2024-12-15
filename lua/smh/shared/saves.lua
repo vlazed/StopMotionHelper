@@ -315,13 +315,13 @@ end
 
 ---@param path string
 ---@param serializedKeyframes SerializedFrameData[]
----@param player Player
+---@param player Falsy<Player>
 function MGR.Save(path, serializedKeyframes, player)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
     end
 
-    path = SaveDir .. (PlayerPath[player] or "") .. path .. ".txt"
+    path = SaveDir .. (IsValid(player) and PlayerPath[player] or "") .. path .. ".txt"
     local json = util.TableToJSON(serializedKeyframes, true)
     file.Write(path, json)
 end

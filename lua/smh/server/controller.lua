@@ -463,12 +463,13 @@ end
 ---@type Receiver
 local function Save(msgLength, player)
     local path = net.ReadString()
+    local isAutoSave = net.ReadBool()
 
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
     local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
 
-    SMH.Saves.Save(path, serializedKeyframes, player)
+    SMH.Saves.Save(path, serializedKeyframes, isAutoSave and player)
 
     net.Start(SMH.MessageTypes.SaveResponse)
     net.WriteBool(false)

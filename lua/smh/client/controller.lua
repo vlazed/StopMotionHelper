@@ -445,9 +445,11 @@ function CTRL.RequestSave(path, saveToClient, isFolder)
 end
 
 ---@param path string
-function CTRL.Save(path)
+---@param isAutoSave boolean?
+function CTRL.Save(path, isAutoSave)
     net.Start(SMH.MessageTypes.Save)
     net.WriteString(path)
+    net.WriteBool(isAutoSave ~= nil and true or false)
     net.SendToServer()
 end
 
@@ -1117,6 +1119,32 @@ local function Setup()
 	net.Receive(SMH.MessageTypes.StopAllAudio, StopAllAudio)
 
     net.Receive(SMH.MessageTypes.RequestDefaultPose, RequestDefaultPose)
+
+    if game.SinglePlayer() then
+        local interval = GetConVar("smh_autosavetime"):GetFloat() * 60
+        timer.Remove("SMH_Autosave_Timer")
+        timer.Create("SMH_Autosave_Timer", interval, -1, function()
+            local nick = LocalPlayer():Nick():gsub(" ", "")
+            local root = "smh/"
+            local prefix = ("auto_save_%s"):format(nick)
+            local suffix = "_00"
+            local search = root .. prefix .. suffix .. "*.txt"
+            local autosaves = file.Find(search, "DATA", "dateasc") or {}
+            for _, autosave in ipairs(autosaves) do
+                local name = autosave:gsub(".txt", "")
+                local index = name:sub(-1)
+                if index + 1 > 5 then
+                    file.Delete(root .. autosave, "DATA")
+                else
+                    file.Rename(root .. autosave, root .. name:sub(1, #name-1) .. tostring(index + 1) .. ".txt")
+                end
+            end
+            CTRL.Save(prefix .. suffix .. "1", true)
+            print(("SMH: Autosaved to %s..."):format(prefix))
+            print(("SMH: Next autosave will be in %.2f minutes"):format(interval / 60))
+        end)
+        timer.Start("SMH_Autosave_Timer")
+    end
 end
 
 Setup()
