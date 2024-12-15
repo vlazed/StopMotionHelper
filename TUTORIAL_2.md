@@ -10,6 +10,24 @@ This is the second part of the tutorial, which goes over the new features added 
 
 Aside from that, it is uncertain if the official version will implement these features the same way as this fork implements them (particularly selecting bonemerged entities or audio playback). If the official version releases these features, please refer to their tutorials.
 
+## Console Variable and Command Summary
+
+| Command Name          | Arguments | Description                                                                                                                                                     |
+|-----------------------|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `smh_previous`        | `n`       | Move the playback back by `n` frames. If past 0, move the playhead to the end of the timeline                                                                   |
+| `smh_next`            | `n`       | Move the playhead forward by `n` frames. If past the frame count, move the playhead to the beginning of the timeline                                            |
+| `smh_previousframe`   | none      | Jump to the previous keyframe before the playhead                                                                                                               |
+| `smh_nextframe`       | none      | Jump to the next keyframe after the playhead                                                                                                                    |
+| `smh_zoom`            | `d`       | Set how many keyframes can be seen on the timeline. If the frame count is `n` and `smh_zoom` is set to `n`, then we will see exactly `n` frames on the timeline |
+| `smh_fps`             | `n`       | Set the playback rate of the timeline to `n` frames per second                                                                                                  |
+| `smh_framecount`      | `n`       | Set the length of the timeline to `n` frames                                                                                                                    |
+| `smh_smooth`          | `n`       | Smooth the frame on the playhead, or multiple selected frames, `n` times                                                                                        |
+| `smh_smoothall`       | `n`       | Smooth all frames `n` times                                                                                                                                     |
+| `smh_motionpathbone`  | `string`  | Select the bone to view its trajectory                                                                                                                          |
+| `smh_motionpathrange` | `n`       | Restrict how many nodes on the motion path to view                                                                                                              |
+| `smh_motionpathsize`  | `d`       | Change the size of the nodes on the motion path.                                                                                                                |
+| `smh_autosavetime`    | `d`       | Set how long, in minutes, it should take for the game to automatically save an animation. Set to 0 to disable                                                   |
+
 ## User Interface
 
 ![New Stop Motion Helper UI](./docs/smh_motionpaths_kfsettings.png)
@@ -108,6 +126,7 @@ There are more features in this version that value an explanation. However, we h
 
 - This fork adds more entities to animate: SMH can now animate GMod's default sun, sky, and fog editors. In addition, the fork also adds a modifier for [volumetric clouds](https://steamcommunity.com/sharedfiles/filedetails/?id=3195029892), allowing its parameters to be adjusted.
 - This exit save feature allows the game to save your SMH animation when the server shuts down with players connected. Similarly, if a player leaves or reloads a map, they will automatically save their progress. Exit saves are found in the `garrysmod/data/smh` folder, named as `exit_save_NICKNAME_ID`, where `NICKNAME` is your Steam name (not username), and `ID` is your [account id](https://developer.valvesoftware.com/wiki/SteamID#:~:text=SteamIDs%20follow%20a,the%20%22account%20number%22).
+- Similar to the exit save feature, the fork also adds an auto saving feature, through the concommand `smh_autosavetime d`, where `d` is decimal number. Auto saves are located in `garrysmod/data/smh` folder, labeled as `auto_save_NAME_00#`, where `NAME` is your Steam nickname, and `#` is a number between `1` and `5`. Up to `5` autosaves are allowed; otherwise, they get deleted afterwards.
 - Framerate, frame count, and timeline length are now console variables, in the form of `smh_fps`, `smh_framecount`, and `smh_zoom`, respectively. This allows you to save your timeline settings. The first two require whole number inputs, while zoom requires a decimal number (although it is saved as a whole number).
 - The physics recorder now includes two more indicators to show that one is recording: a beeping sound akin to SFM during the countdown to record, and a red circle on the top right, which fades when nearing the end of the physics recording session.
 
