@@ -469,7 +469,7 @@ local function Save(msgLength, player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
     local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
 
-    SMH.Saves.Save(path, serializedKeyframes, isAutoSave and player)
+    SMH.Saves.Save(path, serializedKeyframes, not isAutoSave and player)
 
     net.Start(SMH.MessageTypes.SaveResponse)
     net.WriteBool(false)
