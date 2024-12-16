@@ -20,6 +20,7 @@
 ---@field Timeline integer?
 ---@field PlaybackRate integer?
 ---@field PlaybackLength integer?
+---@field TimeStamp number?
 
 ---@class State
 ---@field Entity {[Entity]: boolean}
@@ -27,6 +28,7 @@
 ---@field Timeline integer
 ---@field PlaybackRate integer
 ---@field PlaybackLength integer
+---@field TimeStamp number
 
 ---@class Settings
 ---@field FreezeAll boolean

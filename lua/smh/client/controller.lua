@@ -192,6 +192,7 @@ function CTRL.Record(frame)
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then
         return
     end
+    SMH.State.TimeStamp = RealTime()
     local count = 0
 
     for ent, _ in pairs(SMH.State.Entity) do
@@ -831,6 +832,7 @@ SMH.Controller = CTRL
 local function SetFrameResponse(msgLength)
     local frame = net.ReadUInt(INT_BITCOUNT)
     SMH.State.Frame = frame
+    SMH.State.TimeStamp = RealTime()
     SMH.UI.SetFrame(frame)
 end
 
@@ -845,6 +847,7 @@ local function SelectEntityResponse(msgLength)
     local entity = next(entities)
 
     SMH.State.Entity = entities
+    SMH.State.TimeStamp = RealTime()
     SMH.UI.SetSelectedEntity(entities)
     SMH.UI.SetUsingWorld(entity == LocalPlayer())
     SMH.UI.SetKeyframes(keyframes)
@@ -1121,9 +1124,14 @@ local function Setup()
     net.Receive(SMH.MessageTypes.RequestDefaultPose, RequestDefaultPose)
 
     if game.SinglePlayer() then
-        local interval = GetConVar("smh_autosavetime"):GetFloat() * 60
+        local lastUpdate = SMH.State.TimeStamp
+        local interval = GetConVar("smh_autosavetime")
         timer.Remove("SMH_Autosave_Timer")
-        timer.Create("SMH_Autosave_Timer", interval, -1, function()
+        timer.Create("SMH_Autosave_Timer", interval:GetFloat() * 60, -1, function()
+            -- Only autosave when the user is active (i.e. he changes the state).
+            -- Otherwise, we would be performing unnecessary saving when nothing has changed
+            if lastUpdate == SMH.State.TimeStamp then return end
+
             local nick = LocalPlayer():Nick():gsub(" ", "")
             local root = "smh/"
             local prefix = ("auto_save_%s"):format(nick)
@@ -1141,7 +1149,8 @@ local function Setup()
             end
             CTRL.Save(prefix .. suffix .. "1", true)
             print(("SMH: Autosaved to %s..."):format(prefix))
-            print(("SMH: Next autosave will be in %.2f minutes"):format(interval / 60))
+            print(("SMH: Next autosave will be in %.2f minutes"):format(interval:GetFloat()))
+            lastUpdate = SMH.State.TimeStamp
         end)
         timer.Start("SMH_Autosave_Timer")
     end

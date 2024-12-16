@@ -229,6 +229,7 @@ function PANEL:UpdateTimelines(timelineinfo)
             if mousecode ~= MOUSE_LEFT then return end
 
             SMH.State.Timeline = i
+            SMH.State.TimeStamp = RealTime()
             SMH.Controller.UpdateTimeline()
 
             for j = 1, TotallTimelines do

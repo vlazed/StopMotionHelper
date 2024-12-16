@@ -599,6 +599,7 @@ hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
     for centity, _ in pairs(ClickerEntity) do
         if entity == centity then
             SMH.State.Entity[entity] = nil
+            SMH.State.TimeStamp = RealTime()
             WorldClicker:OnEntitySelected(entity, 2)
         end
     end
