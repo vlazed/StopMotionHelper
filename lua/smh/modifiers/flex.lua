@@ -42,9 +42,11 @@ function MOD:Load(entity, data)
     if count <= 0 then return; end --Shouldn't happen, but meh
 
     entity:SetFlexScale(data.Scale);
+    entity:SetNW2Float("faceposer_scale", data.Scale)
 
     for i, f in pairs(data.Weights) do
         entity:SetFlexWeight(i, f);
+        entity:SetNW2Float("faceposer_flex" .. i, f)
     end
 
 end
