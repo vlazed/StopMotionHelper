@@ -62,6 +62,7 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 
     local scale = SMH.LerpLinear(data1.Scale, data2.Scale, percentage);
     entity:SetFlexScale(scale);
+    entity:SetNW2Float("faceposer_scale", scale)
 
     for i = 0, count - 1 do
 
@@ -70,6 +71,7 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         local w = SMH.LerpLinear(w1, w2, percentage);
 
         entity:SetFlexWeight(i, w);
+        entity:SetNW2Float("faceposer_flex" .. i, w)
 
     end
 
