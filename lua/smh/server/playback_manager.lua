@@ -42,7 +42,9 @@ local function PlaybackSmooth(player, playback, settings)
                 local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
+
                 local modkeys = {}
+
 
                 if not prevKeyframe then continue end
                 

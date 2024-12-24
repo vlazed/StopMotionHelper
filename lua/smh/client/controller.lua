@@ -187,6 +187,7 @@ function CTRL.UpdateServerAudio()
 end
 -- ===============================
 
+
 --interpolation mode
 function CTRL.SetInterpolationMode(mode)
     
@@ -195,6 +196,7 @@ function CTRL.SetInterpolationMode(mode)
     net.SendToServer()
     
 end
+
 
 ---@param frame integer?
 function CTRL.Record(frame)

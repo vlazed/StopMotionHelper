@@ -75,6 +75,7 @@ end)
 
 local MGR = {}
 
+
 -- This function gathers all keyframes data and frames in a table for each modifier.
 --
 -- Modkeys = {
@@ -123,6 +124,8 @@ function MGR.OrganizeKeyframes(player)
     end
     --print("██ OrganizeKeyframes ejecutado con exito! ██")
 end
+
+
 
 ---@param player Player
 ---@return FrameData[]
