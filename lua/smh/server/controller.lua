@@ -1,5 +1,7 @@
 local INT_BITCOUNT = 32
 local KFRAMES_PER_MSG = 250
+SMH.GLOBAL_isOrgKeysNeeded = true
+SMH.GLOBAL_InterpolationMode = 2
 
 local function SendKeyframes(framecount, IDs, ents, Frame, In, Out, ModCount, Modifiers, loop)
     if not loop then loop = 0 end
@@ -74,6 +76,8 @@ local function SendSaves(player)
     net.Send(player)
 end
 
+
+
 local function SetFrame(msgLength, player)
     local newFrame = net.ReadUInt(INT_BITCOUNT)
     local settings = net.ReadTable()
@@ -120,6 +124,20 @@ local function SelectEntity(msgLength, player)
     SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
 
+local function SetInterpolationMode(msgLength, player)
+    --SMH.PropertiesManager.SetInterpolationMode(player, net.ReadBool())
+
+    local mode = net.ReadUInt(INT_BITCOUNT)
+    print("interp mode in server = ", mode)
+    print("2 = cubic, 1 = linear")
+
+    print(" ")
+    print("interp global mode antes = ", SMH.GLOBAL_InterpolationMode)
+
+    SMH.GLOBAL_InterpolationMode = mode
+    print("interp global mode despues = ", SMH.GLOBAL_InterpolationMode)
+end
+
 local function CreateKeyframe(msgLength, player)
     local entities = {}
     for i = 1, net.ReadUInt(INT_BITCOUNT) do
@@ -134,6 +152,7 @@ local function CreateKeyframe(msgLength, player)
     if timeline > totaltimelines then timeline = 1 end
 
     local keyframes = SMH.KeyframeManager.Create(player, entities, frame, timeline)
+    
     if not next(keyframes) then return end
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
 
@@ -229,7 +248,7 @@ local function StartPlayback(msgLength, player)
     local playbackRate = net.ReadUInt(INT_BITCOUNT)
     local settings = net.ReadTable()
 
-    SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
+    SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate, settings) 
 
     net.Start(SMH.MessageTypes.PlaybackResponse)
     net.WriteBool(true)
@@ -301,6 +320,8 @@ local function Load(msgLength, player)
 
     SMH.PropertiesManager.AddEntity(player, {entity})
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
+
+    
 
     local keyframes = SMH.KeyframeManager.GetAllForEntity(player, {entity})
     local framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers = SMH.TableSplit.DKeyframes(keyframes)
@@ -765,6 +786,8 @@ net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 
 net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 
+--setinterpolationmode
+net.Receive(SMH.MessageTypes.SetInterpolationMode, SetInterpolationMode)
 net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframeExecute, UpdateKeyframeExecute)

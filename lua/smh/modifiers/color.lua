@@ -22,19 +22,80 @@ function MOD:Load(entity, data)
 
 end
 
+local function ColorFramesOrganizer(data)
+
+    local colorstable = {}
+    local cn = #data
+
+    local red = {}
+    local green = {}
+    local blue = {}
+    local alpha = {}
+
+    for c = 1, cn do
+
+        table.insert(red, data[c].Color.r)
+        table.insert(green, data[c].Color.g)
+        table.insert(blue, data[c].Color.b)
+        table.insert(alpha, data[c].Color.a)
+
+    end
+
+    colorstable.r = red
+    colorstable.g = green
+    colorstable.b = blue
+    colorstable.a = alpha
+
+    return colorstable
+end
+
+
+function MOD:OrganizeData(args)
+
+    local data = args.data
+
+    local colorstable = {}
+    local cn = #data
+
+    local red = {}
+    local green = {}
+    local blue = {}
+    local alpha = {}
+
+    for c = 1, cn do
+
+        table.insert(red, data[c].Color.r)
+        table.insert(green, data[c].Color.g)
+        table.insert(blue, data[c].Color.b)
+        table.insert(alpha, data[c].Color.a)
+
+    end
+
+    colorstable.r = red
+    colorstable.g = green
+    colorstable.b = blue
+    colorstable.a = alpha
+
+    return colorstable
+end
+
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
     end
 
-    local c1 = data1.Color;
-    local c2 = data2.Color;
+    local ct = {}
 
-    local r = SMH.LerpLinear(c1.r, c2.r, percentage);
-    local g = SMH.LerpLinear(c1.g, c2.g, percentage);
-    local b = SMH.LerpLinear(c1.b, c2.b, percentage);
-    local a = SMH.LerpLinear(c1.a, c2.a, percentage);
+    ct = data2.Keydata
+
+    --ct = ColorFramesOrganizer(data2.Keydata)
+
+    local r = SMH.LerpLinear(data2.Frames, ct.r, percentage);
+    local g = SMH.LerpLinear(data2.Frames, ct.g, percentage);
+    local b = SMH.LerpLinear(data2.Frames, ct.b, percentage);
+    local a = SMH.LerpLinear(data2.Frames, ct.a, percentage);
 
     entity:SetColor(Color(r, g, b, a));
 

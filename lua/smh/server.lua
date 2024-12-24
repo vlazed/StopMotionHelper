@@ -1,6 +1,7 @@
 include("shared.lua")
 
 include("server/controller.lua")
+include("server/quaternions.lua")
 include("server/easing.lua")
 include("server/eyetarget.lua")
 include("server/ghosts_manager.lua")
@@ -12,6 +13,7 @@ include("server/playback_manager.lua")
 include("server/properties_manager.lua")
 include("server/spawn_manager.lua")
 include("server/worldkeyframes_manager.lua")
+
 
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("client.lua")

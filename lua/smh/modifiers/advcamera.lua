@@ -36,14 +36,35 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+    local data = args.data
+
+    local dataFOV = {}
+    local dataNearZ = {}
+    local dataFarZ = {}
+    local dataRoll = {}
+    local dataOffset = {}
+
+    for i=1, #data do
+        table.insert(dataFOV, data[i].FOV)
+        table.insert(dataNearZ, data[i].Nearz)
+        table.insert(dataFarZ, data[i].Farz)
+        table.insert(dataRoll, data[i].Roll)
+        table.insert(dataOffset, data[i].Offset)
+    end
+
+    return {FOV = dataFOV, Nearz = dataNearZ, Farz = dataFarZ, Roll = dataRoll, Offset = dataOffset}
+
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if not self:IsAdvCamera(entity) then return; end -- can never be too sure?
 
-    entity:SetFOV(SMH.LerpLinear(data1.FOV, data2.FOV, percentage));
-    entity:SetNearZ(SMH.LerpLinear(data1.Nearz, data2.Nearz, percentage));
-    entity:SetFarZ(SMH.LerpLinear(data1.Farz, data2.Farz, percentage));
-    entity:SetRoll(SMH.LerpLinear(data1.Roll, data2.Roll, percentage));
-    entity:SetViewOffset(SMH.LerpLinearVector(data1.Offset, data2.Offset, percentage));
+    entity:SetFOV(SMH.LerpLinear(data2.Frames, data2.Keydata.FOV, percentage));
+    entity:SetNearZ(SMH.LerpLinear(data2.Frames, data2.Keydata.Nearz, percentage));
+    entity:SetFarZ(SMH.LerpLinear(data2.Frames, data2.Keydata.Farz, percentage));
+    entity:SetRoll(SMH.LerpLinear(data2.Frames, data2.Keydata.Roll, percentage));
+    entity:SetViewOffset(SMH.LerpLinearVector(data2.Frames, data2.Keydata.Offset, percentage));
 
 end

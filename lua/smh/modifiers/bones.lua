@@ -11,7 +11,7 @@ function MOD:Save(entity)
 
     local data = {};
 
-    for b = 0, count - 1 do
+    for b = 0, count -1 do
 
         local d = {};
         d.Pos = entity:GetManipulateBonePosition(b);
@@ -53,26 +53,52 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+    local entity = args.entity
+    local data = args.data
+    
+    local n = entity:GetBoneCount();
+    local bonetabla = {}
+    local lang
+
+    for b = 0, n-1 do
+        
+        local bpos = {}
+        local bang = {}
+        local bscale = {}
+
+        for f = 1, #data do
+
+            lang = SMH.AngleToQuaternion(data[f][b].Ang)
+
+            table.insert(bpos, data[f][b].Pos)
+            table.insert(bang, lang)
+            table.insert(bscale, data[f][b].Scale)
+
+        end
+
+        bonetabla[b] = bonetabla[b] or {}  
+        bonetabla[b] = {Pos = bpos, Ang = bang, Scale = bscale}
+        
+    end
+    return bonetabla
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
     end
+  
+    for i = 0, #data2.Keydata do
+        local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
+        local Scale = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Scale, percentage);
 
-    local count = entity:GetBoneCount();
-
-    for b = 0, count - 1 do
-
-        local d1 = data1[b];
-        local d2 = data2[b];
-
-        local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
-        local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
-        local Scale = SMH.LerpLinear(d1.Scale, d2.Scale, percentage);
-
-        entity:ManipulateBonePosition(b, Pos);
-        entity:ManipulateBoneAngles(b, Ang);
-        entity:ManipulateBoneScale(b, Scale);
+        entity:ManipulateBonePosition(i, Pos);
+        entity:ManipulateBoneAngles(i, Ang);
+        entity:ManipulateBoneScale(i, Scale);
 
     end
+    
 end

@@ -25,10 +25,28 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+    local data = args.data
+    local lang
+
+    local datavec = {}
+    local dataang = {}
+
+    for i=1, #data do
+        lang = SMH.AngleToQuaternion(data[i].Ang)
+        table.insert(datavec, data[i].Pos)
+        table.insert(dataang, lang)
+    end
+
+    return {Pos = datavec, Ang = dataang}
+
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
-    local Pos = SMH.LerpLinearVector(data1.Pos, data2.Pos, percentage);
-    local Ang = SMH.LerpLinearAngle(data1.Ang, data2.Ang, percentage);
+
+    local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata.Pos, percentage);
+    local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata.Ang, percentage);
 
     entity:SetPos(Pos);
     entity:SetAngles(Ang);

@@ -68,6 +68,15 @@ function CTRL.SelectEntity(entity, enttable)
     net.SendToServer()
 end
 
+--interpolation mode
+function CTRL.SetInterpolationMode(mode)
+    print("interp mode cliente controller", mode)
+    
+    net.Start(SMH.MessageTypes.SetInterpolationMode)
+    net.WriteUInt(mode, INT_BITCOUNT)
+    net.SendToServer()
+end
+
 function CTRL.Record()
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() then
         return
@@ -77,7 +86,7 @@ function CTRL.Record()
     for ent, _ in pairs(SMH.State.Entity) do
         count = count + 1
     end
-
+    print("smh.messagetypes.createkeyframe = ", SMH.MessageTypes.CreateKeyframe)
     net.Start(SMH.MessageTypes.CreateKeyframe)
     net.WriteUInt(count, INT_BITCOUNT)
     for entity, _ in pairs(SMH.State.Entity) do

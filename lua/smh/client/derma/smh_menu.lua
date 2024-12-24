@@ -68,6 +68,20 @@ function PANEL:Init()
     self.EaseOutControl.Label:SetText("Ease out")
     self.EaseOutControl.Label:SizeToContents()
 
+    --Easing options!!!
+    self.InterpolationControl = vgui.Create("DComboBox", self)
+    self.InterpolationControl:AddChoice("Linear")
+    self.InterpolationControl:AddChoice("Cubic")
+    self.InterpolationControl:SetValue("Cubic")
+    self.InterpolationControl.OnSelect = function(_, id, value)
+        --print("la id es " .. id)
+        self:OnRequestInterpolationMode(id)
+        --print(id .. " selected")
+    end
+    self.InterpolationControl.Label = vgui.Create("DLabel", self)
+    self.InterpolationControl.Label:SetText("Interpolation Mode")
+    self.InterpolationControl.Label:SizeToContents()
+
     self.RecordButton = vgui.Create("DButton", self)
     self.RecordButton:SetText("Record")
     self.RecordButton.DoClick = function() self:OnRequestRecord() end
@@ -130,6 +144,11 @@ function PANEL:PerformLayout(width, height)
     self.EaseOutControl:SetSize(50, 20)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
+
+    self.InterpolationControl:SetPos(900, 2)
+    self.InterpolationControl:SetSize(100, 20)
+    sizeX, sizeY = self.InterpolationControl.Label:GetSize()
+    self.InterpolationControl.Label:SetRelativePos(self.InterpolationControl, -(sizeX) - 5, 3)
 
     self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
     self.RecordButton:SetSize(60, 20)
@@ -217,6 +236,7 @@ end
 function PANEL:OnRequestStateUpdate(newState) end
 function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
 function PANEL:OnRequestOpenPropertiesMenu() end
+function PANEL:OnRequestInterpolationMode(mode) end
 function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end
 function PANEL:OnRequestOpenLoadMenu() end

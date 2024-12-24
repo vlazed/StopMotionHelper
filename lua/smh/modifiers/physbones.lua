@@ -59,7 +59,7 @@ function MOD:Load(entity, data, settings)
         if settings.FreezeAll then
             pb:EnableMotion(false);
         else
-            pb:EnableMotion(d.Moveable);
+            pb:EnableMotion(d.Moveable[#d.Moveable]);
         end
 
         pb:Wake();
@@ -80,6 +80,7 @@ function MOD:LoadGhost(entity, ghost, data)
         pb:Wake();
 
         local d = data[i];
+
         pb:SetPos(d.Pos);
         pb:SetAngles(d.Ang);
 
@@ -113,27 +114,57 @@ function MOD:LoadGhostBetween(entity, ghost, data1, data2, percentage)
     end
 end
 
+
+function MOD:OrganizeData(args)
+    local entity = args.entity
+    local data = args.data
+    local lang
+
+    local n = entity:GetPhysicsObjectCount();
+    local bonetabla = {}
+
+    for b = 0, n-1 do
+        
+        local bpos = {}
+        local bang = {}
+        local bmov = {}
+
+        for f = 1, #data do
+
+            lang = SMH.AngleToQuaternion(data[f][b].Ang) 
+
+            table.insert(bpos, data[f][b].Pos)
+            table.insert(bang, lang)
+            table.insert(bmov, data[f][b].Moveable)
+
+
+        end
+
+        bonetabla[b] = bonetabla[b] or {}  
+        bonetabla[b] = {Pos = bpos, Ang = bang, Moveable = bmov}
+        
+    end
+    return bonetabla
+end
+
+
 function MOD:LoadBetween(entity, data1, data2, percentage, settings)
 
     if settings.IgnorePhysBones then
         return;
     end
 
-    local count = entity:GetPhysicsObjectCount();
+    for i = 0, #data2.Keydata do
 
-    for i = 0, count - 1 do
-            local pb = entity:GetPhysicsObjectNum(i);
+        local pb = entity:GetPhysicsObjectNum(i);
 
-        local d1 = data1[i];
-        local d2 = data2[i];
-
-        local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
-        local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
+        local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
 
         if settings.FreezeAll then
             pb:EnableMotion(false);
         else
-            pb:EnableMotion(d1.Moveable);
+            pb:EnableMotion(true);
         end
         pb:SetPos(Pos);
         pb:SetAngles(Ang);

@@ -32,6 +32,7 @@ local function Record(keyframe, player, entity, modnames)
         keyframe.EaseIn[name] = keyframe.EaseIn[name] and keyframe.EaseIn[name] or 0
         keyframe.EaseOut[name] = keyframe.EaseOut[name] and keyframe.EaseOut[name] or 0
     end
+
     return recorded
 end
 
@@ -40,6 +41,7 @@ local function ClearModifier(keyframe, modname)
     keyframe.EaseIn[modname] = nil
     keyframe.EaseOut[modname] = nil
 end
+
 
 hook.Add("EntityRemoved", "SMHKeyframesEntityRemoved", function(entity)
 
@@ -61,6 +63,55 @@ hook.Add("EntityRemoved", "SMHKeyframesEntityRemoved", function(entity)
 end)
 
 local MGR = {}
+
+-- This function gathers all keyframes data and frames in a table for each modifier.
+--
+-- Modkeys = {
+-- ██ Entities[entity] = {
+-- ████ ModData[modifier] = {...}
+-- ████ ModFrames[modifier] = {...}
+-- ██ }
+-- }
+-- 
+function MGR.OrganizeKeyframes(player)
+    if not SMH.KeyframeData.Players[player] then
+        return
+    end
+
+    for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
+        if player == entity then
+            continue
+        end
+
+        table.sort(keyframes, function(a, b) return a.Frame < b.Frame end)
+        
+        for name, mod in pairs(SMH.Modifiers) do
+
+            local keyframesmod = {}
+            local frames = {}
+
+            for k=1, #keyframes do
+                if keyframes[k].Modifiers[name] and keyframes[k].Entity == entity then
+                    table.insert(keyframesmod, keyframes[k].Modifiers[name])
+                    table.insert(frames, keyframes[k].Frame)
+                end
+            end
+
+            mod.OrganizeData = mod.OrganizeData or function(params) 
+                return params.data  
+            end
+
+            keyframesmod = mod:OrganizeData({entity = entity, data = keyframesmod, frames = frames})
+            table.sort(frames) --just in case
+   
+            SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModData[name] = keyframesmod
+            SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModFrames[name] = frames
+
+        end
+        
+    end
+    --print("██ OrganizeKeyframes ejecutado con exito! ██")
+end
 
 function MGR.GetAll(player)
     if not SMH.KeyframeData.Players[player] then
@@ -93,6 +144,7 @@ end
 
 function MGR.Create(player, entities, frame, timeline)
     local keyframes = {}
+    SMH.GLOBAL_isOrgKeysNeeded = true --global keyframe organizer bool
 
     for _, entity in ipairs(entities) do
         if player ~= entity then
@@ -103,6 +155,8 @@ function MGR.Create(player, entities, frame, timeline)
                 local check = Record(keyframe, player, entity, modnames)
                 if check then
                     table.insert(keyframes, keyframe)
+                    --KEYFRAME CREATE nil
+                    --print("keyframe not nil in " .. frame .. " created")
                 end
             else
                 keyframe = SMH.KeyframeData:New(player, entity)
@@ -110,6 +164,8 @@ function MGR.Create(player, entities, frame, timeline)
                 local check = Record(keyframe, player, entity, modnames)
                 if check then
                     table.insert(keyframes, keyframe)
+                    --KEYFRAME CREATE 
+                    --print("keyframe " .. frame .. " created")
                 end
             end
         else
@@ -127,6 +183,8 @@ function MGR.Create(player, entities, frame, timeline)
                 Release = "",
             }
             table.insert(keyframes, keyframe)
+            --KEYFRAME CREATE 
+            --print("keyframe WORLD " .. frame .. " created")
         end
     end
 
@@ -135,6 +193,7 @@ end
 
 function MGR.Update(player, keyframeIds, updateData, timeline)
     local keyframes, movingkeyframes = {}, {}
+    SMH.GLOBAL_isOrgKeysNeeded = true --global keyframe organizer bool
 
     for id, keyframeId in ipairs(keyframeIds) do
         if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
@@ -178,6 +237,7 @@ function MGR.Update(player, keyframeIds, updateData, timeline)
                         keyframe[field][name] = updateData[id][field]
                     end
                     table.insert(keyframes, keyframe)
+                    
                 end
             end
         end
@@ -199,12 +259,15 @@ function MGR.Update(player, keyframeIds, updateData, timeline)
         end
         keyframe.Frame = frame
         table.insert(keyframes, keyframe)
+        --KEYFRAME UPDATE
+        --print("keyframe " .. frame .. " updated")
     end
 
     return keyframes
 end
 
 function MGR.Copy(player, keyframeIds, frame, timeline)
+    SMH.GLOBAL_isOrgKeysNeeded = true --global keyframe organizer bool
     local copiedKeyframes, movingkeyframes = {}, {}
 
     for id, keyframeId in ipairs(keyframeIds) do
@@ -251,12 +314,17 @@ function MGR.Copy(player, keyframeIds, frame, timeline)
 
         keyframe.Frame = frame
         table.insert(copiedKeyframes, keyframe)
+        --KEYFRAME COPY
+        --print("keyframe " .. frame .. " copied")
     end
 
     return copiedKeyframes
 end
 
 function MGR.Delete(player, keyframeId, timeline)
+
+    SMH.GLOBAL_isOrgKeysNeeded = true --global keyframe organizer bool
+
     if not SMH.KeyframeData.Players[player] or not SMH.KeyframeData.Players[player].Keyframes[keyframeId] then
         error("Invalid keyframe ID")
     end
@@ -272,11 +340,16 @@ function MGR.Delete(player, keyframeId, timeline)
 
     if not next(keyframe.Modifiers) then
         SMH.KeyframeData:Delete(player, keyframeId)
+        --KEYFRAME DELETE
+        --print("keyframe " .. keyframe.Frame .. " deleted")
     end
     return entity
 end
 
 function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
+
+    SMH.GLOBAL_isOrgKeysNeeded = true
+
     if SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities[entity] then
         local deletethis = table.Copy(SMH.KeyframeData.Players[player].Entities[entity])
         for _, keyframe in pairs(deletethis) do
@@ -294,6 +367,8 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
                 keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn
                 keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut
                 keyframe.Modifiers[name] = skf.EntityData[name]
+                --KEYFRAME IMPORT
+                --print("keyframe NOT NIL in " .. skf.Position .. " imported")
             end
         else
             local keyframe = SMH.KeyframeData:New(player, entity)
@@ -302,6 +377,9 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
                 keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn
                 keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut
                 keyframe.Modifiers[name] = skf.EntityData[name]
+                --KEYFRAME IMPORT
+                --print("keyframe in " .. skf.Position .. " imported")
+                
             end
         end
     end
@@ -319,5 +397,9 @@ function MGR.UpdateWorldKeyframe(player, frame, str, key)
     if not keyframe then return end
     keyframe.Modifiers["world"][key] = str
 end
+
+
+
+
 
 SMH.KeyframeManager = MGR

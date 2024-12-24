@@ -9,6 +9,7 @@ SMH.MessageTypes = {
     "SelectEntity",
     "SelectEntityResponse",
 
+    "SetInterpolationMode",
     "CreateKeyframe",
     "UpdateKeyframe",
     "UpdateKeyframeExecute",

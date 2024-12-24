@@ -18,9 +18,20 @@ function MOD:Load(entity, data)
     entity:SetModelScale(data.ModelScale);
 end
 
+function MOD:OrganizeData(args)
+    local data = args.data
+    local modelscaletable = {}
+
+    for d=1, #data do
+        table.insert(modelscaletable, data[d].ModelScale)
+    end
+
+    return {ModelScale = modelscaletable}
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
-    local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
+    local lerpedModelScale = SMH.LerpLinear(data2.Frames, data2.Keydata.ModelScale, percentage);
     entity:SetModelScale(lerpedModelScale);
 
 end
