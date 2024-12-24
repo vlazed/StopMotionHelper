@@ -1,9 +1,18 @@
+---@type GhostData
 local GhostData = {}
 local LastFrame = 0
 local LastTimeline = 1
 local SpawnGhost, SpawnGhostData, GhostSettings = {}, {}, {}
 local SpawnOffsetOn, SpawnOriginData, OffsetPos, OffsetAng = {}, {}, {}, {}
+---@type PoseTrees
+local DefaultPoseTrees = {}
 
+---@param player Player
+---@param entity SMHEntity
+---@param color Color
+---@param frame integer
+---@param ghostable SMHEntity[]
+---@return SMHEntity
 local function CreateGhost(player, entity, color, frame, ghostable)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
         if ghost.Entity == entity and ghost.Frame == frame then return ghost end -- we already have a ghost on this entity for this frame, just return it.
@@ -16,9 +25,9 @@ local function CreateGhost(player, entity, color, frame, ghostable)
     if class == "prop_ragdoll" then
         g = ents.Create("prop_ragdoll")
 
-        local flags = entity:GetSaveTable().spawnflags or 0
+        local flags = entity:GetSaveTable(false).spawnflags or 0
         if flags % (2 * 32768) >= 32768 then
-            g:SetKeyValue("spawnflags",32768)
+            g:SetKeyValue("spawnflags", "32768")
             g:SetSaveValue("m_ragdoll.allowStretch", true)
         end
     else
@@ -28,6 +37,8 @@ local function CreateGhost(player, entity, color, frame, ghostable)
             model = entity.AttachedEntity:GetModel()
         end
     end
+
+    ---@cast g SMHEntity
 
     g:SetModel(model)
     g:SetRenderMode(RENDERMODE_TRANSCOLOR)
@@ -43,6 +54,16 @@ local function CreateGhost(player, entity, color, frame, ghostable)
     g.Entity = entity
     g.Frame = frame
     g.Physbones = false
+    g:SetNW2Bool("SMHGhost", true)
+    g:SetNW2Entity("Entity", entity)
+
+    if entity.RagdollWeightData and class == "prop_ragdoll" then
+        timer.Simple(0, function()
+            for i = 0, g:GetPhysicsObjectCount() - 1 do
+                g:GetPhysicsObjectNum(i):SetMass(entity.RagdollWeightData[i])
+            end
+        end)
+    end
 
     table.insert(ghostable, g)
 
@@ -80,12 +101,21 @@ function MGR.SelectEntity(player, entities)
         GhostData[player] = {
             Entity = {},
             Ghosts = {},
+            Nodes = {},
+            PreviousName = "",
+            LastEntity = NULL,
+            Updated = false
         }
     end
 
     GhostData[player].Entity = table.Copy(entities)
 end
 
+---@param player Player
+---@param frame integer
+---@param settings Settings
+---@param timeline Properties
+---@param settimeline integer
 function MGR.UpdateState(player, frame, settings, timeline, settimeline)
     LastFrame = frame
     LastTimeline = settimeline
@@ -142,6 +172,9 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
             if not prevKeyframe and not nextKeyframe then
                 continue
             end
+            ---@cast prevKeyframe FrameData
+            ---@cast nextKeyframe FrameData
+            ---@cast entity SMHEntity
 
             if lerpMultiplier == 0 then
                 if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
@@ -192,6 +225,8 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
                     if not prevKeyframe then
                         continue
                     end
+                    ---@cast prevKeyframe FrameData
+                    ---@cast nextKeyframe FrameData
 
                     if lerpMultiplier <= 0 or settings.TweenDisable then
                         SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
@@ -208,10 +243,28 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
     end
 end
 
+---@param player Player
+---@param timeline Properties
+---@param settings Settings
 function MGR.UpdateSettings(player, timeline, settings)
     MGR.UpdateState(player, LastFrame, settings, timeline, LastTimeline)
 end
 
+---@param modelName string
+---@param tree PoseTree
+function MGR.SetTree(modelName, tree)
+    DefaultPoseTrees[modelName] = tree
+end
+
+function MGR.GetTree(modelName)
+    return DefaultPoseTrees[modelName]
+end
+
+---@param class string
+---@param modelpath string
+---@param data any
+---@param settings Settings
+---@param player Player
 function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -251,7 +304,7 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
             local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(data[name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
+            local offsetdata = mod:Offset(data[name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
             mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
         elseif data[name] then
             mod:Load(SpawnGhost[player], data[name].Modifiers, settings)
@@ -259,6 +312,8 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     end
 end
 
+---@param player Player
+---@param offseton any
 function MGR.RefreshSpawnPreview(player, offseton)
     SpawnOffsetOn[player] = offseton
     if not IsValid(SpawnGhost[player]) then return end
@@ -269,7 +324,7 @@ function MGR.RefreshSpawnPreview(player, offseton)
             local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
+            local offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, SpawnOriginData[player][name].Modifiers, offsetpos, offsetang, nil)
             mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
         elseif SpawnGhostData[player][name] then
             mod:Load(SpawnGhost[player], SpawnGhostData[player][name].Modifiers, GhostSettings[player])
@@ -277,6 +332,7 @@ function MGR.RefreshSpawnPreview(player, offseton)
     end
 end
 
+---@param player Player
 function MGR.SpawnClear(player)
     if IsValid(SpawnGhost[player]) then
         SpawnGhost[player]:Remove()
@@ -284,22 +340,123 @@ function MGR.SpawnClear(player)
     end
 end
 
+---@param data any
+---@param player Player
 function MGR.SetSpawnOrigin(data, player)
     SpawnOriginData[player] = data
 end
 
+---@param player Player
 function MGR.ClearSpawnOrigin(player)
     SpawnOriginData[player] = nil
 end
 
+---@param pos Vector
+---@param player Player
 function MGR.SetPosOffset(pos, player)
     OffsetPos[player] = pos
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])
 end
 
+---@param ang Angle
+---@param player Player
 function MGR.SetAngleOffset(ang, player)
     OffsetAng[player] = ang
     MGR.RefreshSpawnPreview(player, SpawnOffsetOn[player])
+end
+
+---@param player Player
+function MGR.UpdateKeyframe(player)
+    if not GhostData[player] then return end
+
+    GhostData[player].Updated = true
+end
+
+---@param player Player
+---@return table?
+function MGR.RequestNodes(player)
+    if not GhostData[player] then return end
+
+    local nodes = GhostData[player].Nodes
+    local selectedEntities = GhostData[player].Entity
+    local previousName = GhostData[player].PreviousName
+    local lastEntity = GhostData[player].LastEntity
+    local updated = GhostData[player].Updated
+
+    local entities = SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities
+
+    if not nodes or not entities or not selectedEntities or #selectedEntities == 0 then return {} end
+
+    local entity = selectedEntities[1]
+    local keyframes = entities[entity]
+    local boneName = player:GetInfo("smh_motionpathbone")
+
+    if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
+        entity = entity.AttachedEntity
+    end
+
+    GhostData[player].LastEntity = entity
+
+    if not keyframes then return {} end
+    if #boneName == 0 then return {} end
+
+    local sameKeyframeCount = #keyframes == #nodes
+    local sameBoneName = previousName == boneName
+    local sameEntity = lastEntity == entity
+
+    -- Don't send any data back if the number of keyframes, the motion path bone, or the selected entity hasn't changed at all
+    if sameKeyframeCount and sameBoneName and sameEntity and not updated then
+        return
+    end
+
+    GhostData[player].Updated = false
+
+    table.Empty(nodes)
+
+    local bone = entity:LookupBone(boneName)
+    local physBone = bone and entity:TranslateBoneToPhysBone(bone)
+    local isPhysBone = bone and (bone == entity:TranslatePhysBoneToBone(physBone))
+
+    for _, keyframe in pairs(keyframes) do
+        local pos = vector_origin
+        if isPhysBone and keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBone] then
+            pos = keyframe.Modifiers.physbones[physBone].Pos 
+        elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] and DefaultPoseTrees[entity:GetModel()] then
+            local defaultPoseTree = DefaultPoseTrees[entity:GetModel()]
+            local branch = {}
+            do
+                local id = bone
+                local pose = defaultPoseTree[bone]
+                while pose and not pose.IsPhysBone do
+                    table.insert(branch, id)
+                    id = pose.Parent
+                    pose = defaultPoseTree[id]
+                end
+            end
+
+            local ang = angle_zero
+            for i = 1, #branch do
+                local lPos, lAng = defaultPoseTree[branch[i]].LocalPos, defaultPoseTree[branch[i]].LocalAng
+                local dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
+                local finalPos, finalAng = LocalToWorld(dataPos, dataAng, lPos, lAng)
+                pos, ang = LocalToWorld(pos, ang, finalPos, finalAng)
+            end
+            
+            if keyframe.Modifiers.physbones then
+                pos = LocalToWorld(pos, ang, keyframe.Modifiers.physbones[physBone].Pos, keyframe.Modifiers.physbones[physBone].Ang)
+            elseif keyframe.Modifiers.position then
+                pos = LocalToWorld(pos, ang, keyframe.Modifiers.position.Pos, angle_zero)
+            end
+        elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
+            pos = keyframe.Modifiers.position.Pos
+        end
+
+        table.insert(nodes, {keyframe.Frame, pos})
+    end
+
+    GhostData[player].PreviousName = boneName
+
+    return nodes
 end
 
 SMH.GhostsManager = MGR
@@ -313,7 +470,7 @@ hook.Add("Think", "SMHGhostSpawnOffsetPreview", function()
                     local offsetpos = OffsetPos[player] or Vector(0, 0, 0)
                     local offsetang = OffsetAng[player] or Angle(0, 0, 0)
 
-                    offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, data[name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
+                    local offsetdata = mod:Offset(SpawnGhostData[player][name].Modifiers, data[name].Modifiers, offsetpos, offsetang, player:GetEyeTraceNoCursor().HitPos)
                     mod:Load(SpawnGhost[player], offsetdata, GhostSettings[player])
                 end
             end

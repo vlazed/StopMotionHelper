@@ -5,6 +5,11 @@ MGR.OffsetPos, MGR.OffsetAng, MGR.OffsetMode = {}, {}, {}
 
 MGR.OriginData = {}
 
+---@param serializedKeyframes SMHFile
+---@param model any
+---@return string?
+---@return string?
+---@return table?
 local function GetPosData(serializedKeyframes, model)
     for i, sEntity in pairs(serializedKeyframes.Entities) do
         local listname
@@ -32,6 +37,8 @@ local function GetPosData(serializedKeyframes, model)
     end
 end
 
+---@param serializedKeyframes SMHFile
+---@return table
 local function GetDupeData(serializedKeyframes)
     local data = {}
 
@@ -46,6 +53,10 @@ local function GetDupeData(serializedKeyframes)
     return data
 end
 
+---@param player Player
+---@param modname string
+---@param keyframe FrameData
+---@param pos Vector
 local function SetOffset(player, modname, keyframe, pos)
     local mod = SMH.Modifiers[modname]
 
@@ -55,12 +66,24 @@ local function SetOffset(player, modname, keyframe, pos)
     keyframe.Modifiers[modname] = mod:Offset(keyframe.Modifiers[modname], MGR.OriginData[player][modname].Modifiers, offsetpos, offsetang, pos)
 end
 
+---@param entity Entity
+---@param modname string
+---@param keyframe FrameData
+---@param firstkey FrameData
 local function SetDupeOffset(entity, modname, keyframe, firstkey)
     local mod = SMH.Modifiers[modname]
 
     keyframe.Modifiers[modname] = mod:OffsetDupe(entity, keyframe.Modifiers[modname], firstkey[modname].Modifiers)
 end
 
+---@param path string
+---@param model string
+---@param player Player
+---@param serializedKeyframes SMHFile
+---@return string?
+---@return string?
+---@return table?
+---@return boolean?
 function MGR.SetPreviewEntity(path, model, player, serializedKeyframes)
     if not Active[player] then return nil end
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
@@ -80,10 +103,18 @@ function MGR.SetPreviewEntity(path, model, player, serializedKeyframes)
     return class, modelpath, data, neworigin
 end
 
+---@param state any
+---@param player Player
 function MGR.SetGhost(state, player)
     Active[player] = state
 end
 
+---@param model string
+---@param settings Settings
+---@param player Player
+---@param serializedKeyframes SMHFile
+---@return SMHEntity?
+---@return Vector?
 function MGR.Spawn(model, settings, player, serializedKeyframes)
     if not Active[player] then return end
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
@@ -91,6 +122,9 @@ function MGR.Spawn(model, settings, player, serializedKeyframes)
         player:ChatPrint("Stop Motion Helper: Failed to get entity info. Probably you're trying to load world entity, or the save is from older SMH version!")
         return
     end
+
+    ---@cast modelpath string
+    ---@cast data any
 
     if IsValid(player) and not player:CheckLimit("smhentity") then return end
 
@@ -126,12 +160,14 @@ function MGR.Spawn(model, settings, player, serializedKeyframes)
             local offsetpos = MGR.OffsetPos[player] or Vector(0, 0, 0)
             local offsetang = MGR.OffsetAng[player] or Angle(0, 0, 0)
 
-            offsetdata = mod:Offset(data[name].Modifiers, MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, tracepos)
+            local offsetdata = mod:Offset(data[name].Modifiers, MGR.OriginData[player][name].Modifiers, offsetpos, offsetang, tracepos)
             mod:Load(entity, offsetdata, settings)
         else
             mod:Load(entity, data[name].Modifiers, settings)
         end
     end
+
+    ---@cast entity SMHEntity
 
     return entity, tracepos
 end
@@ -204,7 +240,7 @@ function MGR.Pack(entities, serializedKeyframes)
         local entity = entities[data.Properties.Name]
         if not IsValid(entity) or entity:IsPlayer() then continue end
 
-        duplicator.ClearEntityModifier(ent, "SMHPackage")
+        duplicator.ClearEntityModifier(entity, "SMHPackage")
         duplicator.StoreEntityModifier(entity, "SMHPackage", table.Copy(data))
     end
 end

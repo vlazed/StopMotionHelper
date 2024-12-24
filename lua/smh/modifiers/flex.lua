@@ -42,9 +42,11 @@ function MOD:Load(entity, data)
     if count <= 0 then return; end --Shouldn't happen, but meh
 
     entity:SetFlexScale(data.Scale);
+    entity:SetNW2Float("faceposer_scale", data.Scale)
 
     for i, f in pairs(data.Weights) do
         entity:SetFlexWeight(i, f);
+        entity:SetNW2Float("faceposer_flex" .. i, f)
     end
 
 end
@@ -82,8 +84,6 @@ function MOD:OrganizeData(args)
 
 end
 
---[[ OLD OLD OLD
-
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
@@ -95,6 +95,7 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 
     local scale = SMH.LerpLinear(data1.Scale, data2.Scale, percentage);
     entity:SetFlexScale(scale);
+    entity:SetNW2Float("faceposer_scale", scale)
 
     for i = 0, count - 1 do
 
@@ -103,14 +104,13 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         local w = SMH.LerpLinear(w1, w2, percentage);
 
         entity:SetFlexWeight(i, w);
+        entity:SetNW2Float("faceposer_flex" .. i, w)
 
     end
 
 end
 
---]]
-
-function MOD:LoadBetween(entity, data1, data2, percentage)
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
@@ -121,12 +121,12 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     if count <= 0 then return; end --Shouldn't happen, but meh
 
 
-    local scale = SMH.LerpLinear(data2.Frames, datatotal.Scale, percentage);
+    local scale = SMH.LerpCubic(data2.Frames, datatotal.Scale, percentage);
     entity:SetFlexScale(scale);
 
     for i = 0, count - 1 do
 
-        local w = SMH.LerpLinear(data2.Frames, datatotal.Weights[i], percentage);
+        local w = SMH.LerpCubic(data2.Frames, datatotal.Weights[i], percentage);
 
         entity:SetFlexWeight(i, w);
 

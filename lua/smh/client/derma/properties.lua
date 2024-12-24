@@ -1,5 +1,8 @@
+---@class SMHProperties: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 local EntsTable = {}
+local BonemergedEntsTable = {}
 local PropertyTable = {}
 local ModifierList = {}
 local Fallback = "none"
@@ -25,6 +28,18 @@ local function FindEntityInfo(entity)
     return nil
 end
 
+local function FindBonemergedEntity(name)
+    if BonemergedEntsTable then
+        for kentity, value in pairs(BonemergedEntsTable) do
+            if value.Name == name then
+                return kentity
+            end
+        end
+    end
+
+    return nil
+end
+
 local function FindEntity(name)
     if EntsTable then
         for kentity, value in pairs(EntsTable) do
@@ -42,6 +57,16 @@ local function UpdateName(name)
     if EntsTable then
         EntsTable[selectedEntity].Name = name
     end
+end
+
+local function TransformToEntityTable(tab)
+    local newtab = {}
+    for _, ent in ipairs(tab) do
+        if not ent:GetModel() then continue end
+        newtab[ent] = {}
+        newtab[ent].Name = GetModelName(ent)
+    end
+    return newtab
 end
 
 function PANEL:Init()
@@ -76,10 +101,25 @@ function PANEL:Init()
     self.EntityList = vgui.Create("DListView", self.EntitiesPanel)
     self.EntityList:AddColumn("Recorded Entities")
     self.EntityList:SetMultiSelect(false)
+
+    self.BonemergedList = vgui.Create("DListView", self.EntitiesPanel)
+    self.BonemergedList:AddColumn("Bonemerged Entities")
+    self.BonemergedList:SetMultiSelect(false)
+
     self.EntityList.OnRowSelected = function(_, rowIndex, row)
         local _, selectedName = self.EntityList:GetSelectedLine()
         if not IsValid(selectedName) then return end
+        ---@cast selectedName DListView_Line
         local selectedEntity = FindEntity(selectedName:GetValue(1))
+        if not IsValid(selectedEntity) then return end
+        self:SelectEntity(selectedEntity)
+    end
+
+    self.BonemergedList.OnRowSelected = function(_, rowIndex, row)
+        local _, selectedName = self.BonemergedList:GetSelectedLine()
+        if not IsValid(selectedName) then return end
+        ---@cast selectedName DListView_Line
+        local selectedEntity = FindBonemergedEntity(selectedName:GetValue(1))
         if not IsValid(selectedEntity) then return end
         self:SelectEntity(selectedEntity)
     end
@@ -180,6 +220,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.EntitiesPanel:SetPos(4, 30)
@@ -189,7 +230,10 @@ function PANEL:PerformLayout(width, height)
         self.EntityNameEnter.Label:SetRelativePos(self.EntityNameEnter, 2, -5 - self.EntityNameEnter.Label:GetTall())
 
     self.EntityList:SetPos(5, 60)
-    self.EntityList:SetSize(230, self.EntitiesPanel:GetTall() - 60 - 5)
+    self.EntityList:SetSize(230, self.EntitiesPanel:GetTall() - 215 - 5)
+
+    self.BonemergedList:SetPos(5, 240)
+    self.BonemergedList:SetSize(230, self.EntitiesPanel:GetTall() - 240 - 5)
 
     self.TimelinesPanel:SetPos(248, 30)
     self.TimelinesPanel:SetSize(self:GetWide() - 456, self:GetTall() - 4 - 30)
@@ -285,12 +329,26 @@ function PANEL:UpdateSelectedEnt(ent)
 
     selectedEntity = ent
     self:SetEntities(EntsTable)
+    if ent then
+        -- TODO: Get descendants or get ancestor instead of finding immediate parent to get all entities in the bonemerge tree
+        if not IsValid(ent:GetParent()) then
+            self:SetBonemergedEntities(TransformToEntityTable(ent:GetChildren()))
+        else
+            self:SetBonemergedEntities(TransformToEntityTable(ent:GetParent():GetChildren()))
+        end
+    else
+        self:SetBonemergedEntities({})
+    end
 end
 
 function PANEL:SetName(name)
     self.EntityNameEnter:SetText(name)
     UpdateName(name)
     self:SetEntities(EntsTable)
+end
+
+function PANEL:GetEntityName(entity)
+    return EntsTable[entity] and EntsTable[entity].Name or GetModelName(entity)
 end
 
 function PANEL:UpdateTimelineInfo(timelineinfo)
@@ -338,7 +396,7 @@ function PANEL:BuildTimelineinfo()
         for mod, name in pairs(ModifierList) do
             self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
             self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
-            self.TimelinesUI[i].Contents.Checker[mod]:SetTextColor(Color(25, 25, 25))
+            self.TimelinesUI[i].Contents.Checker[mod]:SetDark(true)
             self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check)
                 if UsingWorld then return end
                 self:OnUpdateModifierRequested(i, mod, check)
@@ -402,6 +460,17 @@ function PANEL:SetEntities(entities)
     end
 
     self.EntityList:UpdateLines(entlist)
+end
+
+function PANEL:SetBonemergedEntities(entities)
+    local entlist = {}
+    BonemergedEntsTable = table.Copy(entities)
+
+    for entity, value in pairs(BonemergedEntsTable) do
+        table.insert(entlist, value.Name)
+    end
+
+    self.BonemergedList:UpdateLines(entlist)
 end
 
 function PANEL:InitModifiers(list)

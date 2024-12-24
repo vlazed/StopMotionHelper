@@ -1,3 +1,5 @@
+---@class SMHLoad: DFrame
+---@field BaseClass DFrame|Panel
 local PANEL = {}
 
 function PANEL:Init()
@@ -39,6 +41,7 @@ function PANEL:Init()
     self.EntityList.OnRowSelected = function(_, rowIndex, row)
         local _, selectedSave = self.FileList:GetSelectedLine()
         if not IsValid(selectedSave) then return end
+        ---@cast selectedSave DListView_Line
         self:OnModelInfoRequested(selectedSave:GetValue(1),row:GetValue(1), false)
     end
 
@@ -70,6 +73,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.PathLabel:SetPos(5, 30)
@@ -144,6 +148,9 @@ end
 function PANEL:LoadSelected()
     local _, selectedSave = self.FileList:GetSelectedLine()
     local _, selectedEntity = self.EntityList:GetSelectedLine()
+
+    ---@cast selectedSave DListView_Line
+    ---@cast selectedEntity DListView_Line
 
     -- TODO clientside support for loading and saving
 

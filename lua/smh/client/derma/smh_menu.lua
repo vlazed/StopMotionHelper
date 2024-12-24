@@ -1,3 +1,5 @@
+---@class SMHMenu: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
@@ -23,6 +25,10 @@ function PANEL:Init()
     self.PlaybackRateControl = vgui.Create("DNumberWang", self)
     self.PlaybackRateControl:SetMinMax(1, 216000)
     self.PlaybackRateControl:SetDecimals(0)
+    self.PlaybackRateControl:SetConVar("smh_fps")
+    self.PlaybackRateControl.Think = function(self)
+        self:ConVarNumberThink()
+    end
     self.PlaybackRateControl.OnValueChanged = function(_, value)
         self:OnRequestStateUpdate({ PlaybackRate = tonumber(value) })
     end
@@ -31,8 +37,12 @@ function PANEL:Init()
     self.PlaybackRateControl.Label:SizeToContents()
 
     self.PlaybackLengthControl = vgui.Create("DNumberWang", self)
-    self.PlaybackLengthControl:SetMinMax(1, 999)
+    self.PlaybackLengthControl:SetMinMax(1, 100000)
     self.PlaybackLengthControl:SetDecimals(0)
+    self.PlaybackLengthControl:SetConVar("smh_framecount")
+    self.PlaybackLengthControl.Think = function(self)
+        self:ConVarNumberThink()
+    end
     self.PlaybackLengthControl.OnValueChanged = function(_, value)
         self:OnRequestStateUpdate({ PlaybackLength = tonumber(value) })
     end
@@ -74,9 +84,7 @@ function PANEL:Init()
     self.InterpolationControl:AddChoice("Cubic")
     self.InterpolationControl:SetValue("Cubic")
     self.InterpolationControl.OnSelect = function(_, id, value)
-        --print("la id es " .. id)
         self:OnRequestInterpolationMode(id)
-        --print(id .. " selected")
     end
     self.InterpolationControl.Label = vgui.Create("DLabel", self)
     self.InterpolationControl.Label:SetText("Interpolation Mode")
@@ -103,11 +111,35 @@ function PANEL:Init()
     self.SettingsButton.DoClick = function() self:OnRequestOpenSettings() end
 
     self.Easing:SetVisible(false)
+	
+	-- AUDIO =============================================
+	self.EditAudioTrack = vgui.Create("DCheckBoxLabel", self)
+    self.EditAudioTrack:SetText("Edit Audio Track")
+	self.EditAudioTrack.OnChange = function(bool) self:OnRequestEditAudioTrack(bool) end
+	
+	self.AudioClipTools = vgui.Create("DButton", self)
+    self.AudioClipTools:SetText("Audio Clip Tools")
+	self.AudioClipTools:SetEnabled(false)
+    self.AudioClipTools.DoClick = function() self:OnRequestAudioClipTools() end
+	
+	self.InsertAudioButton = vgui.Create("DButton", self)
+    self.InsertAudioButton:SetText("Insert Audio")
+    self.InsertAudioButton.DoClick = function() self:OnRequestInsertAudioMenu() end
+	
+	self.SaveAudioButton = vgui.Create("DButton", self)
+    self.SaveAudioButton:SetText("Save Audio Seq")
+	self.SaveAudioButton.DoClick = function() self:OnRequestOpenSaveAudioMenu() end
+	
+	self.LoadAudioButton = vgui.Create("DButton", self)
+    self.LoadAudioButton:SetText("Load Audio Seq")
+	self.LoadAudioButton.DoClick = function() self:OnRequestOpenLoadAudioMenu() end
+	-- ===================================================
 
 end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self:SetTitle("Stop Motion Helper")
@@ -164,9 +196,27 @@ function PANEL:PerformLayout(width, height)
 
     self.SettingsButton:SetPos(width - 60 * 1 - 5 * 1, 2)
     self.SettingsButton:SetSize(60, 20)
+	
+	-- AUDIO ==========================================================
+	self.EditAudioTrack:SetPos(width - 60 * 7.25 - 5 * 7.25 + 3, 2)
+    self.EditAudioTrack:SetSize(120, 20)
+	
+	self.AudioClipTools:SetPos(width - 60 * 8.5 - 5 * 8.5, 2)
+    self.AudioClipTools:SetSize(80, 20)
+	
+	self.InsertAudioButton:SetPos(width - 60 * 9.5 - 5 * 9.5 - 20, 2)
+    self.InsertAudioButton:SetSize(80, 20)
+	
+	self.SaveAudioButton:SetPos(width - 85 * 9.5 - 5 * 9.5 + 30, 2)
+    self.SaveAudioButton:SetSize(85, 20)
+	
+	self.LoadAudioButton:SetPos(width - 85 * 8.5 - 5 * 8.5 + 30, 2)
+    self.LoadAudioButton:SetSize(85, 20)
+	-- ================================================================
 
 end
 
+---@param timelineinfo TimelineSetting
 function PANEL:UpdateTimelines(timelineinfo)
     self.TimelinesBase:Clear()
 
@@ -196,6 +246,7 @@ function PANEL:UpdateTimelines(timelineinfo)
             if mousecode ~= MOUSE_LEFT then return end
 
             SMH.State.Timeline = i
+            SMH.State.TimeStamp = RealTime()
             SMH.Controller.UpdateTimeline()
 
             for j = 1, TotallTimelines do
@@ -209,18 +260,28 @@ function PANEL:UpdateTimelines(timelineinfo)
     end
 end
 
+---@param state State
 function PANEL:SetInitialState(state)
     self.PlaybackRateControl:SetValue(state.PlaybackRate)
     self.PlaybackLengthControl:SetValue(state.PlaybackLength)
     self:UpdatePositionLabel(state.Frame, state.PlaybackLength)
 end
 
+---@param frame integer
+---@param totalFrames integer
 function PANEL:UpdatePositionLabel(frame, totalFrames)
     local offset = GetConVar("smh_startatone"):GetInt()
     self.PositionLabel:SetText("Position: " .. frame + offset .. " / " .. totalFrames - (1 - offset))
     self.PositionLabel:SizeToContents()
 end
 
+-- AUDIO
+function PANEL:UpdateAudioTrackEditMode(edit)
+	self.AudioClipTools:SetEnabled(edit)
+end
+
+---@param easeIn number
+---@param easeOut number
 function PANEL:ShowEasingControls(easeIn, easeOut)
     self._sendKeyframeChanges = false
     self.EaseInControl:SetValue(easeIn)
@@ -233,13 +294,23 @@ function PANEL:HideEasingControls()
     self.Easing:SetVisible(false)
 end
 
+---@param newState NewState
 function PANEL:OnRequestStateUpdate(newState) end
+---@param newKeyframeData any
 function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
 function PANEL:OnRequestOpenPropertiesMenu() end
-function PANEL:OnRequestInterpolationMode(mode) end
+function PANEL:OnRequestInterpolationMode(mode) end --interpolation!!
 function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end
 function PANEL:OnRequestOpenLoadMenu() end
 function PANEL:OnRequestOpenSettings() end
+
+-- AUDIO =========================================
+function PANEL:OnRequestInsertAudioMenu() end
+function PANEL:OnRequestEditAudioTrack(bool) end
+function PANEL:OnRequestAudioClipTools() end
+function PANEL:OnRequestOpenSaveAudioMenu() end
+function PANEL:OnRequestOpenLoadAudioMenu() end
+-- ===============================================
 
 vgui.Register("SMHMenu", PANEL, "DFrame")

@@ -11,7 +11,7 @@ function MOD:Save(entity)
 
     local data = {};
 
-    for b = 0, count -1 do
+    for b = 0, count - 1 do
 
         local d = {};
         d.Pos = entity:GetManipulateBonePosition(b);
@@ -89,11 +89,35 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
     end
+
+    local count = entity:GetBoneCount();
+
+    for b = 0, count - 1 do
+
+        local d1 = data1[b];
+        local d2 = data2[b];
+
+        local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
+        local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
+        local Scale = SMH.LerpLinear(d1.Scale, d2.Scale, percentage);
+
+        entity:ManipulateBonePosition(b, Pos);
+        entity:ManipulateBoneAngles(b, Ang);
+        entity:ManipulateBoneScale(b, Scale);
+
+    end
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
   
     for i = 0, #data2.Keydata do
-        local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Pos, percentage);
-        local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
-        local Scale = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Scale, percentage);
+        local Pos = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpCubicAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
+        local Scale = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Scale, percentage);
 
         entity:ManipulateBonePosition(i, Pos);
         entity:ManipulateBoneAngles(i, Ang);

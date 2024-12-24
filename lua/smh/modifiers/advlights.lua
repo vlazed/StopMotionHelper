@@ -146,28 +146,58 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if not self:IsAdvLight(entity) then return; end -- can never be too sure?
 
-    entity:SetBrightness(SMH.LerpLinear(data2.Frames, data2.Keydata.Brightness, percentage));
-    entity:SetLightColor(SMH.LerpLinearVector(data2.Frames, data2.Keydata.Color, percentage));
+    entity:SetBrightness(SMH.LerpLinear(data1.Brightness, data2.Brightness, percentage));
+    entity:SetLightColor(SMH.LerpLinearVector(data1.Color, data2.Color, percentage));
 
     if self:IsProjectedLight(entity) then
         local theclass = entity:GetClass();
         if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then
-            entity:SetLightFOV(SMH.LerpLinear(data2.Frames, data2.Keydata.FOV, percentage));
+            entity:SetLightFOV(SMH.LerpLinear(data1.FOV, data2.FOV, percentage));
         end
         if theclass == "projected_light_new" then
-            entity:SetOrthoBottom(SMH.LerpLinear(data2.Frames, data2.Keydata.OrthoBottom, percentage));
-            entity:SetOrthoLeft(SMH.LerpLinear(data2.Frames, data2.Keydata.OrthoLeft, percentage));
-            entity:SetOrthoRight(SMH.LerpLinear(data2.Frames, data2.Keydata.OrthoRight, percentage));
-            entity:SetOrthoTop(SMH.LerpLinear(data2.Frames, data2.Keydata.OrthoTop, percentage));
+            entity:SetOrthoBottom(SMH.LerpLinear(data1.OrthoBottom, data2.OrthoBottom, percentage));
+            entity:SetOrthoLeft(SMH.LerpLinear(data1.OrthoLeft, data2.OrthoLeft, percentage));
+            entity:SetOrthoRight(SMH.LerpLinear(data1.OrthoRight, data2.OrthoRight, percentage));
+            entity:SetOrthoTop(SMH.LerpLinear(data1.OrthoTop, data2.OrthoTop, percentage));
         end
-        entity:SetNearZ(SMH.LerpLinear(data2.Frames, data2.Keydata.Nearz, percentage));
-        entity:SetFarZ(SMH.LerpLinear(data2.Frames, data2.Keydata.Farz, percentage));
+        entity:SetNearZ(SMH.LerpLinear(data1.Nearz, data2.Nearz, percentage));
+        entity:SetFarZ(SMH.LerpLinear(data1.Farz, data2.Farz, percentage));
     elseif entity:GetClass() == "cheap_light" then
-        entity:SetLightSize(SMH.LerpLinear(data2.Frames, data2.Keydata.LightSize, percentage));
+        entity:SetLightSize(SMH.LerpLinear(data1.LightSize, data2.LightSize, percentage));
     else
-        entity:SetInnerFOV(SMH.LerpLinear(data2.Frames, data2.Keydata.InFOV, percentage));
-        entity:SetOuterFOV(SMH.LerpLinear(data2.Frames, data2.Keydata.OutFOV, percentage));
-        entity:SetRadius(SMH.LerpLinear(data2.Frames, data2.Keydata.Radius, percentage));
+        entity:SetInnerFOV(SMH.LerpLinear(data1.InFOV, data2.InFOV, percentage));
+        entity:SetOuterFOV(SMH.LerpLinear(data1.OutFOV, data2.OutFOV, percentage));
+        entity:SetRadius(SMH.LerpLinear(data1.Radius, data2.Radius, percentage));
+    end
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if not self:IsAdvLight(entity) then return; end -- can never be too sure?
+
+    entity:SetBrightness(SMH.LerpCubic(data2.Frames, data2.Keydata.Brightness, percentage));
+    entity:SetLightColor(SMH.LerpCubicVector(data2.Frames, data2.Keydata.Color, percentage));
+
+    if self:IsProjectedLight(entity) then
+        local theclass = entity:GetClass();
+        if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then
+            entity:SetLightFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.FOV, percentage));
+        end
+        if theclass == "projected_light_new" then
+            entity:SetOrthoBottom(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoBottom, percentage));
+            entity:SetOrthoLeft(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoLeft, percentage));
+            entity:SetOrthoRight(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoRight, percentage));
+            entity:SetOrthoTop(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoTop, percentage));
+        end
+        entity:SetNearZ(SMH.LerpCubic(data2.Frames, data2.Keydata.Nearz, percentage));
+        entity:SetFarZ(SMH.LerpCubic(data2.Frames, data2.Keydata.Farz, percentage));
+    elseif entity:GetClass() == "cheap_light" then
+        entity:SetLightSize(SMH.LerpCubic(data2.Frames, data2.Keydata.LightSize, percentage));
+    else
+        entity:SetInnerFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.InFOV, percentage));
+        entity:SetOuterFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.OutFOV, percentage));
+        entity:SetRadius(SMH.LerpCubic(data2.Frames, data2.Keydata.Radius, percentage));
     end
 
 end

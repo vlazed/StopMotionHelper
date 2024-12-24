@@ -59,7 +59,7 @@ function MOD:Load(entity, data, settings)
         if settings.FreezeAll then
             pb:EnableMotion(false);
         else
-            pb:EnableMotion(d.Moveable[#d.Moveable]);
+            pb:EnableMotion(d.Moveable);
         end
 
         pb:Wake();
@@ -80,7 +80,6 @@ function MOD:LoadGhost(entity, ghost, data)
         pb:Wake();
 
         local d = data[i];
-
         pb:SetPos(d.Pos);
         pb:SetAngles(d.Ang);
 
@@ -154,17 +153,47 @@ function MOD:LoadBetween(entity, data1, data2, percentage, settings)
         return;
     end
 
-    for i = 0, #data2.Keydata do
+    local count = entity:GetPhysicsObjectCount();
 
-        local pb = entity:GetPhysicsObjectNum(i);
+    for i = 0, count - 1 do
+            local pb = entity:GetPhysicsObjectNum(i);
 
-        local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata[i].Pos, percentage);
-        local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
+        local d1 = data1[i];
+        local d2 = data2[i];
+
+        local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
+        local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
 
         if settings.FreezeAll then
             pb:EnableMotion(false);
         else
-            pb:EnableMotion(true);
+            pb:EnableMotion(d1.Moveable);
+        end
+        pb:SetPos(Pos);
+        pb:SetAngles(Ang);
+
+        pb:Wake();
+    end
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage, settings)
+
+    if settings.IgnorePhysBones then
+        return;
+    end
+
+    for i = 0, #data2.Keydata do
+
+        local pb = entity:GetPhysicsObjectNum(i);
+
+        local Pos = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpCubicAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
+
+        if settings.FreezeAll then
+            pb:EnableMotion(false);
+        else
+            pb:EnableMotion(d1.Moveable);
         end
         pb:SetPos(Pos);
         pb:SetAngles(Ang);

@@ -1,3 +1,5 @@
+---@class SMHSettings: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
@@ -46,6 +48,12 @@ function PANEL:Init()
     self.EnableWorld = CreateCheckBox("EnableWorld", "Enable World keyframes")
     self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
 
+    self.PathButton = vgui.Create("DButton", self)
+    self.PathButton:SetText("Motion Paths")
+    self.PathButton.DoClick = function()
+        self:OnRequestOpenMotionPaths()
+    end
+
     self.PhysButton = vgui.Create("DButton", self)
     self.PhysButton:SetText("Physics Recorder")
     self.PhysButton.DoClick = function()
@@ -58,43 +66,60 @@ function PANEL:Init()
         self:OnRequestOpenHelp()
     end
 
-    self:SetSize(250, 290)
+    self.Width = 250
+    self.Height = 315
+
+    self:SetSize(self.Width, self.Height)
 
     self._changingSettings = false
 
 end
 
+---Initialize a starting position. Every call to this function will add to the pos variable 
+---@param pos number Initial position
+---@param offset number
+---@return fun(panel: Panel)
+local function setPosition(pos, offset)
+    return function(panel)
+        panel:SetPos(5, pos)
+        pos = pos + offset
+    end
+end
+
 function PANEL:PerformLayout(width, height)
 
+    local setCheckboxPos = setPosition(25, 20)
+
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
-    self.FreezeAll:SetPos(5, 25)
+    setCheckboxPos(self.FreezeAll)
+    setCheckboxPos(self.LocalizePhysBones)
+    setCheckboxPos(self.IgnorePhysBones)
+    setCheckboxPos(self.GhostPrevFrame)
+    setCheckboxPos(self.GhostNextFrame)
+    setCheckboxPos(self.GhostAllEntities)
+    setCheckboxPos(self.TweenDisable)
+    setCheckboxPos(self.SmoothPlayback)
+    setCheckboxPos(self.EnableWorld)
 
-    self.LocalizePhysBones:SetPos(5, 45)
-
-    self.IgnorePhysBones:SetPos(5, 65)
-
-    self.GhostPrevFrame:SetPos(5, 85)
-    self.GhostNextFrame:SetPos(5, 105)
-    self.GhostAllEntities:SetPos(5, 125)
-
-    self.TweenDisable:SetPos(5, 145)
-
-    self.SmoothPlayback:SetPos(5, 165)
-
-    self.EnableWorld:SetPos(5, 185)
-
-    self.GhostTransparency:SetPos(5, 205)
+    setCheckboxPos(self.GhostTransparency)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
 
-    self.PhysButton:SetPos(5, 230)
+    local setButtonPos = setPosition(self.GhostTransparency:GetY() + 25, 25)
+
+    setButtonPos(self.PathButton)
+    self.PathButton:SetSize(self:GetWide() - 10, 20)
+
+    setButtonPos(self.PhysButton)
     self.PhysButton:SetSize(self:GetWide() - 10, 20)
 
-    self.HelpButton:SetPos(5, 255)
+    setButtonPos(self.HelpButton)
     self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
 
 end
 
+---@param settings Settings
 function PANEL:ApplySettings(settings)
     self._changingSettings = true
 
@@ -123,8 +148,10 @@ function PANEL:ApplySettings(settings)
     self._changingSettings = false
 end
 
+---@param settings Settings
 function PANEL:OnSettingsUpdated(settings) end
 function PANEL:OnRequestOpenHelp() end
 function PANEL:OnRequestOpenPhysRecorder() end
+function PANEL:OnRequestOpenMotionPaths() end
 
 vgui.Register("SMHSettings", PANEL, "DFrame")

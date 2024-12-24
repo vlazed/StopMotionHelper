@@ -1,13 +1,11 @@
-
-local linealSwitch = false
-local resultAngle = angle_zero
-local currentFrame = 0
-
 local abs = math.abs
 local min = math.min
 local max = math.max
 
 
+------------------------
+-- ANGLE CUBIC EASING --
+------------------------
 
 local function QuaternionHermiteInterpolate(t, q0, q1, m0, m1)
 
@@ -114,7 +112,6 @@ local function HermiteEasingQuaternion(t, prev, p1, p2, p3, ts)
     p3 = SMH.AdjustQuaternionOrientation(p1, p3)
 
 
-    --if SMH.quatequal(cachedprevf, p1) and SMH.quatequal(cachednextf, p2) then
     if SMH.QuaternionAreEqual(cachedprevf, p1) and SMH.QuaternionAreEqual(cachednextf, p2) then
         q_tangent0 = cachedt0
         q_tangent1 = cachedt1
@@ -133,72 +130,10 @@ local function HermiteEasingQuaternion(t, prev, p1, p2, p3, ts)
     return SMH.QuaternionToAngle(interpolatedQuat)
 end
 
-   
-------------------
--- ANGLE EASING --
-------------------
-
-
-local function LinearEasingAngle(frames, points, t)
-    local n = #points
-    local fn = #frames
-    -- Asegúrate de que haya al menos 2 puntos para la interpolación
-    if n < 2 then
-        table.insert(points, points[1])
-    end
-    --FRMAES INPLEMENTASHON
-
-    -- Encontrar el segmento adecuado
-    local scaledT
-    local index
-    local localT
-    local firstFrame = frames[1]
-    local lastFrame = frames[fn]
-
-    --NEWNEWNENWNE
-    scaledT = allFrames_actualFrame
-    --NEWNEWNWEN
-
-
-    -- Ajustar el índice para empezar en 0, como en la primera implementación
-    index = 0
-    for i = 1, fn - 1 do
-        if scaledT >= frames[i] and scaledT <= frames[i + 1] then
-            index = i  -- Restar 1 para compensar el inicio desde 0
-            firstFrame = frames[i]
-            lastFrame = frames[i + 1]
-            break
-        end
-    end
-    
-
-    if allFrames_actualFrame < frames[1] then
-        localT = 0
-        index = 0
-    elseif allFrames_actualFrame > frames[fn] then
-        localT = 1
-        index = fn-1
-    else
-        localT = (allFrames_actualFrame - firstFrame) / (lastFrame - firstFrame)
-    end
-
-    localT = max(0, min(1, localT))
-
-    -- Encuentra los puntos que se usarán para la interpolación lineal
-    --local idx = math.floor(t * (n - 1)) + 1
-    local p1 = SMH.QuaternionToAngle(points[max(1, index)])
-    local p2 = SMH.QuaternionToAngle(points[min(n, index + 1)])
-    --local localT = (t * (n - 1)) % 1
-    local AngleFinal = LerpAngle(localT, p1, p2)
-  
-    AngleFinal:Normalize()
-    return AngleFinal
-end
 
 
 local framestable = {}
 local pprev, pp1, pp2, pp3 = nil, nil, nil, nil
-
 
 local function HermiteEasingAngle(frames, points, t)
     local n = #points
@@ -208,19 +143,14 @@ local function HermiteEasingAngle(frames, points, t)
         table.insert(points, points[1])
     end
 
-    local scaledT
     local index
     local localT
     local firstFrame = frames[1]
     local lastFrame = frames[fn]
     
-
-    scaledT = allFrames_actualFrame
-
     index = 0
-    
     for i = 1, fn - 1 do
-        if scaledT >= frames[i] and scaledT <= frames[i + 1] then
+        if t >= frames[i] and t <= frames[i + 1] then
             index = i  
             firstFrame = frames[i]
             lastFrame = frames[i + 1]
@@ -228,14 +158,14 @@ local function HermiteEasingAngle(frames, points, t)
         end
     end
 
-    if allFrames_actualFrame < frames[1] then
+    if t < frames[1] then
         localT = 0
         index = 0
-    elseif allFrames_actualFrame > frames[fn] then
+    elseif t > frames[fn] then
         localT = 1
         index = fn-1
     else
-        localT = (allFrames_actualFrame - firstFrame) / (lastFrame - firstFrame)
+        localT = (t - firstFrame) / (lastFrame - firstFrame)
         index = index - 1
     end
 
@@ -260,131 +190,10 @@ local function HermiteEasingAngle(frames, points, t)
 end
 
 
-function SMH.LerpLinearAngle(s, e, p)
 
-    local resultado
-
-    if SMH.GLOBAL_InterpolationMode == 1 then
-        linealSwitch = true
-    elseif SMH.GLOBAL_InterpolationMode == 2 then
-        linealSwitch = false
-    end
-
-    if linealSwitch then
-        resultado = LinearEasingAngle(s, e, p)
-    else
-        resultado = HermiteEasingAngle(s, e, p)
-    end   
-
-    return resultado 
-end
-
-
-------------------------------
--- VECTOR and NUMBER EASING --
-------------------------------
-
-
-local function LinearEasingVector(frames, points, t)
-    local n = #points
-    local fn = #frames
-    local scaledT
-    local index
-    local localT
-    local firstFrame = frames[1]
-    local lastFrame = frames[fn]
-    -- Asegúrate de que haya al menos 2 puntos para la interpolación
-    if n < 2 then
-        --table.insert(points, points[1])
-    end
-
-    scaledT = allFrames_actualFrame
-
-    -- Ajustar el índice para empezar en 0, como en la primera implementación
-    index = 0
-    for i = 1, fn - 1 do
-        if scaledT >= frames[i] and scaledT <= frames[i + 1] then
-            index = i  -- Restar 1 para compensar el inicio desde 0
-            firstFrame = frames[i]
-            lastFrame = frames[i + 1]
-            break
-        end
-    end
-    
-
-    if allFrames_actualFrame < frames[1] then
-        localT = 0
-        index = 0
-    elseif allFrames_actualFrame > frames[fn] then
-        localT = 1
-        index = fn-1
-    else
-        localT = (allFrames_actualFrame - firstFrame) / (lastFrame - firstFrame)
-    end
-
-    localT = max(0, min(1, localT))
-
-    
-    local p1 = points[max(1, index)]
-    local p2 = points[min(n, index + 1)]
-
-    local VectorFinal = LerpVector(localT, p1, p2);
-
-    return VectorFinal
-end
-
-
-local function LinearEasingNum(frames, points, t)
-    local n = #points
-    local fn = #frames
-    -- Asegúrate de que haya al menos 2 puntos para la interpolación
-    if n < 2 then
-        table.insert(points, points[1])
-    end
-    -- Encuentra los puntos que se usarán para la interpolación lineal
-    
-    --print("allFrames_lastFrame = ", allFrames_lastFrame)
-
-    local scaledT
-    local index
-    local localT
-    local firstFrame = frames[1]
-    local lastFrame = frames[fn]
-
-    scaledT = allFrames_actualFrame
-
-    -- Ajustar el índice para empezar en 0, como en la primera implementación
-    index = 0
-    for i = 1, fn - 1 do
-        if scaledT >= frames[i] and scaledT <= frames[i + 1] then
-            index = i  -- Restar 1 para compensar el inicio desde 0
-            firstFrame = frames[i]
-            lastFrame = frames[i + 1]
-            break
-        end
-    end
-    
-    if allFrames_actualFrame < frames[1] then
-        localT = 0
-        index = 0
-    elseif allFrames_actualFrame > frames[fn] then
-        localT = 1
-        index = fn-1
-    else
-        localT = (allFrames_actualFrame - firstFrame) / (lastFrame - firstFrame)
-    end
-
-    localT = max(0, min(1, localT))
-
-    local idx = index
-    local p1 = points[max(1, idx)]
-    local p2 = points[min(n, idx + 1)]
-
-    local NumFinal = Lerp(localT, p1, p2)
-
-    return NumFinal
-end
-
+------------------------------------
+-- VECTOR and NUMBER CUBIC EASING --
+------------------------------------
 
 local function AdjustVectorOrientation(v1, v2)
     if type(v1) == "Vector" and type(v2) == "Vector" then
@@ -490,7 +299,6 @@ local function HermiteEasing(frames, points, t)
         table.insert(points, points[1])
     end
 
-    local scaledT
     local index
     local localT
     local firstFrame = frames[1]
@@ -498,11 +306,10 @@ local function HermiteEasing(frames, points, t)
 
     local m0, m1 = nil, nil
 
-    scaledT = allFrames_actualFrame
 
     index = 0
     for i = 1, fn - 1 do
-        if scaledT >= frames[i] and scaledT <= frames[i + 1] then
+        if t >= frames[i] and t <= frames[i + 1] then
             index = i  
             firstFrame = frames[i]
             lastFrame = frames[i + 1]
@@ -511,14 +318,14 @@ local function HermiteEasing(frames, points, t)
     end
 
 
-    if allFrames_actualFrame < frames[1] then
+    if t < frames[1] then
         localT = 0
         index = 0
-    elseif allFrames_actualFrame > frames[fn] then
+    elseif t > frames[fn] then
         localT = 1
         index = fn-1
     else
-        localT = (allFrames_actualFrame - firstFrame) / (lastFrame - firstFrame)
+        localT = (t - firstFrame) / (lastFrame - firstFrame)
         index = index - 1
     end
 
@@ -559,43 +366,49 @@ local function HermiteEasing(frames, points, t)
 end
 
 
-function SMH.LerpLinearVector(s, e, p)
 
-    local result
+------------------------
+-- Cubic interp methods
+------------------------
 
-    if SMH.GLOBAL_InterpolationMode == 1 then
-        linealSwitch = true
-    elseif SMH.GLOBAL_InterpolationMode == 2 then
-        linealSwitch = false
-    end
+function SMH.LerpCubicAngle(s, e, p)
 
-    if linealSwitch then
-        result = LinearEasingVector(s, e, p)
-    else
-        result = HermiteEasing(s, e, p)
-    end
+    return HermiteEasingAngle(s, e, p) 
 
-    return result
+end
+
+function SMH.LerpCubicVector(s, e, p)
+
+    return HermiteEasing(s, e, p)
 
 end
 
 
+function SMH.LerpCubic(s, e, p)
+
+    return HermiteEasing(s, e, p)
+
+end
+
+
+----------------
+-- Lerp methods
+----------------
+
 function SMH.LerpLinear(s, e, p)
 
-    local result
+    return Lerp(p, s, e);
 
-    if SMH.GLOBAL_InterpolationMode == 1 then
-        linealSwitch = true
-    elseif SMH.GLOBAL_InterpolationMode == 2 then
-        linealSwitch = false
-    end
-    
-    if linealSwitch then
-        result = LinearEasingNum(s, e, p)
-    else
-        result = HermiteEasing(s, e, p)
-    end
+end
 
-    return result
+function SMH.LerpLinearVector(s, e, p)
+
+    return LerpVector(p, s, e);
+
+end
+
+function SMH.LerpLinearAngle(s, e, p)
+
+    return LerpAngle(p, s, e);
 
 end

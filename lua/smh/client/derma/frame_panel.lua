@@ -1,4 +1,7 @@
+---@class SMHFramePanel: DPanel
 local PANEL = {}
+
+Derma_Install_Convar_Functions(PANEL)
 
 function PANEL:Init()
 
@@ -21,6 +24,7 @@ function PANEL:Init()
     self.ScrollButtonRight.DoClick = function() self:SetScrollOffset(self.ScrollOffset + 1) end
 
     self.Zoom = 100
+    self:SetConVar("smh_zoom")
     self.TotalFrames = 100
     self.ScrollOffset = 0
     self.FrameArea = {0, 1}
@@ -28,6 +32,8 @@ function PANEL:Init()
     self._scrollCursorOffset = 0
 
     self.FramePointers = {}
+	self.AudioClipPointers = {}
+	
 
 end
 
@@ -57,11 +63,10 @@ function PANEL:PerformLayout(width, height)
 
     self:RefreshScrollBar()
     self:RefreshFrames()
-
+	
 end
 
 function PANEL:Paint(width, height)
-
     local startX, endX = unpack(self.FrameArea)
     local frameWidth = (endX - startX) / (self.Zoom - 1)
 
@@ -72,7 +77,10 @@ function PANEL:Paint(width, height)
             surface.DrawLine(x, 6, x, height - 6)
         end
     end
-
+	
+	for _, pointer in pairs(self.AudioClipPointers) do
+        pointer:PaintOverride()
+    end
 end
 
 function PANEL:UpdateFrameCount(totalframes)
@@ -108,6 +116,9 @@ function PANEL:RefreshFrames()
     for _, pointer in pairs(self.FramePointers) do
         pointer:RefreshFrame()
     end
+	for i, pointer in pairs(self.AudioClipPointers) do -- AUDIO
+        pointer:RefreshFrame(i)
+    end
 end
 
 function PANEL:SetScrollOffset(offset)
@@ -137,6 +148,58 @@ function PANEL:DeleteFramePointer(pointer)
     pointer:Remove()
 end
 
+-- AUDIO ======================================================
+function PANEL:SortClipOrder()
+	table.sort(self.AudioClipPointers, function(a, b)
+		local aFrame = a:GetStartFrame()
+		local bFrame = b:GetStartFrame()
+		if aFrame == bFrame then
+			return a:GetDuration() > b:GetDuration()
+		else
+			return aFrame < bFrame
+		end
+	end)
+	self:RefreshFrames()
+end
+
+function PANEL:GetAudioClipPointerAtFrame(frame)
+	--get all clips that exist at this frame
+	local clips = {}
+	for k,v in pairs(self.AudioClipPointers) do
+		local startFrame = v:GetFrame()
+		local endFrame = v:GetDuration()*SMH.State.PlaybackRate
+		if startFrame <= frame and endFrame >= frame then
+			table.insert(clips,v)
+		end
+	end
+	--return last clip
+	if not table.IsEmpty(clips) then
+		return clips[#clips]
+	end
+end
+
+function PANEL:CreateAudioClipPointer(audioClip)
+    local pointer = vgui.Create("SMHAudioClipPointer", self)
+	pointer:Setup(audioClip)
+	table.insert(self.AudioClipPointers, pointer)
+	self:SortClipOrder()
+
+    return pointer
+end
+
+function PANEL:DeleteAudioClipPointer(pointer)
+    table.RemoveByValue(self.AudioClipPointers, pointer)
+    pointer:Remove()
+end
+
+function PANEL:DeleteAllAudioClipPointers()
+	for k,v in pairs(self.AudioClipPointers) do
+		v:Remove()
+	end
+	table.Empty(self.AudioClipPointers)
+end
+-- ============================================================
+
 function PANEL:OnMousePressed(mousecode)
     if mousecode ~= MOUSE_LEFT then
         return
@@ -162,9 +225,8 @@ function PANEL:OnMouseWheeled(scrollDelta)
         newZoom = 30
     end
 
-    self.Zoom = newZoom
-    self:RefreshFrames()
-    self:RefreshScrollBar()
+    self:SetValue(newZoom)
+    self:ConVarChanged(tostring(newZoom))
 end
 
 function PANEL:OnScrollBarPressed(mousecode)
@@ -177,6 +239,18 @@ function PANEL:OnScrollBarPressed(mousecode)
 
     local cursorXOffset, _ = self.ScrollBar:CursorPos()
     self._scrollCursorOffset = cursorXOffset
+end
+
+function PANEL:SetValue(newValue)
+    self.Zoom = newValue
+    self:RefreshFrames()
+    
+    if not self.ScrollBarRect then return end
+    self:RefreshScrollBar()
+end
+
+function PANEL:Think()
+    self:ConVarNumberThink()
 end
 
 function PANEL:OnScrollBarReleased(mousecode)

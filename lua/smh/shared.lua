@@ -8,6 +8,13 @@ SMH.MessageTypes = {
 
     "SelectEntity",
     "SelectEntityResponse",
+	
+	-- AUDIO ==============
+	"UpdateServerAudio",
+	"PlayAudio",
+	"StopAudio",
+	"StopAllAudio",
+	-- ====================
 
     "SetInterpolationMode",
     "CreateKeyframe",
@@ -85,6 +92,11 @@ SMH.MessageTypes = {
     "StartPhysicsRecord",
     "StopPhysicsRecord",
     "StopPhysicsRecordResponse",
+
+    "RequestNodes",
+    "RequestNodesResponse",
+    "RequestDefaultPose",
+    "RequestDefaultPoseResponse",
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val
@@ -96,3 +108,4 @@ CreateConVar("sbox_maxsmhentity", 20, FCVAR_NOTIFY)
 
 include("shared/saves.lua")
 include("shared/tablesplit.lua")
+include("shared/audioseq_saves.lua")

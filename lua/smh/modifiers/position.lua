@@ -44,9 +44,19 @@ end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
+    local Pos = SMH.LerpLinearVector(data1.Pos, data2.Pos, percentage);
+    local Ang = SMH.LerpLinearAngle(data1.Ang, data2.Ang, percentage);
 
-    local Pos = SMH.LerpLinearVector(data2.Frames, data2.Keydata.Pos, percentage);
-    local Ang = SMH.LerpLinearAngle(data2.Frames, data2.Keydata.Ang, percentage);
+    entity:SetPos(Pos);
+    entity:SetAngles(Ang);
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+
+    local Pos = SMH.LerpCubicVector(data2.Frames, data2.Keydata.Pos, percentage);
+    local Ang = SMH.LerpCubicAngle(data2.Frames, data2.Keydata.Ang, percentage);
 
     entity:SetPos(Pos);
     entity:SetAngles(Ang);

@@ -58,8 +58,21 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
-    --local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage); OG
-    local et = SMH.LerpLinearVector(data2.Frames, data2.Keydata.EyeTarget, percentage);
+    local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage);
+
+    entity:SetEyeTarget(et);
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
+
+    if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
+
+    local et = SMH.LerpCubicVector(data2.Frames, data2.Keydata.EyeTarget, percentage);
 
     entity:SetEyeTarget(et);
 

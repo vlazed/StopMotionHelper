@@ -1,3 +1,11 @@
+
+---@param keyframes FrameData[]
+---@param frame integer
+---@param ignoreCurrentFrame boolean
+---@param modname Modifiers
+---@return FrameData? prevKeyframe
+---@return FrameData? nextKeyframe
+---@return integer
 function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     if ignoreCurrentFrame == nil then
         ignoreCurrentFrame = false
@@ -27,6 +35,9 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
         nextKeyframe = prevKeyframe
     end
 
+    ---@cast prevKeyframe FrameData
+    ---@cast nextKeyframe FrameData
+
     local lerpMultiplier = 0
     if prevKeyframe.Frame ~= nextKeyframe.Frame then
         lerpMultiplier = (frame - prevKeyframe.Frame) / (nextKeyframe.Frame - prevKeyframe.Frame)
@@ -36,11 +47,13 @@ function SMH.GetClosestKeyframes(keyframes, frame, ignoreCurrentFrame, modname)
     return prevKeyframe, nextKeyframe, lerpMultiplier
 end
 
-
+---@class KeyframeData
 local META = {}
 META.__index = META
 
-
+---@param player Player
+---@param entity Entity
+---@return FrameData
 function META:New(player, entity)
     local keyframe = {
         ID = self.NextKeyframeId,
@@ -82,6 +95,8 @@ function META:New(player, entity)
     return keyframe
 end
 
+---@param player Player
+---@param id integer
 function META:Delete(player, id)
     if not self.Players[player] or not self.Players[player].Keyframes[id] then
         return
@@ -94,6 +109,8 @@ function META:Delete(player, id)
     self.Players[player].Keyframes[id] = nil
 end
 
+---@type KeyframeData
+---@diagnostic disable-next-line
 SMH.KeyframeData = {
     NextKeyframeId = 0,
     Players = {},

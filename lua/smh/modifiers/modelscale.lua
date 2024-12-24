@@ -31,7 +31,14 @@ end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
-    local lerpedModelScale = SMH.LerpLinear(data2.Frames, data2.Keydata.ModelScale, percentage);
+    local lerpedModelScale = SMH.LerpLinear(data1.ModelScale, data2.ModelScale, percentage);
+    entity:SetModelScale(lerpedModelScale);
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    local lerpedModelScale = SMH.LerpCubic(data2.Frames, data2.Keydata.ModelScale, percentage);
     entity:SetModelScale(lerpedModelScale);
 
 end

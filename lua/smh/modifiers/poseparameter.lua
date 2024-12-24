@@ -43,9 +43,24 @@ end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
+    for name, value1 in pairs(data1) do
+
+        local value2 = data2[name];
+        if value1 and value2 then
+            entity:SetPoseParameter(name, SMH.LerpLinear(value1, value2, percentage));
+        elseif value1 then
+            entity:SetPoseParameter(name, value1);
+        end
+
+    end
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
     for name, value in pairs(data2.Keydata) do
 
-        entity:SetPoseParameter(name, SMH.LerpLinear(data2.Frames, value, percentage));
+        entity:SetPoseParameter(name, SMH.LerpCubic(data2.Frames, value, percentage));
 
     end
 

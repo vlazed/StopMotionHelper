@@ -1,3 +1,5 @@
+---@class SMHPhysRecord: DFrame
+---@field BaseClass DFrame
 local PANEL = {}
 
 function PANEL:Init()
@@ -111,6 +113,7 @@ end
 
 function PANEL:PerformLayout(width, height)
 
+    ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     self.FrameAmount:SetPos(5, 25)
