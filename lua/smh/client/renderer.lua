@@ -80,8 +80,9 @@ function MGR.GetNodes()
 end
 
 do
-    local GREEN = Color(0, 200, 0)
-    local YELLOW = Color(200, 200, 0)
+    local RED = Color(255, 30, 30)
+    local GREEN = Color(30, 200, 30)
+    local YELLOW = Color(200, 200, 30)
     local nodeRange = GetConVar("smh_motionpathrange")
     local sphereSize = GetConVar("smh_motionpathsize")
     local currentFrameIndex = 1 
@@ -107,14 +108,16 @@ do
         local baseSize = sphereSize:GetFloat()
         for i = 1, #Nodes do 
             local currentFrame = SMH.State.Frame == Nodes[i].Frame
+            local color = (SMH.State.Frame > Nodes[i].Frame) and RED or GREEN
             local size = baseSize + baseSize * 0.125 * math.sin(3 * CurTime() + i / 2)
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
-            render.DrawSphere(Nodes[i].Pos, size, 10, 10, currentFrame and YELLOW or GREEN)
+            render.DrawSphere(Nodes[i].Pos, size, 10, 10, currentFrame and YELLOW or color)
         end
         for i = 1, #Nodes - 1 do 
+            local color = (SMH.State.Frame > Nodes[i].Frame) and RED or GREEN
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
 
-            render.DrawLine(Nodes[i].Pos, Nodes[i+1].Pos, GREEN, false)
+            render.DrawLine(Nodes[i].Pos, Nodes[i+1].Pos, color, false)
         end
     end)
 end
