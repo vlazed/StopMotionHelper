@@ -69,10 +69,22 @@ function META:New(player, entity)
         self.Players[player] = {
             Keyframes = {},
             Entities = {},
+            Modkeys = {}
         }
     end
 
     self.Players[player].Keyframes[keyframe.ID] = keyframe
+
+    if not self.Players[player].Modkeys.Entities then
+        self.Players[player].Modkeys.Entities = {}
+    end
+
+    if not self.Players[player].Modkeys.Entities[entity] then
+        self.Players[player].Modkeys.Entities[entity] = {
+            ModData = {},
+            ModFrames = {}
+        }
+    end
 
     if not self.Players[player].Entities[entity] then
         self.Players[player].Entities[entity] = {}

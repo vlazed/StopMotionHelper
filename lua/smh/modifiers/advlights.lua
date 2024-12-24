@@ -91,6 +91,57 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+    local data = args.data
+    
+    local tbright = {}
+    local tcolor = {}
+    local tfov = {}
+    local torthob = {}
+    local torthol = {}
+    local torthor = {}
+    local torthot = {}
+    local tnearz = {}
+    local tfarz = {}
+    local tlightsize = {}
+    local tinfov = {}
+    local toutfov = {}
+    local tradius = {}
+    
+    for d=1, #data do
+        table.insert(tbright, data[d].Brightness)
+        table.insert(tcolor, data[d].Color)
+        table.insert(tfov, data[d].FOV)
+        table.insert(torthob, data[d].OrthoBottom)
+        table.insert(torthol, data[d].OrthoLeft)
+        table.insert(torthor, data[d].OrthoRight)
+        table.insert(torthot, data[d].OrthoTop)
+        table.insert(tnearz, data[d].Nearz)
+        table.insert(tfarz, data[d].Farz)
+        table.insert(tlightsize, data[d].LightSize)
+        table.insert(tinfov, data[d].InFOV)
+        table.insert(toutfov, data[d].OutFOV)
+        table.insert(tradius, data[d].Radius)
+    end
+
+    return {
+        Brightness = tbright,
+        Color = tcolor,
+        FOV = tfov,
+        OrthoBottom = torthob,
+        OrthoLeft = torthol,
+        OrthoRight = torthor,
+        OrthoTop = torthot,
+        Nearz = tnearz,
+        Farz = tfarz,
+        LightSize = tlightsize,
+        InFOV = tinfov,
+        OutFOV = toutfov,
+        Radius = tradius
+    }
+    
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if not self:IsAdvLight(entity) then return; end -- can never be too sure?
@@ -117,6 +168,36 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         entity:SetInnerFOV(SMH.LerpLinear(data1.InFOV, data2.InFOV, percentage));
         entity:SetOuterFOV(SMH.LerpLinear(data1.OutFOV, data2.OutFOV, percentage));
         entity:SetRadius(SMH.LerpLinear(data1.Radius, data2.Radius, percentage));
+    end
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if not self:IsAdvLight(entity) then return; end -- can never be too sure?
+
+    entity:SetBrightness(SMH.LerpCubic(data2.Frames, data2.Keydata.Brightness, percentage));
+    entity:SetLightColor(SMH.LerpCubicVector(data2.Frames, data2.Keydata.Color, percentage));
+
+    if self:IsProjectedLight(entity) then
+        local theclass = entity:GetClass();
+        if theclass ~= "expensive_light" and theclass ~= "expensive_light_new" then
+            entity:SetLightFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.FOV, percentage));
+        end
+        if theclass == "projected_light_new" then
+            entity:SetOrthoBottom(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoBottom, percentage));
+            entity:SetOrthoLeft(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoLeft, percentage));
+            entity:SetOrthoRight(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoRight, percentage));
+            entity:SetOrthoTop(SMH.LerpCubic(data2.Frames, data2.Keydata.OrthoTop, percentage));
+        end
+        entity:SetNearZ(SMH.LerpCubic(data2.Frames, data2.Keydata.Nearz, percentage));
+        entity:SetFarZ(SMH.LerpCubic(data2.Frames, data2.Keydata.Farz, percentage));
+    elseif entity:GetClass() == "cheap_light" then
+        entity:SetLightSize(SMH.LerpCubic(data2.Frames, data2.Keydata.LightSize, percentage));
+    else
+        entity:SetInnerFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.InFOV, percentage));
+        entity:SetOuterFOV(SMH.LerpCubic(data2.Frames, data2.Keydata.OutFOV, percentage));
+        entity:SetRadius(SMH.LerpCubic(data2.Frames, data2.Keydata.Radius, percentage));
     end
 
 end
