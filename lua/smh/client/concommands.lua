@@ -113,9 +113,10 @@ concommand.Add("smh_previousframe", function()
     end
 end, nil, "Jumps the playhead to the previous, immediate keyframe on the timeline, relative to the playhead")
 
-concommand.Add("+smh_playback", function()
-    SMH.Controller.StartPlayback()
-end, nil, "Start SMH playback relative to the playhead at the framerate specified by the user. Note that this does not move the playhead")
+concommand.Add("+smh_playback", function(_, _, args)
+    local start = #args > 1 and tonumber(args[1]) or SMH.State.Frame
+    SMH.Controller.StartPlayback(math.floor(start))
+end, nil, "Start SMH playback relative to the playhead at the framerate specified by the user. Note that this does not move the playhead. If a number is specified, it will start playback at that frame")
 
 concommand.Add("-smh_playback", function()
     SMH.Controller.StopPlayback()

@@ -343,11 +343,12 @@ function CTRL.DeleteKeyframe(keyframeId)
     end
 end
 
-function CTRL.StartPlayback()
+---@param startFrame integer
+function CTRL.StartPlayback(startFrame)
     if SMH.PhysRecord.IsActive() then return end
 
     net.Start(SMH.MessageTypes.StartPlayback)
-    net.WriteUInt(SMH.State.Frame, INT_BITCOUNT)
+    net.WriteUInt(startFrame, INT_BITCOUNT)
     net.WriteUInt(SMH.State.PlaybackLength - 1, INT_BITCOUNT)
     net.WriteUInt(SMH.State.PlaybackRate, INT_BITCOUNT)
     net.WriteTable(SMH.Settings.GetAll())
