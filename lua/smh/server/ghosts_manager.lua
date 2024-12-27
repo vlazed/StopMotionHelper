@@ -12,8 +12,9 @@ local DefaultPoseTrees = {}
 ---@param color Color
 ---@param frame integer
 ---@param ghostable SMHEntity[]
+---@param xray boolean
 ---@return SMHEntity
-local function CreateGhost(player, entity, color, frame, ghostable)
+local function CreateGhost(player, entity, color, frame, ghostable, xray)
     for _, ghost in ipairs(GhostData[player].Ghosts) do
         if ghost.Entity == entity and ghost.Frame == frame then return ghost end -- we already have a ghost on this entity for this frame, just return it.
     end
@@ -49,6 +50,10 @@ local function CreateGhost(player, entity, color, frame, ghostable)
 
     g:SetPos(entity:GetPos())
     g:SetAngles(entity:GetAngles())
+
+    if xray then
+        g:SetMaterial("!SMH_XRay")
+    end
 
     g.SMHGhost = true
     g.Entity = entity
@@ -154,6 +159,7 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
     end
 
     local alpha = settings.GhostTransparency * 255
+    local xray = settings.GhostXRay
     local selectedtime  = settimeline
     if selectedtime > timeline.Timelines then -- this shouldn't really happen?
         selectedtime = 1
@@ -178,19 +184,19 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
 
             if lerpMultiplier == 0 then
                 if settings.GhostPrevFrame and prevKeyframe.Frame < frame then
-                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts)
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts, xray)
                     SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
                 elseif settings.GhostNextFrame and nextKeyframe.Frame > frame then
-                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts)
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts, xray)
                     SetGhostFrame(entity, g, nextKeyframe.Modifiers, name)
                 end
             else
                 if settings.GhostPrevFrame then
-                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts)
+                    local g = CreateGhost(player, entity, Color(200, 0, 0, alpha), prevKeyframe.Frame, ghosts, xray)
                     SetGhostFrame(entity, g, prevKeyframe.Modifiers, name)
                 end
                 if settings.GhostNextFrame then
-                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts)
+                    local g = CreateGhost(player, entity, Color(0, 200, 0, alpha), nextKeyframe.Frame, ghosts, xray)
                     SetGhostFrame(entity, g, nextKeyframe.Modifiers, name)
                 end
             end
@@ -198,7 +204,7 @@ function MGR.UpdateState(player, frame, settings, timeline, settimeline)
             if settings.OnionSkin then
                 for _, keyframe in pairs(keyframes) do
                     if keyframe.Modifiers[name] then
-                        local g = CreateGhost(player, entity, Color(255, 255, 255, alpha), keyframe.Frame, ghosts)
+                        local g = CreateGhost(player, entity, Color(255, 255, 255, alpha), keyframe.Frame, ghosts, xray)
                         SetGhostFrame(entity, g, keyframe.Modifiers, name)
                     end
                 end

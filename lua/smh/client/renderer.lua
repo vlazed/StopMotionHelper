@@ -1,6 +1,15 @@
 local UseScreenshot = false
 local IsRendering = false
 
+CreateMaterial("SMH_XRay", "UnlitGeneric", {
+	["$basetexture"] = 	"color/white",
+    ["$model"] = 		1,
+    ["$translucent"] = 	1,
+    ["$decal"] = 	1,
+    ["$ignorez"] = 		1,
+    ["$nocull"] = 		1,
+})
+
 ---@type Node[]
 local Nodes = {}
 

@@ -36,6 +36,7 @@
 ---@field IgnorePhysBones boolean
 ---@field GhostPrevFrame boolean
 ---@field GhostNextFrame boolean
+---@field GhostXRay boolean
 ---@field GhostAllEntities boolean
 ---@field GhostTransparency number
 ---@field OnionSkin boolean

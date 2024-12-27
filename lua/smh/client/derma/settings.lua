@@ -43,6 +43,7 @@ function PANEL:Init()
     self.GhostPrevFrame = CreateCheckBox("GhostPrevFrame", "Ghost previous frame")
     self.GhostNextFrame = CreateCheckBox("GhostNextFrame", "Ghost next frame")
     self.GhostAllEntities = CreateCheckBox("GhostAllEntities", "Ghost all entities")
+    self.GhostXRay = CreateCheckBox("GhostXRay", "Enable X-Ray ghosts")
     self.TweenDisable = CreateCheckBox("TweenDisable", "Disable tweening")
     self.SmoothPlayback = CreateCheckBox("SmoothPlayback", "Smooth playback")
     self.EnableWorld = CreateCheckBox("EnableWorld", "Enable World keyframes")
@@ -67,7 +68,7 @@ function PANEL:Init()
     end
 
     self.Width = 250
-    self.Height = 315
+    self.Height = 340
 
     self:SetSize(self.Width, self.Height)
 
@@ -99,6 +100,7 @@ function PANEL:PerformLayout(width, height)
     setCheckboxPos(self.GhostPrevFrame)
     setCheckboxPos(self.GhostNextFrame)
     setCheckboxPos(self.GhostAllEntities)
+    setCheckboxPos(self.GhostXRay)
     setCheckboxPos(self.TweenDisable)
     setCheckboxPos(self.SmoothPlayback)
     setCheckboxPos(self.EnableWorld)
@@ -130,6 +132,7 @@ function PANEL:ApplySettings(settings)
         "GhostPrevFrame",
         "GhostNextFrame",
         "GhostAllEntities",
+        "GhostXRay",
         "TweenDisable",
         "SmoothPlayback",
         "EnableWorld",

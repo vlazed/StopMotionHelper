@@ -69,6 +69,7 @@ local ConVars = {
     GhostPrevFrame = CreateTypedConVar(ConVarType.Bool, "smh_ghostprevframe", false),
     GhostNextFrame = CreateTypedConVar(ConVarType.Bool, "smh_ghostnextframe", false),
     GhostAllEntities = CreateTypedConVar(ConVarType.Bool, "smh_ghostallentities", false),
+    GhostXRay = CreateTypedConVar(ConVarType.Bool, "smh_ghostxray", false),
     GhostTransparency = CreateTypedConVar(ConVarType.Float, "smh_ghosttransparency", 0.5),
     OnionSkin = CreateTypedConVar(ConVarType.Bool, "smh_onionskin", false),
     TweenDisable = CreateTypedConVar(ConVarType.Bool, "smh_tweendisable", false),
