@@ -208,3 +208,9 @@
 ---@field Step number
 ---@field Up number
 ---@field Down number
+
+---@alias FramePointerDictionary {[integer]: SMHFramePointer}
+
+---@class EasingData
+---@field EaseIn number
+---@field EaseOut number

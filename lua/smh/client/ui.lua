@@ -9,10 +9,15 @@ local LoadMenu = nil
 ---@type SMHProperties
 local PropertiesMenu = nil
 
+---@type {[integer]: integer}
 local FrameToKeyframe = {}
+---@type FramePointerDictionary
 local KeyframePointers = {}
+---@type {[integer]: EasingData}
 local KeyframeEasingData = {}
+---@type {[integer]: integer}
 local KeyframeIDs = {}
+---@type FramePointerDictionary
 local SelectedPointers = {}
 local OffsetPointers = {}
 local LocalIDs = 0
@@ -24,7 +29,7 @@ local KeyColor = Color(0, 200, 0)
 
 local ClickerEntity = {}
 
----@param pointer integer
+---@param pointer SMHFramePointer
 local function DeleteEmptyKeyframe(pointer)
     for id, kpointer in pairs(KeyframePointers) do
         if pointer == kpointer then
@@ -138,7 +143,7 @@ local function CreateCopyPointer(keyframeId)
 end
 
 ---@param keyframeId integer
----@return unknown
+---@return SMHFramePointer
 local function NewKeyframePointer(keyframeId)
 
     local pointer = WorldClicker.MainMenu.FramePanel:CreateFramePointer(
@@ -380,9 +385,20 @@ local function AddCallbacks()
         SMH.Controller.SetFrame(newFrame)
     end
 
-    WorldClicker.KeyframeSettings.OnRequestSelectAllFrames = function(_)
+    WorldClicker.KeyframeSettings.OnRequestSelectFrames = function(_, increment)
+        local start = increment == 0 and 0 or SMH.State.Frame
+        local checkLeft = increment < 0
         for _, kpointer in pairs(KeyframePointers) do
-            SMH.UI.ToggleSelect(kpointer)
+            if Either(checkLeft, start >= kpointer:GetFrame(), start <= kpointer:GetFrame()) then
+                SMH.UI.ToggleSelect(kpointer)
+                -- HACK: ToggleSelect does not finalize the timeline placement of keyframes 
+                -- during offsetting, which results in "ghost" keyframes 
+                -- (EaseIn and EaseOut UI appear when no keyframes are present). 
+                -- This workaround fixes that issue.
+                if not kpointer:GetSelected() then
+                    kpointer:OnPointerReleased(kpointer:GetFrame())
+                end
+            end
         end
     end
 
@@ -741,6 +757,7 @@ function MGR.SetKeyframes(keyframes, isreceiving)
     end
 end
 
+---@param keyframe FrameData
 function MGR.UpdateKeyframe(keyframe)
     if not KeyframeIDs[keyframe.ID] then
         if not FrameToKeyframe[keyframe.Frame] then
@@ -866,6 +883,7 @@ function MGR.ClearAllSelected()
     SelectedPointers = {}
 end
 
+---@param pointer SMHFramePointer
 function MGR.ShiftSelect(pointer)
     if not LastSelectedKeyframe then 
         MGR.ToggleSelect(pointer) 
@@ -896,6 +914,7 @@ function MGR.SelectAll()
     end
 end
 
+---@param pointer SMHFramePointer
 function MGR.ToggleSelect(pointer)
     local selected = not pointer:GetSelected()
     local frame = pointer:GetFrame()

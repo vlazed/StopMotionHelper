@@ -68,10 +68,22 @@ function PANEL:Init()
     self.SelectAllButton = vgui.Create("DButton", self)
     self.SelectAllButton:SetText("Select All")
     self.SelectAllButton.DoClick = function()
-        self:OnRequestSelectAllFrames()
+        self:OnRequestSelectFrames(0)
     end
 
-    self.Width = 240
+    self.SelectLeftButton = vgui.Create("DButton", self)
+    self.SelectLeftButton:SetText("Select Left")
+    self.SelectLeftButton.DoClick = function()
+        self:OnRequestSelectFrames(-1)
+    end
+
+    self.SelectRightButton = vgui.Create("DButton", self)
+    self.SelectRightButton:SetText("Select Right")
+    self.SelectRightButton.DoClick = function()
+        self:OnRequestSelectFrames(1)
+    end
+
+    self.Width = 360
     self.Height = 80
 
     self:SetSize(self.Width, self.Height)
@@ -94,12 +106,16 @@ end
 function PANEL:PerformLayout(width, height)
 
     local buttonWidth = 60
-    local setButtonPos = setPosition(width * 0.48 - buttonWidth, height * 0.45, 70)
+    local setButtonPos = setPosition(width * 0.3 - buttonWidth, height * 0.375, 70)
 
     ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
+    setButtonPos(self.SelectLeftButton)
+    self.SelectAllButton:SetSize(buttonWidth, 20)
     setButtonPos(self.SelectAllButton)
+    self.SelectAllButton:SetSize(buttonWidth, 20)
+    setButtonPos(self.SelectRightButton)
     self.SelectAllButton:SetSize(buttonWidth, 20)
     setButtonPos(self.SmoothButton)
     self.SmoothButton:SetSize(buttonWidth, 20)
@@ -108,7 +124,7 @@ function PANEL:PerformLayout(width, height)
     self.SmoothSlider:SetSize(self:GetWide() - 5, 25)
 end
 
-function PANEL:OnRequestSelectAllFrames() end
+function PANEL:OnRequestSelectFrames(increment) end
 function PANEL:OnRequestSmooth() end
 
 vgui.Register("SMHKeyframeSettings", PANEL, "DFrame")

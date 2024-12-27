@@ -213,8 +213,11 @@ function PANEL:OnCursorMoved()
     end
 end
 
+---@param newFrame integer
 function PANEL:OnFrameChanged(newFrame) end
+---@param frame integer
 function PANEL:OnPointerReleased(frame) end
+---@param mousecode integer
 function PANEL:OnCustomMousePressed(mousecode) end
 
 vgui.Register("SMHFramePointer", PANEL, "DPanel")
