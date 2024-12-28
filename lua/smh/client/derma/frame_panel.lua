@@ -33,7 +33,8 @@ function PANEL:Init()
 
     self.FramePointers = {}
 	self.AudioClipPointers = {}
-	
+
+    self:UpdateMajor(GetConVar("smh_majortickinterval"):GetInt())
 
 end
 
@@ -66,16 +67,46 @@ function PANEL:PerformLayout(width, height)
 	
 end
 
+---@param newMajor integer
+function PANEL:UpdateMajor(newMajor)
+    self.major = newMajor
+    self.majorFactorSet = {}
+    local quarter, half = math.floor(self.major * 0.25), math.floor(self.major * 0.5)
+    for i = 0, quarter do
+        local _, frac = math.modf(self.major / i)
+        local factor = 0.45
+        local inv = 1 / (i+1)
+        if frac == 0 and inv ~= 0.5 then 
+            factor = inv * 0.85
+        end
+        self.majorFactorSet[i] = factor
+    end
+    for i = quarter, half do
+        self.majorFactorSet[i] = self.majorFactorSet[half-i]
+    end
+end
+
+---Triangle sine wave function with range [0, 4*a/p] 
+---@param x number point
+---@param a number amplitude
+---@param p number period
+---@return number
+local function triangle(x, a, p)
+    return 4 * a / p * math.abs(((x - p * 0.5) % p) - p * 0.5)
+end
+
 function PANEL:Paint(width, height)
     local startX, endX = unpack(self.FrameArea)
     local frameWidth = (endX - startX) / (self.Zoom - 1)
+    local major = self.major
+    local majorFactorSet = self.majorFactorSet
 
     surface.SetDrawColor(255, 255, 255, 255)
-    for i = 0, self.Zoom - 1 do
-        if self.ScrollOffset + i < self.TotalFrames then
-            local x = startX + frameWidth * i
-            surface.DrawLine(x, 6, x, height - 6)
-        end
+    for i = self.ScrollOffset, self.ScrollOffset + self.Zoom - 1 do
+        local x = startX + frameWidth * i - self.ScrollOffset * frameWidth
+        local index = triangle(i, major * 0.25, major)
+        local tickHeight = majorFactorSet[index] or 0.45
+        surface.DrawLine(x, height * (1 - tickHeight), x, height * tickHeight)
     end
 	
 	for _, pointer in pairs(self.AudioClipPointers) do
@@ -250,6 +281,10 @@ function PANEL:SetValue(newValue)
 end
 
 function PANEL:Think()
+    local newMajor = GetConVar("smh_majortickinterval"):GetInt()
+    if self.major ~= newMajor then
+        self:UpdateMajor(newMajor)
+    end
     self:ConVarNumberThink()
 end
 

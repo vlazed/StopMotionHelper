@@ -48,6 +48,12 @@ function PANEL:Init()
     self.SmoothPlayback = CreateCheckBox("SmoothPlayback", "Smooth playback")
     self.EnableWorld = CreateCheckBox("EnableWorld", "Enable World keyframes")
     self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
+    
+    self.MajorTickInterval = vgui.Create("DNumSlider", self)
+    self.MajorTickInterval:SetMinMax(4, 16)
+    self.MajorTickInterval:SetDecimals(0)
+    self.MajorTickInterval:SetText("Major Tick Interval")
+    self.MajorTickInterval:SetConVar("smh_majortickinterval")
 
     self.PathButton = vgui.Create("DButton", self)
     self.PathButton:SetText("Motion Paths")
@@ -68,7 +74,7 @@ function PANEL:Init()
     end
 
     self.Width = 250
-    self.Height = 340
+    self.Height = 360
 
     self:SetSize(self.Width, self.Height)
 
@@ -107,8 +113,10 @@ function PANEL:PerformLayout(width, height)
 
     setCheckboxPos(self.GhostTransparency)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
+    setCheckboxPos(self.MajorTickInterval)
+    self.MajorTickInterval:SetSize(self:GetWide() - 5 - 5, 25)
 
-    local setButtonPos = setPosition(self.GhostTransparency:GetY() + 25, 25)
+    local setButtonPos = setPosition(self.MajorTickInterval:GetY() + 25, 25)
 
     setButtonPos(self.PathButton)
     self.PathButton:SetSize(self:GetWide() - 10, 20)
