@@ -6,16 +6,16 @@ It can also be used for recorded animation, but it is mainly designed around sto
 ## Fork Details
 
 This unofficial version of SMH adds:
-- Bonemerged entity support
-- Frame jumping support
-- Smoothing trick concommand
+- Support for animating bonemerged entities
+- Bone motion paths with offsetting
+- Audio playback from this [fork](https://github.com/smg4tech/StopMotionHelper)
+- Exit saves and auto saves
+- Smoothing trick UI and concommand
 - FPS, framecount, and timeline length convars to save between sessions
-- Exit saves
-- Bone motion paths
-- Entity names when hovered over
+- Keyframe jumping
 - Modifiers for environment editors and volumetric clouds
 - Quality-of-life physics-recording indicators
-- Audio playback from this [fork](https://github.com/smg4tech/StopMotionHelper)
+- Entity names when hovered over
 
 See this [tutorial](./TUTORIAL_2.md) for more information. These changes are unlikely to be added into the official SMH version. If these changes happen to be included in the official version, I'd recommend migrating from my fork.
 
