@@ -30,6 +30,21 @@
 ---@field PlaybackLength integer
 ---@field TimeStamp number
 
+---@class AudioClip
+---@field ID integer
+---@field Path string
+---@field AudioChannel IGModAudioChannel
+---@field Frame integer
+---@field Duration number
+---@field StartTime integer
+
+---@class AudioClipData
+---@field AudioClips {[integer]: AudioClip}
+---@field NextKeyframeId integer
+---@field Delete fun(self: AudioClipData, id: number)
+---@field New fun(self: AudioClipData, station: IGModAudioChannel, path: string): AudioClip
+---@field DeleteAll fun(self: AudioClipData)
+
 ---@class Settings
 ---@field FreezeAll boolean
 ---@field LocalizePhysBones boolean

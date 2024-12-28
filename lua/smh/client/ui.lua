@@ -644,11 +644,39 @@ function MGR.Close()
     WorldClicker:SetVisible(false)
 end
 
+function MGR.ScrubAudio(frame, lastFrame, sampleTime)
+    for _, audioClip in pairs(SMH.AudioClipData.AudioClips) do
+        local totalFrames = audioClip.Duration * SMH.State.PlaybackRate
+        if audioClip.Frame <= frame and math.abs(audioClip.Frame - frame) < totalFrames then            
+            local oldRate = audioClip.AudioChannel:GetPlaybackRate()
+            local frameDifference = math.abs(frame - lastFrame)
+            local totalTime = (1 / SMH.State.PlaybackRate + math.abs(sampleTime / frameDifference)) * frameDifference
+            local sign = (frame - lastFrame) >= 0 and 1 or -1
+            if audioClip.AudioChannel:GetState() ~= GMOD_CHANNEL_PLAYING then
+                SMH.AudioClip.Play(audioClip.ID, (frame - audioClip.Frame) / totalFrames * audioClip.Duration)
+            end
+            audioClip.AudioChannel:SetPlaybackRate(sign)
+            timer.Simple(totalTime, function()
+                SMH.AudioClip.Stop(audioClip.ID)
+                audioClip.AudioChannel:SetPlaybackRate(oldRate)
+            end)
+        end
+    end
+end
+
+local lastFrame = nil
 function MGR.SetFrame(frame)
+    lastFrame = lastFrame or frame
+    local sampleTime = 0.1
     if not WorldClicker.MainMenu.FramePointer:IsDragging() then
         WorldClicker.MainMenu.FramePointer:SetFrame(frame)
+    else
+        MGR.ScrubAudio(frame, lastFrame, sampleTime)
     end
-
+    timer.Simple(sampleTime, function()
+        lastFrame = frame
+    end)
+    
     WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
 
     if not PropertiesMenu:GetUsingWorld() then

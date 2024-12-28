@@ -35,6 +35,7 @@ function META:DeleteAll()
 	end
 end
 
+---@class AudioClipData
 SMH.AudioClipData = {
 	AudioClips = {},
     NextKeyframeId = 0
