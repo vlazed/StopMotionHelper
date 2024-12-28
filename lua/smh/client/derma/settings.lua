@@ -50,10 +50,15 @@ function PANEL:Init()
     self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
     
     self.MajorTickInterval = vgui.Create("DNumSlider", self)
-    self.MajorTickInterval:SetMinMax(4, 16)
+    self.MajorTickInterval:SetMinMax(3, 16)
     self.MajorTickInterval:SetDecimals(0)
     self.MajorTickInterval:SetText("Major Tick Interval")
     self.MajorTickInterval:SetConVar("smh_majortickinterval")
+    self.MajorTickInterval.OnValueChanged = function(_, newVal)
+        if newVal < 4 then
+            self.MajorTickInterval.TextArea:SetValue("Disabled")
+        end
+    end
 
     self.PathButton = vgui.Create("DButton", self)
     self.PathButton:SetText("Motion Paths")

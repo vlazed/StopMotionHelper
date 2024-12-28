@@ -4,7 +4,7 @@ CreateClientConVar("smh_motionpathbone", "", true, true, "Set the bone that the 
 CreateClientConVar("smh_motionpathrange", "0", true, false, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
 CreateClientConVar("smh_motionpathsize", "1", true, false, "Set the size of the nodes in the motion path", 0)
 CreateClientConVar("smh_motionpathoffset", "0 0 0", true, false, "Set the size of the nodes in the motion path")
-CreateClientConVar("smh_majortickinterval", "10", true, false, "Set the interval for the ticks on the frame panel", 4, 16)
+CreateClientConVar("smh_majortickinterval", "3", true, false, "Set the interval for the ticks on the frame panel", 3, 16)
 local autosaveTime = CreateClientConVar("smh_autosavetime", "5", true, false, "Set the autosave interval in minutes. Set to 0 to disable", 0)
 cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue)
     newValue = tonumber(newValue)

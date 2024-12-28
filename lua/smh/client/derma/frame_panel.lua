@@ -104,8 +104,8 @@ function PANEL:Paint(width, height)
     surface.SetDrawColor(255, 255, 255, 255)
     for i = self.ScrollOffset, self.ScrollOffset + self.Zoom - 1 do
         local x = startX + frameWidth * i - self.ScrollOffset * frameWidth
-        local index = triangle(i, major * 0.25, major)
-        local tickHeight = majorFactorSet[index] or 0.45
+        local index = major > 3 and triangle(i, major * 0.25, major) or -1
+        local tickHeight = Either(major > 3, majorFactorSet[index] or 0.45, 0.85)
         surface.DrawLine(x, height * (1 - tickHeight), x, height * tickHeight)
     end
 	
