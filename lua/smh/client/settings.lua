@@ -9,7 +9,8 @@ local GhostVars = {
     smh_ghostnextframe = "GhostNextFrame",
     smh_ghostallentities = "GhostAllEntities",
     smh_ghosttransparency = "GhostTransparency",
-    smh_onionskin = "OnionSkin"
+    smh_onionskin = "OnionSkin",
+    smh_ghostxray = "GhostXRay",
 }
 
 local TYPED_CV = {}
