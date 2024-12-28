@@ -77,10 +77,10 @@ function MGR.SetNodes(newNodes)
     if #newNodes == 0 then return end
     local sortedNodes = {}
     for i = 1, #newNodes do
-        sortedNodes[newNodes[i][1]] = newNodes[i][2]
+        sortedNodes[newNodes[i][1]] = {newNodes[i][2], newNodes[i][3]}
     end
-    for frame, pos in SortedPairs(sortedNodes) do
-        table.insert(Nodes, {Pos = pos, Frame = frame})
+    for frame, pose in SortedPairs(sortedNodes) do
+        table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
     end
 end
 
@@ -94,12 +94,14 @@ do
     local YELLOW = Color(200, 200, 30)
     local nodeRange = GetConVar("smh_motionpathrange")
     local sphereSize = GetConVar("smh_motionpathsize")
+    local offset = GetConVar("smh_motionpathoffset")
     local currentFrameIndex = 1 
 
     hook.Remove("PreDrawEffects", "SMHRenderMotionPath")
     hook.Add("PreDrawEffects", "SMHRenderMotionPath", function()
         nodeRange = nodeRange or GetConVar("smh_motionpathrange")
         sphereSize = sphereSize or GetConVar("smh_motionpathsize")
+        offset = offset or GetConVar("smh_motionpathoffset")
 
         if #Nodes == 0 or IsRendering then return end
         if not next(SMH.State.Entity) then Nodes = {} return end
@@ -115,18 +117,31 @@ do
         end
 
         local baseSize = sphereSize:GetFloat()
+        local vectorString = offset:GetString():Split(" ")
+        local vectorOffset = Vector(vectorString[1], vectorString[2], vectorString[3])
         for i = 1, #Nodes do 
             local currentFrame = SMH.State.Frame == Nodes[i].Frame
             local color = (SMH.State.Frame > Nodes[i].Frame) and RED or GREEN
             local size = baseSize + baseSize * 0.125 * math.sin(3 * CurTime() + i / 2)
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
-            render.DrawSphere(Nodes[i].Pos, size, 10, 10, currentFrame and YELLOW or color)
+            render.DrawSphere(
+                LocalToWorld(vectorOffset, angle_zero, Nodes[i].Pos, Nodes[i].Ang), 
+                size, 
+                10, 
+                10, 
+                currentFrame and YELLOW or color
+            )
         end
         for i = 1, #Nodes - 1 do 
             local color = (SMH.State.Frame > Nodes[i].Frame) and RED or GREEN
             if nodeRange:GetInt() > 0 and math.abs(currentFrameIndex - i) > nodeRange:GetInt() then continue end
 
-            render.DrawLine(Nodes[i].Pos, Nodes[i+1].Pos, color, false)
+            render.DrawLine(
+                LocalToWorld(vectorOffset, angle_zero, Nodes[i].Pos, Nodes[i].Ang), 
+                LocalToWorld(vectorOffset, angle_zero, Nodes[i+1].Pos, Nodes[i+1].Ang), 
+                color, 
+                false
+            )
         end
     end)
 end

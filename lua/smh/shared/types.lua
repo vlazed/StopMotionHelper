@@ -197,6 +197,7 @@
 
 ---@class Node
 ---@field Pos Vector
+---@field Ang Angle
 ---@field Frame integer
 
 ---@class SMHWorldClicker: SMHWorldClickerPanel
