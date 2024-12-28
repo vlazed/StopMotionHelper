@@ -901,6 +901,7 @@ local function RequestNodes(msgLength, player)
     for i = 1, #nodes do
         net.WriteUInt(nodes[i][1], 14)
         net.WriteVector(nodes[i][2])
+        net.WriteAngle(nodes[i][3])
     end
     net.Send(player)
 end

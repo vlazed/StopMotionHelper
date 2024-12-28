@@ -425,8 +425,10 @@ function MGR.RequestNodes(player)
 
     for _, keyframe in pairs(keyframes) do
         local pos = vector_origin
+        local ang = angle_zero
         if isPhysBone and keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBone] then
             pos = keyframe.Modifiers.physbones[physBone].Pos 
+            ang = keyframe.Modifiers.physbones[physBone].Ang 
         elseif bone and keyframe.Modifiers.bones and keyframe.Modifiers.bones[bone] and DefaultPoseTrees[entity:GetModel()] then
             local defaultPoseTree = DefaultPoseTrees[entity:GetModel()]
             local branch = {}
@@ -440,7 +442,6 @@ function MGR.RequestNodes(player)
                 end
             end
 
-            local ang = angle_zero
             for i = 1, #branch do
                 local lPos, lAng = defaultPoseTree[branch[i]].LocalPos, defaultPoseTree[branch[i]].LocalAng
                 local dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
@@ -455,9 +456,10 @@ function MGR.RequestNodes(player)
             end
         elseif keyframe.Modifiers.position and keyframe.Modifiers.position.Pos then
             pos = keyframe.Modifiers.position.Pos
+            ang = keyframe.Modifiers.position.Ang
         end
 
-        table.insert(nodes, {keyframe.Frame, pos})
+        table.insert(nodes, {keyframe.Frame, pos, ang})
     end
 
     GhostData[player].PreviousName = boneName

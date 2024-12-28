@@ -1058,7 +1058,7 @@ local function RequestNodesResponse(msgLength)
     local nodes = {}
     local len = net.ReadUInt(14)
     for i = 1, len do 
-        nodes[i] = {net.ReadUInt(14), net.ReadVector()}
+        nodes[i] = {net.ReadUInt(14), net.ReadVector(), net.ReadAngle()}
     end
 
     SMH.Renderer.SetNodes(nodes)
