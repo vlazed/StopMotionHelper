@@ -92,6 +92,8 @@ do
     local RED = Color(255, 30, 30)
     local GREEN = Color(30, 200, 30)
     local YELLOW = Color(200, 200, 30)
+    local UP_OFFSET = vector_up * 2.5
+
     local nodeRange = GetConVar("smh_motionpathrange")
     local sphereSize = GetConVar("smh_motionpathsize")
     local offset = GetConVar("smh_motionpathoffset")
@@ -142,6 +144,32 @@ do
                 color, 
                 false
             )
+        end
+    end)
+
+    hook.Remove("HUDPaint", "SMHDrawMotionPathText")
+    hook.Add("HUDPaint", "SMHDrawMotionPathText", function()
+        offset = offset or GetConVar("smh_motionpathoffset")
+
+        for i = 1, #Nodes - 1 do
+            if Nodes[i].Frame ~= SMH.State.Frame then continue end 
+            
+            local vectorString = offset:GetString():Split(" ")
+            local vectorOffset = Vector(vectorString[1], vectorString[2], vectorString[3])
+            local framePosition = LocalToWorld(vectorOffset, angle_zero, Nodes[i].Pos, Nodes[i].Ang)
+            if Nodes[i-1] then
+                local previousPosition = LocalToWorld(vectorOffset, angle_zero, Nodes[i-1].Pos, Nodes[i-1].Ang)
+                local dist = tostring(math.abs(Nodes[i].Frame - Nodes[i-1].Frame))
+                local pos = ((framePosition + previousPosition) * 0.5 + UP_OFFSET):ToScreen()
+                draw.SimpleTextOutlined(dist, "smh_tooltip", pos.x, pos.y, RED, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 0, color_black)
+            end
+            if Nodes[i+1] then
+                local nextPosition = LocalToWorld(vectorOffset, angle_zero, Nodes[i+1].Pos, Nodes[i+1].Ang)
+                local dist = tostring(math.abs(Nodes[i].Frame - Nodes[i+1].Frame))
+                local pos = ((framePosition + nextPosition) * 0.5 + UP_OFFSET):ToScreen()
+                draw.SimpleTextOutlined(dist, "smh_tooltip", pos.x, pos.y, GREEN, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 0, color_black)
+            end
+            return
         end
     end)
 end
