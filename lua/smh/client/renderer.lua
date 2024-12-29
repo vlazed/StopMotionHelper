@@ -95,16 +95,19 @@ do
     local UP_OFFSET = vector_up * 2.5
 
     local nodeRange = GetConVar("smh_motionpathrange")
+    local name = GetConVar("smh_motionpathbone")
     local sphereSize = GetConVar("smh_motionpathsize")
     local offset = GetConVar("smh_motionpathoffset")
     local currentFrameIndex = 1 
 
     hook.Remove("PreDrawEffects", "SMHRenderMotionPath")
     hook.Add("PreDrawEffects", "SMHRenderMotionPath", function()
+        name = name or GetConVar("smh_motionpathbone")
         nodeRange = nodeRange or GetConVar("smh_motionpathrange")
         sphereSize = sphereSize or GetConVar("smh_motionpathsize")
         offset = offset or GetConVar("smh_motionpathoffset")
 
+        if #name:GetString() == 0 then return end
         if #Nodes == 0 or IsRendering then return end
         if not next(SMH.State.Entity) then Nodes = {} return end
 
@@ -150,6 +153,9 @@ do
     hook.Remove("HUDPaint", "SMHDrawMotionPathText")
     hook.Add("HUDPaint", "SMHDrawMotionPathText", function()
         offset = offset or GetConVar("smh_motionpathoffset")
+        name = name or GetConVar("smh_motionpathbone")
+
+        if #name:GetString() == 0 then return end
 
         for i = 1, #Nodes do
             if Nodes[i].Frame ~= SMH.State.Frame then continue end 

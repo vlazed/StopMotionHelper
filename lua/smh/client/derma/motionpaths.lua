@@ -60,6 +60,7 @@ function PANEL:Init()
 
     self:SetTitle("SMH Motion Paths")
     self:SetDeleteOnClose(false)
+    self:SetDraggable(true)
 
     self.BoneName = vgui.Create("DTextEntry", self)
     self.BoneName:SetConVar("smh_motionpathbone")
@@ -73,6 +74,12 @@ function PANEL:Init()
     local sizeValue = GetConVar("smh_motionpathsize")
     self.NodeSize = CreateSlider("Node Size", 0, 10, sizeValue and sizeValue:GetInt() or 0, 2)
     self.NodeSize:SetConVar("smh_motionpathsize")
+
+    self.BoneNameReset = vgui.Create("DButton", self)
+    self.BoneNameReset:SetText("Clear Path")
+    self.BoneNameReset.DoClick = function(_)
+        RunConsoleCommand("smh_motionpathbone", "")
+    end
 
     local offsetValue = GetConVar("smh_motionpathoffset")
     local offsets = offsetValue:GetString():Split(" ")
@@ -91,7 +98,7 @@ function PANEL:Init()
     end
 
     self.Width = 250
-    self.Height = 175
+    self.Height = 230
 
     self:SetSize(self.Width, self.Height)
 
@@ -121,34 +128,37 @@ end
 
 function PANEL:PerformLayout(width, height)
 
-    local setPos = setPosition(25, 20)
+    local setPos = setPosition(25, 30)
 
     ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     setPos(self.PathRange)
-    self.PathRange:SetSize(width, 20)
+    self.PathRange:SetSize(width - 10, 20)
 
     setPos(self.NodeSize)
-    self.NodeSize:SetSize(width, 20)
+    self.NodeSize:SetSize(width - 10, 20)
 
     setPos(self.BoneName)
-    self.BoneName:SetX(120)
+    self.BoneName:SetX(self.NodeSize.Slider:GetX())
     self.BoneName:SetSize(width - 20 - self.BoneName:GetX(), 20)
     self.BoneName.Label:SetPos(5, self.BoneName:GetY())
     self.BoneName.Label:SetSize(self.BoneName:GetX(), 20)
 
     local _, y = self.BoneName:GetPos()
     local _, offset = self.BoneName:GetSize()
-    local setPos = setPosition(y + offset, 20)
+    local setPos = setPosition(y + offset + 10, 30)
     setPos(self.OffsetXSlider)
     self.OffsetXSlider:SetSize(width - 10, 20)
     setPos(self.OffsetYSlider)
     self.OffsetYSlider:SetSize(width - 10, 20)
     setPos(self.OffsetZSlider)
     self.OffsetZSlider:SetSize(width - 10, 20)
+
     setPos(self.ResetOffset)
-    self.ResetOffset:SetSize(width - 10, 20)
+    self.BoneNameReset:SetSize(width / 2 - 10, 20)
+    self.ResetOffset:SetSize(width / 2 - 10, 20)
+    self.BoneNameReset:SetPos(width / 2 + 5, self.ResetOffset:GetY())
 end
 
 vgui.Register("SMHMotionPaths", PANEL, "DFrame")
