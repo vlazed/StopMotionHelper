@@ -26,7 +26,10 @@ Aside from that, it is uncertain if the official version will implement these fe
 | `smh_motionpathbone`  | `string`  | Select the bone to view its trajectory                                                                                                                          |
 | `smh_motionpathrange` | `n`       | Restrict how many nodes on the motion path to view                                                                                                              |
 | `smh_motionpathsize`  | `d`       | Change the size of the nodes on the motion path.                                                                                                                |
+| `smh_motionpathoffset`| `f f f`   | Offset the position of the nodes with respect to the bone.                                                                                                      |
 | `smh_autosavetime`    | `d`       | Set how long, in minutes, it should take for the game to automatically save an animation. Set to 0 to disable                                                   |
+| `smh_majortickinterval`| `n`      | Set the interval which to distinguish frames by size. Set to 3 to disable                                                                                       |
+| `smh_ghostxray`        | `d`      | Set to 1 to enable XRay ghosts (ghosts are colored solid, bright, and ignores obstructions)                                                                     |
 
 ## User Interface
 
@@ -38,7 +41,7 @@ The UI in this version of SMH reflects the same version dated [at this time](htt
 2. Audio playback, and
 3. Motion Paths.
 
-Although the keyframe settings float above the timeline, it is not moveable. However, the motion paths settings are moveable. Also note that one can access the motion path settings by navigating to the Settings button and clicking the button that says "Motion Paths" (between "Ghost transparency" and "Physics Recorder"). The audio playback user interface are new features added by the [SMG4 team](https://github.com/smg4tech/StopMotionHelper), from Version 0.1.0.
+Although the keyframe settings float above the timeline, it is not moveable. Also note that one can access the motion path settings by navigating to the Settings button and clicking the button that says **"Motion Paths"** (between "Ghost transparency" and "Physics Recorder"). The audio playback user interface are new features added by the [SMG4 team](https://github.com/smg4tech/StopMotionHelper), from Version 0.1.0.
 
 From the screenshot, we will introduce the new features, naturally stepping through the user interface from the left ot the right.
 
@@ -50,9 +53,9 @@ From the screenshot, we will introduce the new features, naturally stepping thro
 
 This fork of SMH extends user's abilities to move through the timeline, adjust keyframe positions, and influence the effect of the animation. These can be done through the console, or through the readily available user interface. 
 
-The first option is "Select All." As expected, this option will select all keyframes in the timeline. This circumvents the need to 1) select the first keyframe, 2) zoom or scroll to the right to find the ending keyframe, 3) select the final keyframe, and compresses the steps to do this into one (this saves two keystrokes). We can then manipulate these keyframes in any way, either by offsetting them to a different point on the timeline, deleting them all, or performing the smoothing operation.
+The first set of option surrounds the **"Select All"** button. As expected, this option will select all keyframes in the timeline. This circumvents the need to 1) select the first keyframe, 2) zoom or scroll to the right to find the ending keyframe, 3) select the final keyframe, and compresses the steps to do this into one (this saves two keystrokes). We can then manipulate these keyframes in any way, either by offsetting them to a different point on the timeline, deleting them all, or performing the smoothing operation. Similarly, the options next to "Select All", **"Select Left"** and **"Select Right"**, perform a similar task to "Select All": the "Select Left" (or Right) button will select the keyframes to the left (or right) of the playhead, including the keyframe on the playhead.
 
-In addition, the "Select All" feature acts as an invert operator. To explain, press "Select All" twice, and the keyframes will be deselected. The following video will illustrate another use case, which involves selecting a subsequence of keyframes in the timeline and the other keyframes.
+In addition, the select buttons acts as an invert operator. To explain, press "Select All" twice, and the keyframes will be deselected. The following video will illustrate another use case, which involves selecting a subsequence of keyframes in the timeline and the other keyframes.
 
 https://github.com/user-attachments/assets/c9ace8da-7e25-4515-95a1-b4e99509e205
 
@@ -91,11 +94,15 @@ To add your own audio to use, you must do the following:
 
 ![Stop Motion Helper Audio Windows](./docs/smh_audioplayback_3.png)
 
-If we insert an audio clip into the timeline in 1), and check "Edit Audio Track", we will be able to see the clip on the timeline. This clip gives us the length of the clip, and its waveform, indicating where in the clip is it the loudest. The length of the clip on the timeline is influenced by the framerate and how much the timeline has zoomed in or out (after importing engineer_taunts12.mp3, I executed `smh_zoom 500`). We can play the audio clip through `+smh_playback`, given that we disable smooth playback to ensure consistent audio playback.
+If we insert an audio clip into the timeline in 1), and check "Edit Audio Track", we will be able to see the clip on the timeline. This clip gives us the length of the clip, and its waveform, indicating where in the clip is it the loudest. The length of the clip on the timeline is influenced by the framerate and how much the timeline has zoomed in or out (after importing engineer_taunts12.mp3, I executed `smh_zoom 500`). 
+
+We can play the audio clip through `+smh_playback`, given that we disable smooth playback to ensure consistent audio playback. In addition, we can also "scrub" the audio clip by dragging the playhead over a section of the clip, and it will play a part of it. The following video showcases both the audio scrubbing and audio playback feature.
+
+https://github.com/user-attachments/assets/5e638d18-8a53-452f-9ada-decb66fce8ca
 
 We can then use 4) the Audio Clip Tools to manipulate this audio clip. To delete an audio clip, the playhead must be adjusted to the *beginning* of the audio clip (not somewhere in the middle, or at the end). We click on it twice to delete the audio clip (the first click will confirm if one is sure to delete the audio clip). Alternatively, if we wanted to delete all audio clips, we use "Delete All."
 
-Audio sequence placements on the timeline are saved in the `garrysmod/data/smh/audio` folder. It is recommended to keep audio in this directory and animation files elsewhere.
+Audio sequence placements on the timeline are saved in the `garrysmod/data/smh/audio` folder. It is recommended to keep these audio placements in this directory and animation files elsewhere.
 
 ### Selecting Bonemerged Entities
 
@@ -117,9 +124,11 @@ There are a few behavior quirks to be aware of when animating bonemerged entitie
 
 ![Stop Motion Helper Motion Paths](./docs/smh_motionpaths.png)
 
-The last addition to the SMH UI is a window for modifying motion paths. In the earlier media on this tutorial, motion paths are shown as green circles, with green lines connecting between them. These green circles are keyframes, while the green lines show the path that the animated object will take. Yellow circles indicate the keyframe that the playhead is in. We can adjust how much of the trajectory we want to see with the "Path Range" slider. For reference, setting the slider to 1 will show two green circles immediately before and after the keyframe (as in Ghost Previous/Next frame); setting the slider to 2 will show four green circles, and 3 shows 6; in general, setting the slider to `n` will give us `2n` circles.
+The last addition to the SMH UI is a window for modifying motion paths. In the earlier media on this tutorial, motion paths are shown as green circles, with green lines connecting between them. These green circles are keyframes, while the green lines show the path that the animated object will take. Yellow circles indicate the keyframe that the playhead is in. Red lines are shown before the yellow circles to indicate the past. Immediately before the previous frame and next frame, a number also shows up on the path, indicating keyframe distance. 
 
-Finally, we can choose which bone to follow in the Bone Name text entry. Simply reference the bone that you want to follow (for instance, one can use Ragdoll Mover to identify), and type its name (it is case-sensitive!). This works for physical bones and nonphysical bones.
+We can adjust how much of the trajectory we want to see with the **"Path Range"** slider. For reference, setting the slider to 1 will show two green circles immediately before and after the keyframe (as in Ghost Previous/Next frame); setting the slider to 2 will show four green circles, and 3 shows 6; in general, setting the slider to `n` will give us `2n` circles.
+
+Finally, we can choose which bone to follow in the **"Bone Name"** text entry. Simply reference the bone that you want to follow (for instance, one can use Ragdoll Mover to identify), and type its name (it is case-sensitive!). Based on this, we can use the **Offset sliders** to visualize rotations.
 
 Alternatively, these settings can be changed in the console. The following table summarizes these console commands. Note that `n` is a whole number, `d` is a decimal-point number, and `string` can be a name.
 
@@ -128,7 +137,7 @@ Alternatively, these settings can be changed in the console. The following table
 | `smh_motionpathbone`  | `string`  | Select the bone to view its trajectory             |
 | `smh_motionpathrange` | `n`       | Restrict how many nodes on the motion path to view |
 | `smh_motionpathsize`  | `d`       | Change the size of the nodes on the motion path.   |
-
+| `smh_motionpathoffset`| `d d d`   | Offset the position of the nodes with respect to the bone. |
 
 ### Miscellaneous
 
@@ -137,8 +146,11 @@ There are more features in this version that value an explanation. However, we h
 - This fork adds more entities to animate: SMH can now animate GMod's default sun, sky, and fog editors. In addition, the fork also adds a modifier for [volumetric clouds](https://steamcommunity.com/sharedfiles/filedetails/?id=3195029892), allowing its parameters to be adjusted.
 - This exit save feature allows the game to save your SMH animation when the server shuts down with players connected. Similarly, if a player leaves or reloads a map, they will automatically save their progress. Exit saves are found in the `garrysmod/data/smh` folder, named as `exit_save_NICKNAME_ID`, where `NICKNAME` is your Steam name (not username), and `ID` is your [account id](https://developer.valvesoftware.com/wiki/SteamID#:~:text=SteamIDs%20follow%20a,the%20%22account%20number%22).
 - Similar to the exit save feature, the fork also adds a *single-player-only* auto saving feature, through the concommand `smh_autosavetime d`, where `d` is decimal number. Auto saves are located in `garrysmod/data/smh` folder, labeled as `auto_save_NAME_00#`, where `NAME` is your Steam nickname, and `#` is a number between `1` and `5`. Up to `5` autosaves are allowed; otherwise, they get deleted afterwards.
+- The timeline can be customized further with `smh_majortickinterval n`, where `n` is a whole number between `3` and `16`. This command is also found in Settings as a slider. The command distinguishes parts of the timeline at intervals to make keyframe placement easier, as well as for visual aesthetic. Set it to `3` to disable.
 - Framerate, frame count, and timeline length are now console variables, in the form of `smh_fps`, `smh_framecount`, and `smh_zoom`, respectively. This allows you to save your timeline settings. The first two require whole number inputs, while zoom requires a decimal number (although it is saved as a whole number).
 - The physics recorder now includes two more indicators to show that one is recording: a beeping sound akin to SFM during the countdown to record, and a red circle on the top right, which fades when nearing the end of the physics recording session.
+- `+smh_playback` command has been extended to play the SMH animation at any frame other than at the playhead. To see this, provide a whole number argument to the command (e.g. `+smh_playback 0` to play an animation from the beginning).
+- Ghosts can be set into 'x-ray mode', which changes a ghost's appearance to a solid color and makes them ignore obstructions (they can be seen through walls or objects). You can use this if you are unable to see the previous/next frame ghost (due to $alphatest/$translucent materials).
 
 
 ## Other Resources
