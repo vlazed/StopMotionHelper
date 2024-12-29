@@ -4,7 +4,7 @@ local ActivePlaybacks = {}
 local MGR = {}
 
 ---@param player Player
----@param playback any
+---@param playback Playback
 ---@param settings Settings
 local function PlaybackSmooth(player, playback, settings)
     if not SMH.KeyframeData.Players[player] then
@@ -162,7 +162,9 @@ function MGR.UpdateServerAudio(len,ply)
 	end
 end
 
-local function AudioPlayback(player, playback)
+---@param player Player
+---@param playback Playback
+function MGR.AudioPlayback(player, playback)
 	--check for end of playback
 	if playback.CurrentFrame == playback.EndFrame then
 		SMH.Controller.StopAllAudio(player)
@@ -207,6 +209,7 @@ local function AudioPlayback(player, playback)
 	end
 end
 -- ======================================
+local AudioPlayback = MGR.AudioPlayback
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do

@@ -31,19 +31,30 @@ function MGR.RecordStart(player, framecount, interval, frame, playbackrate, endf
     if interval < 0 then interval = 0 end
     local counter = -1
     RecordPhys(player, entities, timelines, frame)
-
+    
+    local startFrame = frame
     timer.Create(SMHRecorderID .. player:EntIndex(), 1 / playbackrate , framecount, function()
         counter = counter + 1
 
         if interval == 0 or (counter / interval) == math.Round(counter / interval)  then 
             RecordPhys(player, entities, timelines, frame)
         end
+        SMH.PlaybackManager.AudioPlayback(player, {
+            CurrentFrame = frame,
+            PlaybackRate = playbackrate,
+            StartFrame = startFrame,
+            EndFrame = endframe - 1,
+            Timer = 0,
+            PrevFrame = 0,
+            Settings = settings
+        })
 
         if counter >= framecount - 1 or frame + 1 > endframe - 1  then
             RecordPhys(player, entities, timelines, frame)
             timer.Remove(SMHRecorderID .. player:EntIndex())
             player:ChatPrint( "SMH Physics Recorder stopped.")
             SMH.Controller.StopPhysicsRecordResponse(player)
+            SMH.Controller.StopAllAudio(player)
         else
             frame = frame + 1
             SMH.PlaybackManager.SetFrameIgnore(player, frame, settings, timelines)
