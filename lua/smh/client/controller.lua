@@ -343,18 +343,8 @@ function CTRL.DeleteKeyframe(keyframeId)
     end
 end
 
----@param startFrame integer
-function CTRL.StartPlayback(startFrame)
-    if SMH.PhysRecord.IsActive() then return end
-
-    net.Start(SMH.MessageTypes.StartPlayback)
-    net.WriteUInt(startFrame, INT_BITCOUNT)
-    net.WriteUInt(SMH.State.PlaybackLength - 1, INT_BITCOUNT)
-    net.WriteUInt(SMH.State.PlaybackRate, INT_BITCOUNT)
-    net.WriteTable(SMH.Settings.GetAll())
-    net.SendToServer()
-	
-	-- AUDIO =========================
+local function PlayAudioInBetween()
+    -- AUDIO =========================
 	//check for any clips that are partway through and play them from that point
 	for i,clip in pairs(SMH.AudioClipData.AudioClips) do
 		//calculate end frame
@@ -366,6 +356,20 @@ function CTRL.StartPlayback(startFrame)
 		end
 	end
 	-- AUDIO =========================
+end
+
+---@param startFrame integer
+function CTRL.StartPlayback(startFrame)
+    if SMH.PhysRecord.IsActive() then return end
+
+    net.Start(SMH.MessageTypes.StartPlayback)
+    net.WriteUInt(startFrame, INT_BITCOUNT)
+    net.WriteUInt(SMH.State.PlaybackLength - 1, INT_BITCOUNT)
+    net.WriteUInt(SMH.State.PlaybackRate, INT_BITCOUNT)
+    net.WriteTable(SMH.Settings.GetAll())
+    net.SendToServer()
+	
+    PlayAudioInBetween()
 end
 
 function CTRL.StopPlayback()
@@ -820,6 +824,8 @@ function CTRL.StartPhysicsRecord(framecount, interval, entities)
     end
     net.WriteTable(SMH.Settings.GetAll())
     net.SendToServer()
+
+    PlayAudioInBetween()
 end
 
 function CTRL.StopPhysicsRecord()
