@@ -1138,6 +1138,8 @@ local function Setup()
             -- Only autosave when the user is active (i.e. he changes the state).
             -- Otherwise, we would be performing unnecessary saving when nothing has changed
             if lastUpdate == SMH.State.TimeStamp then return end
+            -- Don't autosave if we're disabled (i.e. this is set to 0)
+            if interval:GetFloat() == 0 then return end
 
             local nick = LocalPlayer():Nick():gsub(" ", "")
             local root = "smh/"
@@ -1159,7 +1161,6 @@ local function Setup()
             print(("SMH: Next autosave will be in %.2f minutes"):format(interval:GetFloat()))
             lastUpdate = SMH.State.TimeStamp
         end)
-        timer.Start("SMH_Autosave_Timer")
     end
 end
 
