@@ -19,7 +19,7 @@ cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue
         timer.Pause("SMH_Autosave_Timer")
         if newValue > 0 then
             timer.Adjust("SMH_Autosave_Timer", newValue * 60)
-            timer.UnPause("SMH_Autosave_Timer")
+            timer.Start("SMH_Autosave_Timer")
         end
     end
 end)
