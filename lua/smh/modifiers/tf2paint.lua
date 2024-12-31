@@ -1,5 +1,6 @@
 
 MOD.Name = "TF2 Item Paint";
+MOD.Default = false
 
 function MOD:PaintInstalled()
     return isfunction(GiveMatproxyTF2ItemPaint)

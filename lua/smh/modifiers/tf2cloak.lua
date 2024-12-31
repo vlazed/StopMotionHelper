@@ -1,5 +1,6 @@
 
 MOD.Name = "TF2 Cloak";
+MOD.Default = false
 
 function MOD:CloakInstalled()
     return isfunction(GiveMatproxyTF2CloakEffect)

@@ -534,7 +534,7 @@ local function RequestModifiers(msgLength, player)
     local list = {}
 
     for name, mod in pairs(SMH.Modifiers) do
-        list[name] = mod.Name
+        list[name] = {mod.Name, mod.Default}
     end
 
     net.Start(SMH.MessageTypes.RequestModifiersResponse)

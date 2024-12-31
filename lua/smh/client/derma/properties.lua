@@ -337,7 +337,8 @@ function PANEL:BuildTimelineinfo()
         self.TimelinesUI[i].Contents.Checker = {}
         for mod, name in pairs(ModifierList) do
             self.TimelinesUI[i].Contents.Checker[mod] = vgui.Create("DCheckBoxLabel", self.TimelinesUI[i].Contents)
-            self.TimelinesUI[i].Contents.Checker[mod]:SetText(name)
+            self.TimelinesUI[i].Contents.Checker[mod].Default = name[2]
+            self.TimelinesUI[i].Contents.Checker[mod]:SetText(name[1])
             self.TimelinesUI[i].Contents.Checker[mod]:SetTextColor(Color(25, 25, 25))
             self.TimelinesUI[i].Contents.Checker[mod].OnChange = function(_, check)
                 if UsingWorld then return end
@@ -348,7 +349,7 @@ function PANEL:BuildTimelineinfo()
         end
 
         for _, mod in ipairs(PropertyTable.TimelineMods[i]) do
-            self.TimelinesUI[i].Contents.Checker[mod]:SetChecked(true)
+            self.TimelinesUI[i].Contents.Checker[mod]:SetChecked(Either(GetConVar("smh_currentpreset"):GetString() == "default", self.TimelinesUI[i].Contents.Checker[mod].Default, true))
         end
 
         self.TimelinesUI[i]:SetContents(self.TimelinesUI[i].Contents)

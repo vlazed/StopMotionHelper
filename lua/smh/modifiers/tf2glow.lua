@@ -1,5 +1,6 @@
 
-MOD.Name = "TF2 Jarate & Sparks";
+MOD.Name = "TF2 Glow";
+MOD.Default = false
 
 function MOD:SparksInstalled()
     return isfunction(GiveMatproxyTF2CritGlow)
