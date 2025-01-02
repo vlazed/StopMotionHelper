@@ -2,7 +2,7 @@
 MOD.Name = "Advanced Color";
 
 function MOD:AdvColorInstalled(entity)
-    return isfunction(entity.SetSubColor) and next(entity._adv_colours)
+    return isfunction(entity.SetSubColor) and entity._adv_colours and next(entity._adv_colours)
 end
 
 function MOD:Save(entity)
@@ -11,6 +11,13 @@ function MOD:Save(entity)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
+    end
+
+    -- Initialize all advanced colour fields
+    for i = 0, #entity:GetMaterials() - 1 do
+        if not entity._adv_colours[i] then
+            entity:SetSubColor(i, color_white)
+        end
     end
 
     local data = {}
