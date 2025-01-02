@@ -5,6 +5,15 @@ function MOD:AdvColorInstalled(entity)
     return isfunction(entity.SetSubColor) and entity._adv_colours and next(entity._adv_colours)
 end
 
+function MOD:InitializeEntity(entity)
+    -- Initialize all advanced colour fields
+    for i = 0, #entity:GetMaterials() - 1 do
+        if not entity._adv_colours[i] then
+            entity:SetSubColor(i, color_white)
+        end
+    end
+end
+
 function MOD:Save(entity)
 
     if not self:AdvColorInstalled(entity) then return end
@@ -13,12 +22,7 @@ function MOD:Save(entity)
         entity = entity.AttachedEntity;
     end
 
-    -- Initialize all advanced colour fields
-    for i = 0, #entity:GetMaterials() - 1 do
-        if not entity._adv_colours[i] then
-            entity:SetSubColor(i, color_white)
-        end
-    end
+    self:InitializeEntity(entity)
 
     local data = {}
     for i, color in pairs(entity._adv_colours) do
@@ -31,6 +35,8 @@ end
 function MOD:Load(entity, data)
 
     if not self:AdvColorInstalled(entity) then return end
+
+    self:InitializeEntity(entity)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
@@ -45,6 +51,8 @@ end
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if not self:AdvColorInstalled(entity) then return end
+
+    self:InitializeEntity(entity)
 
     if self:IsEffect(entity) then
         entity = entity.AttachedEntity;
