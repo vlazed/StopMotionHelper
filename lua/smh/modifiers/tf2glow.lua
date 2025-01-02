@@ -42,10 +42,10 @@ function MOD:Save(entity)
 
     local glow = self:GetGlowEntity(entity)
     if IsValid(glow) then
-        data.GlowColor = glow.Color
+        data.GlowColor = glow:GetColor()
         data.SparksRed = glow:GetSparksRed()
         data.SparksBlu = glow:GetSparksBlu()
-        data.SparksColorable = glow:GetSparksColorabl() 
+        data.SparksColorable = glow:GetSparksColorable() 
         data.SparksJarate = glow:GetSparksJarate()
         data.SparksJarateColorable = glow:GetSparksJarateColorable()
     end
@@ -72,7 +72,11 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
 
     local glow = self:GetGlowEntity(entity)
     if IsValid(glow) then
-        glow:SetColor(SMH.LerpLinearVector(data1.GlowColor, data2.GlowColor, percentage))
+        local r = SMH.LerpLinear(data1.GlowColor.r, data2.GlowColor.r, percentage)
+        local g = SMH.LerpLinear(data1.GlowColor.g, data2.GlowColor.g, percentage)
+        local b = SMH.LerpLinear(data1.GlowColor.b, data2.GlowColor.b, percentage)
+
+        glow:SetColor(Color(r, g, b))
         glow:SetSparksRed(data1.SparksRed)
         glow:SetSparksBlu(data1.SparksBlu)
         glow:SetSparksColorable(data1.SparksColorable)

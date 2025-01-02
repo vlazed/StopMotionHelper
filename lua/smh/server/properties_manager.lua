@@ -186,7 +186,9 @@ function MGR.InitTimelineSetting(player, timelineInfo)
 
         timelinemods[1] = { KeyColor = Color(0, 200, 0) }
         for name, mod in pairs(SMH.Modifiers) do
-            table.insert(timelinemods[1], name)
+            if mod.Default then
+                table.insert(timelinemods[1], name)
+            end
         end
     else
         timelines = timelineInfo.Timelines

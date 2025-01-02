@@ -36,7 +36,7 @@ function MOD:Save(parent)
 
     local paint = self:GetPaintEntity(parent)
     if IsValid(paint) then
-        data.PaintColor = paint.Color
+        data.PaintColor = paint:GetColor()
         data.PaintOverride = paint:GetPaintOverride()
     end
 
@@ -58,7 +58,10 @@ function MOD:LoadBetween(parent, data1, data2, percentage)
 
     local paint = self:GetPaintEntity(parent)
     if IsValid(paint) then
-        paint:SetColor(SMH.LerpLinearVector(data1.PaintColor, data2.PaintColor, percentage))
+        local r = SMH.LerpLinear(data1.PaintColor.r, data2.PaintColor.r, percentage)
+        local g = SMH.LerpLinear(data1.PaintColor.g, data2.PaintColor.g, percentage)
+        local b = SMH.LerpLinear(data1.PaintColor.b, data2.PaintColor.b, percentage)
+        paint:SetColor(Color(r, g, b))
         paint:SetPaintOverride(data1.PaintOverride)
     end
 
