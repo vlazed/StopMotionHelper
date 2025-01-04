@@ -480,7 +480,7 @@ function MGR.SetFrame(frame)
         if FrameToKeyframe[frame] ~= nil then
             local data = KeyframeEasingData[FrameToKeyframe[frame]]
             if data then
-                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
             else
                 WorldClicker.MainMenu:ShowEasingControls(0, 0)
             end
@@ -544,7 +544,7 @@ function MGR.SetKeyframes(keyframes, isreceiving)
         if FrameToKeyframe[SMH.State.Frame] ~= nil then
             local data = KeyframeEasingData[FrameToKeyframe[SMH.State.Frame]]
             if data then
-                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn, data.EaseOut)
+                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
             else
                 WorldClicker.MainMenu:ShowEasingControls(0, 0)
             end
@@ -593,7 +593,10 @@ function MGR.UpdateKeyframe(keyframe)
         --     WorldClicker.MainMenu.FramePanel:DeleteFramePointer(pointer)
         -- end
     end
-    local _, name = next(PropertiesMenu:GetCurrentModifiers())
+    local k, name = next(PropertiesMenu:GetCurrentModifiers())
+    while not keyframe.EaseIn[name] and k do
+        k, name = next(PropertiesMenu:GetCurrentModifiers(), k)
+    end
 
     KeyframeEasingData[KeyframeIDs[keyframe.ID]] = {
         EaseIn = keyframe.EaseIn[name],
@@ -610,7 +613,7 @@ function MGR.UpdateKeyframe(keyframe)
     end
     FrameToKeyframe[keyframe.Frame] = KeyframeIDs[keyframe.ID]
     if keyframe.Frame == SMH.State.Frame then
-        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn[name], keyframe.EaseOut[name])
+        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn[name] or 0, keyframe.EaseOut[name] or 0)
     end
 end
 
