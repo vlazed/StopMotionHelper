@@ -1,3 +1,4 @@
+local disableExitSaves = CreateConVar("smh_disableexitsaves", "0", FCVAR_PROTECTED + FCVAR_ARCHIVE)
 local INT_BITCOUNT = 32
 local KFRAMES_PER_MSG = 250
 
@@ -944,8 +945,26 @@ for _, message in pairs(SMH.MessageTypes) do
     util.AddNetworkString(message)
 end
 
+local steamIds = {}
+
+hook.Remove("player_activate", "SMHRecordSteamID")
+hook.Add("player_activate", "SMHRecordSteamID", function(data)
+    local player = Player(data.userid)
+    if not IsValid(player) then return end
+
+    local accountId = player:AccountID()
+    ---Sometimes, account id might report -1, so we'll just do it again until we get a positive number
+    while accountId < 0 do
+        accountId = player:AccountID()
+    end
+
+    steamIds[player] = accountId
+end)
+
 hook.Remove("ShutDown", "SMHExitSave")
 hook.Add("ShutDown", "SMHExitSave", function()
+    if disableExitSaves:GetBool() then return end
+
     for _, player in player.Iterator() do
         local properties = SMH.PropertiesManager.GetAllProperties(player)
         local keyframes = SMH.KeyframeManager.GetAll(player)
@@ -959,7 +978,7 @@ hook.Add("ShutDown", "SMHExitSave", function()
 
         -- Remove spaces from player name
         local playerName = string.gsub(player:Nick(), " ", "")
-        local saveName = ("EXIT_SAVE_%s_%d"):format(playerName, player:AccountID())
+        local saveName = ("EXIT_SAVE_%s_%d"):format(playerName, steamIds[player] or player:AccountID())
         SMH.Saves.Save(saveName, serializedKeyframes, player)
     end
 end)
