@@ -38,6 +38,18 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+    local entity = args.entity
+    local data = args.data
+
+    local EyeTarget = {}
+    for f = 1 , #data do
+        table.insert(EyeTarget, data[f].EyeTarget)
+    end
+
+    return {EyeTarget = EyeTarget}
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
@@ -47,6 +59,20 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
 
     local et = SMH.LerpLinearVector(data1.EyeTarget, data2.EyeTarget, percentage);
+
+    entity:SetEyeTarget(et);
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
+
+    if not self:HasEyes(entity) then return; end --Shouldn't happen, but meh
+
+    local et = SMH.LerpCubicVector(data2.Frames, data2.Keydata.EyeTarget, percentage);
 
     entity:SetEyeTarget(et);
 

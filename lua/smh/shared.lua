@@ -16,6 +16,7 @@ SMH.MessageTypes = {
 	"StopAllAudio",
 	-- ====================
 
+    "SetInterpolationMode",
     "CreateKeyframe",
     "UpdateKeyframe",
     "UpdateKeyframeExecute",

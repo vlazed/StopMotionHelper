@@ -187,6 +187,17 @@ function CTRL.UpdateServerAudio()
 end
 -- ===============================
 
+
+--interpolation mode
+function CTRL.SetInterpolationMode(mode)
+    
+    net.Start(SMH.MessageTypes.SetInterpolationMode)
+    net.WriteUInt(mode, INT_BITCOUNT)
+    net.SendToServer()
+    
+end
+
+
 ---@param frame integer?
 function CTRL.Record(frame)
     if not next(SMH.State.Entity) or SMH.State.Frame < 0 or SMH.State.Timeline < 1 or SMH.PhysRecord.IsActive() or (frame and frame < 0) then

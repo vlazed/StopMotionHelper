@@ -113,6 +113,40 @@ function MOD:LoadGhostBetween(entity, ghost, data1, data2, percentage)
     end
 end
 
+
+function MOD:OrganizeData(args)
+    local entity = args.entity
+    local data = args.data
+    local lang
+
+    local n = entity:GetPhysicsObjectCount();
+    local bonetabla = {}
+
+    for b = 0, n-1 do
+        
+        local bpos = {}
+        local bang = {}
+        local bmov = {}
+
+        for f = 1, #data do
+
+            lang = SMH.AngleToQuaternion(data[f][b].Ang) 
+
+            table.insert(bpos, data[f][b].Pos)
+            table.insert(bang, lang)
+            table.insert(bmov, data[f][b].Moveable)
+
+
+        end
+
+        bonetabla[b] = bonetabla[b] or {}  
+        bonetabla[b] = {Pos = bpos, Ang = bang, Moveable = bmov}
+        
+    end
+    return bonetabla
+end
+
+
 function MOD:LoadBetween(entity, data1, data2, percentage, settings)
 
     if settings.IgnorePhysBones then
@@ -129,6 +163,32 @@ function MOD:LoadBetween(entity, data1, data2, percentage, settings)
 
         local Pos = SMH.LerpLinearVector(d1.Pos, d2.Pos, percentage);
         local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
+
+        if settings.FreezeAll then
+            pb:EnableMotion(false);
+        else
+            pb:EnableMotion(d1.Moveable);
+        end
+        pb:SetPos(Pos);
+        pb:SetAngles(Ang);
+
+        pb:Wake();
+    end
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage, settings)
+
+    if settings.IgnorePhysBones then
+        return;
+    end
+
+    for i = 0, #data2.Keydata do
+
+        local pb = entity:GetPhysicsObjectNum(i);
+
+        local Pos = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpCubicAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
 
         if settings.FreezeAll then
             pb:EnableMotion(false);

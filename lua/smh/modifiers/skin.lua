@@ -27,6 +27,11 @@ function MOD:Load(entity, data)
     entity:SetSkin(data);
 end
 
+function MOD:OrganizeData(args)
+    local data = args.data
+    return data;
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then

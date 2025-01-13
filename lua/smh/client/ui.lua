@@ -313,6 +313,10 @@ local function AddCallbacks()
             PropertiesMenu:HideWorldSettings()
         end
     end
+    --interpolation mode!!
+    WorldClicker.MainMenu.OnRequestInterpolationMode = function(_, mode)
+        SMH.Controller.SetInterpolationMode(mode)
+    end
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
     end

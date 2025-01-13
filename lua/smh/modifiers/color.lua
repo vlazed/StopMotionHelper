@@ -22,6 +22,35 @@ function MOD:Load(entity, data)
 
 end
 
+function MOD:OrganizeData(args)
+
+    local data = args.data
+
+    local colorstable = {}
+    local cn = #data
+
+    local red = {}
+    local green = {}
+    local blue = {}
+    local alpha = {}
+
+    for c = 1, cn do
+
+        table.insert(red, data[c].Color.r)
+        table.insert(green, data[c].Color.g)
+        table.insert(blue, data[c].Color.b)
+        table.insert(alpha, data[c].Color.a)
+
+    end
+
+    colorstable.r = red
+    colorstable.g = green
+    colorstable.b = blue
+    colorstable.a = alpha
+
+    return colorstable
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
@@ -35,6 +64,25 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     local g = SMH.LerpLinear(c1.g, c2.g, percentage);
     local b = SMH.LerpLinear(c1.b, c2.b, percentage);
     local a = SMH.LerpLinear(c1.a, c2.a, percentage);
+
+    entity:SetColor(Color(r, g, b, a));
+
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
+
+    local ct = {}
+
+    ct = data2.Keydata
+
+    local r = SMH.LerpCubic(data2.Frames, ct.r, percentage);
+    local g = SMH.LerpCubic(data2.Frames, ct.g, percentage);
+    local b = SMH.LerpCubic(data2.Frames, ct.b, percentage);
+    local a = SMH.LerpCubic(data2.Frames, ct.a, percentage);
 
     entity:SetColor(Color(r, g, b, a));
 
