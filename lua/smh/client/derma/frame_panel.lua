@@ -102,7 +102,7 @@ function PANEL:Paint(width, height)
     local majorFactorSet = self.majorFactorSet
 
     surface.SetDrawColor(255, 255, 255, 255)
-    for i = self.ScrollOffset, self.ScrollOffset + self.Zoom - 1 do
+    for i = self.ScrollOffset, math.min(self.ScrollOffset + self.Zoom - 1, self.TotalFrames - 1) do
         local x = startX + frameWidth * i - self.ScrollOffset * frameWidth
         local index = major > 3 and triangle(i, major * 0.25, major) or -1
         local tickHeight = Either(major > 3, majorFactorSet[index] or 0.45, 0.85)
