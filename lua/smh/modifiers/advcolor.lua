@@ -1,6 +1,12 @@
 
 MOD.Name = "Advanced Color";
 
+local COLOR = FindMetaTable("Color")
+
+local function ToColor(colorTable)
+    return setmetatable(colorTable, COLOR)
+end
+
 function MOD:AdvColorInstalled(entity)
     return isfunction(entity.SetSubColor) and entity._adv_colours and next(entity._adv_colours)
 end
@@ -30,7 +36,7 @@ function MOD:Load(entity, data)
     end
 
     for i, color in pairs(data) do
-        entity:SetSubColor(i, color)
+        entity:SetSubColor(i, ToColor(color))
     end
 
 end
