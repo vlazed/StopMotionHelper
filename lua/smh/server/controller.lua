@@ -1,4 +1,6 @@
-local disableExitSaves = CreateConVar("smh_disableexitsaves", "0", FCVAR_PROTECTED + FCVAR_ARCHIVE)
+local disableExitSaves = CreateConVar("smh_disableexitsaves", "0", FCVAR_PROTECTED + FCVAR_ARCHIVE, "If set to 1, it prevents the server from making saves per user if the server gracefully closes (map change, `quit` command, `reload` (singleplayer-only), etc.)")
+local disableNetworking = CreateConVar("smh_disablenetworking", "0", FCVAR_PROTECTED + FCVAR_ARCHIVE, "If set to 1, faceposer, fingerposer, and eyeposer values won't be sent to the client.")
+
 local INT_BITCOUNT = 32
 local KFRAMES_PER_MSG = 250
 

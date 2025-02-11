@@ -1,6 +1,25 @@
 
 MOD.Name = "Nonphysical Bones";
 
+-- Adapted from fingerposer.lua
+-- https://github.com/Facepunch/garrysmod/blob/7eca8adacc38defdfb2c257fda040d44470abf10/garrysmod/gamemodes/sandbox/entities/weapons/gmod_tool/stools/finger.lua
+local function networkFingerVariables(ent)
+    if GetConVar("smh_disablenetworking"):GetInt() > 0 then return end
+
+    if not ent.FingerIndex then return end
+
+    local VarsOnHand = 15
+	
+    for i = 1, VarsOnHand do
+		local bone = ent.FingerIndex[ i ]
+		if ( bone ) then
+			local Ang = ent:GetManipulateBoneAngles( bone )
+			ent:SetNW2Angle( Format( "finger_%s", i-1), Ang )
+		end
+
+	end
+end
+
 function MOD:Save(entity)
 
     if self:IsEffect(entity) then
@@ -51,6 +70,7 @@ function MOD:Load(entity, data)
 
     end
 
+    networkFingerVariables(entity)
 end
 
 function MOD:LoadBetween(entity, data1, data2, percentage)
@@ -75,4 +95,6 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         entity:ManipulateBoneScale(b, Scale);
 
     end
+
+    networkFingerVariables(entity)
 end

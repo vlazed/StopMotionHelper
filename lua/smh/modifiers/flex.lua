@@ -1,6 +1,12 @@
 
 MOD.Name = "Facial flexes";
 
+local function networkFlex(entity, index, weight)
+    if GetConVar("smh_disablenetworking"):GetInt() > 0 then return end
+
+    entity:SetNW2Float("faceposer_flex" .. index, weight)
+end
+
 function MOD:Save(entity)
 
     if self:IsEffect(entity) then
@@ -46,7 +52,7 @@ function MOD:Load(entity, data)
 
     for i, f in pairs(data.Weights) do
         entity:SetFlexWeight(i, f);
-        entity:SetNW2Float("faceposer_flex" .. i, f)
+        networkFlex(entity, i, f)
     end
 
 end
@@ -71,8 +77,7 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
         local w = SMH.LerpLinear(w1, w2, percentage);
 
         entity:SetFlexWeight(i, w);
-        entity:SetNW2Float("faceposer_flex" .. i, w)
-
+        networkFlex(entity, i, w)
     end
 
 end
