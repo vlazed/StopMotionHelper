@@ -92,13 +92,23 @@ function PANEL:Init()
     self.ResetOffset = vgui.Create("DButton", self)
     self.ResetOffset:SetText("Reset Offset")
     self.ResetOffset.DoClick = function()
-        self.OffsetXSlider:SetValue(0)
-        self.OffsetYSlider:SetValue(0)
-        self.OffsetZSlider:SetValue(0)
+        offsetValue:SetString(Format("0 0 0"))
+    end
+
+    self.SetOffsetFromView = vgui.Create("DButton", self)
+    self.SetOffsetFromView:SetText("Set Offset from View")
+    self.SetOffsetFromView.DoClick = function()
+        ---@type TraceResult
+        local trace = LocalPlayer():GetEyeTraceNoCursor()
+        local pos, ang = SMH.Renderer.GetBonePoseFromFrame()
+        if trace.HitPos and pos and pos ~= vector_origin then
+            pos, _ = WorldToLocal(trace.HitPos, angle_zero, pos, ang)
+            offsetValue:SetString(Format("%.3f %.3f %.3f", pos[1], pos[2], pos[3]))
+        end
     end
 
     self.Width = 250
-    self.Height = 230
+    self.Height = 250
 
     self:SetSize(self.Width, self.Height)
 
@@ -145,9 +155,10 @@ function PANEL:PerformLayout(width, height)
     self.BoneName.Label:SetPos(5, self.BoneName:GetY())
     self.BoneName.Label:SetSize(self.BoneName:GetX(), 20)
 
-    local _, y = self.BoneName:GetPos()
-    local _, offset = self.BoneName:GetSize()
-    local setPos = setPosition(y + offset + 10, 30)
+    local y= self.BoneName:GetY()
+    local offset = self.BoneName:GetTall()
+    
+    setPos = setPosition(y + offset + 10, 30)
     setPos(self.OffsetXSlider)
     self.OffsetXSlider:SetSize(width - 10, 20)
     setPos(self.OffsetYSlider)
@@ -159,6 +170,12 @@ function PANEL:PerformLayout(width, height)
     self.BoneNameReset:SetSize(width / 2 - 10, 20)
     self.ResetOffset:SetSize(width / 2 - 10, 20)
     self.BoneNameReset:SetPos(width / 2 + 5, self.ResetOffset:GetY())
+
+    y = self.ResetOffset:GetY()
+    offset = self.BoneName:GetTall()
+    setPos = setPosition(y + offset + 2, 30)
+    setPos(self.SetOffsetFromView)
+    self.SetOffsetFromView:SetSize(width - 10, 20)
 end
 
 vgui.Register("SMHMotionPaths", PANEL, "DFrame")

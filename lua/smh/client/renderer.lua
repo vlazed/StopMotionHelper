@@ -10,8 +10,12 @@ CreateMaterial("SMH_XRay", "UnlitGeneric", {
     ["$nocull"] = 		1,
 })
 
+---This stores the nodes for easy iteration
 ---@type Node[]
 local Nodes = {}
+---This stores the existing nodes indexed by frame, for easy access
+---@type Node[]
+local NodeSet = {}
 
 local MGR = {}
 
@@ -73,6 +77,7 @@ end
 
 function MGR.SetNodes(newNodes)
     Nodes = {}
+    NodeSet = {}
 
     if #newNodes == 0 then return end
     local sortedNodes = {}
@@ -82,10 +87,51 @@ function MGR.SetNodes(newNodes)
     for frame, pose in SortedPairs(sortedNodes) do
         table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
     end
+    NodeSet = sortedNodes
 end
 
 function MGR.GetNodes()
     return Nodes
+end
+
+---@return Vector
+---@return Angle
+function MGR.GetBonePoseFromFrame()
+    if not next(NodeSet) then 
+        return vector_origin, angle_zero
+    end
+
+    ---@type Vector, Angle, Vector, Angle
+    local prevPos, prevAng, nextPos, nextAng
+    ---@type integer, integer, integer
+    local currentFrame, prevFrame, nextFrame = SMH.State.Frame, 0, SMH.State.PlaybackLength
+    for i = currentFrame, 0, -1 do
+        if NodeSet[i] then
+            prevPos, prevAng = NodeSet[i][1], NodeSet[i][2]
+            prevFrame = i
+            break
+        end
+    end
+    for i = currentFrame, SMH.State.PlaybackLength, 1 do
+        if NodeSet[i] then
+            nextPos, nextAng = NodeSet[i][1], NodeSet[i][2]
+            nextFrame = i
+            break
+        end
+    end
+
+    if currentFrame == nextFrame or currentFrame == prevFrame then
+        return prevPos, prevAng
+    elseif prevPos and not nextPos then
+        return prevPos, prevAng
+    elseif nextPos and not prevPos then
+        return nextPos, nextAng
+    elseif not prevPos and not nextPos then
+        return vector_origin, angle_zero
+    end
+
+    local lerp = Lerp(currentFrame, prevFrame, nextFrame)
+    return SMH.LerpLinearVector(prevPos, nextPos, lerp), SMH.LerpLinearAngle(prevAng, nextAng, lerp)
 end
 
 do
