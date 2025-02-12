@@ -92,19 +92,13 @@ function PANEL:Init()
     self.ResetOffset = vgui.Create("DButton", self)
     self.ResetOffset:SetText("Reset Offset")
     self.ResetOffset.DoClick = function()
-        offsetValue:SetString(Format("0 0 0"))
+        RunConsoleCommand("smh_motionpath_reset")
     end
 
     self.SetOffsetFromView = vgui.Create("DButton", self)
     self.SetOffsetFromView:SetText("Set Offset from View")
     self.SetOffsetFromView.DoClick = function()
-        ---@type TraceResult
-        local trace = LocalPlayer():GetEyeTraceNoCursor()
-        local pos, ang = SMH.Renderer.GetBonePoseFromFrame()
-        if trace.HitPos and pos and pos ~= vector_origin then
-            pos, _ = WorldToLocal(trace.HitPos, angle_zero, pos, ang)
-            offsetValue:SetString(Format("%.3f %.3f %.3f", pos[1], pos[2], pos[3]))
-        end
+        RunConsoleCommand("smh_motionpath_offsetfromview")
     end
 
     self.Width = 250

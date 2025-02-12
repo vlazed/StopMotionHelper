@@ -3,7 +3,7 @@ CreateClientConVar("smh_currentpreset", "default", true, false)
 CreateClientConVar("smh_motionpathbone", "", true, true, "Set the bone that the motion path will track")
 CreateClientConVar("smh_motionpathrange", "0", true, false, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
 CreateClientConVar("smh_motionpathsize", "1", true, false, "Set the size of the nodes in the motion path", 0)
-CreateClientConVar("smh_motionpathoffset", "0 0 0", true, false, "Set the size of the nodes in the motion path")
+local motionPathOffset = CreateClientConVar("smh_motionpathoffset", "0 0 0", true, false, "Set the size of the nodes in the motion path")
 CreateClientConVar("smh_majortickinterval", "3", true, false, "Set the interval for the ticks on the frame panel", 3, 16)
 local autosaveTime = CreateClientConVar("smh_autosavetime", "5", true, false, "Set the autosave interval in minutes. Set to 0 to disable", 0)
 cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue)
@@ -146,6 +146,22 @@ concommand.Add("smh_smooth", function(_, _, args)
     SMH.Controller.Smooth(frames, passes)
     
 end, nil, "Apply additional keyframes to produce a smoother result", nil)
+
+concommand.Add("smh_motionpath_offsetfromview", function()
+    local player = LocalPlayer()
+    ---@type TraceResult
+    local trace = SMH.UI.IsOpen() and player:GetEyeTraceNoCursor() or player:GetEyeTrace()
+
+    local pos, ang = SMH.Renderer.GetBonePoseFromFrame()
+    if trace.HitPos and pos and pos ~= vector_origin then
+        pos, _ = WorldToLocal(trace.HitPos, angle_zero, pos, ang)
+        motionPathOffset:SetString(Format("%.3f %.3f %.3f", pos[1], pos[2], pos[3]))
+    end
+end, nil, "Sets the offset for two cases: if the Stop Motion Helper timeline is visible, it sets it from the player's view, otherwise it uses the cursor to set the offset", nil)
+
+concommand.Add("smh_motionpath_resetoffset", function()
+    motionPathOffset:SetString("0 0 0")
+end, nil, "Resets the motion path offset to 0 0 0", nil)
 
 concommand.Add("smh_smoothall", function(_, _, args)
     local passes = tonumber(args[1]) or 1

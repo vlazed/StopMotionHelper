@@ -628,6 +628,7 @@ end)
 
 local MGR = {}
 
+---@return boolean
 function MGR.IsOpen()
     return WorldClicker:IsVisible()
 end
