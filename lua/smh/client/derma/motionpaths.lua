@@ -92,7 +92,7 @@ function PANEL:Init()
     self.ResetOffset = vgui.Create("DButton", self)
     self.ResetOffset:SetText("Reset Offset")
     self.ResetOffset.DoClick = function()
-        RunConsoleCommand("smh_motionpath_reset")
+        RunConsoleCommand("smh_motionpath_resetoffset")
     end
 
     self.SetOffsetFromView = vgui.Create("DButton", self)
