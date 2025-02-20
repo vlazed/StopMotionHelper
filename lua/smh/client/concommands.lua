@@ -23,6 +23,7 @@ cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue
         end
     end
 end)
+CreateClientConVar("smh_scrollmultiplier", "1", true, false, "Set how much scrolling should affect the timeline", 0, 100)
 
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()

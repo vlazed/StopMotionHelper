@@ -247,9 +247,13 @@ function PANEL:OnMousePressed(mousecode)
     self:OnFramePressed(framePosition)
 end
 
+local scrollMultiplierConVar = GetConVar("smh_scrollmultiplier")
+
 function PANEL:OnMouseWheeled(scrollDelta)
+    scrollMultiplierConVar = scrollMultiplierConVar or GetConVar("smh_scrollmultiplier")
+
     scrollDelta = -scrollDelta
-    local newZoom = self.Zoom + scrollDelta
+    local newZoom = self.Zoom + scrollDelta * scrollMultiplierConVar:GetFloat()
     if newZoom > 500  then
         newZoom = 500
     elseif newZoom < 30 then
