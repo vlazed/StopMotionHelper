@@ -569,15 +569,15 @@ function CTRL.ShouldHighlight()
     return SMH.UI.IsOpen()
 end
 
----@param useScreenshot boolean
+---@param renderCmd string
 ---@param StartFrame integer
-function CTRL.ToggleRendering(useScreenshot, StartFrame)
+function CTRL.ToggleRendering(renderCmd, StartFrame)
     if SMH.PhysRecord.IsActive() then return end
 
     if SMH.Renderer.IsRendering() then
         SMH.Renderer.Stop()
     else
-        SMH.Renderer.Start(useScreenshot, StartFrame)
+        SMH.Renderer.Start(renderCmd, StartFrame)
     end
 end
 

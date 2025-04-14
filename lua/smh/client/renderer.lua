@@ -1,4 +1,4 @@
-local UseScreenshot = false
+local RenderCmd = ""
 local IsRendering = false
 
 CreateMaterial("SMH_XRay", "UnlitGeneric", {
@@ -38,12 +38,7 @@ local function RenderTick()
 
     local newPos = SMH.State.Frame + 1
 
-    local command = "jpeg"
-    if UseScreenshot then
-        command = "screenshot"
-    end
-
-    RunConsoleCommand(command)
+    LocalPlayer():ConCommand(RenderCmd)
 
     if newPos >= SMH.State.PlaybackLength then
         MGR.Stop()
@@ -60,10 +55,11 @@ local function RenderTick()
 
 end
 
----@param useScreenshot boolean
+---@param renderCmd string
 ---@param StartFrame integer
-function MGR.Start(useScreenshot, StartFrame)
-    UseScreenshot = useScreenshot
+function MGR.Start(renderCmd, StartFrame)
+    if not isstring(renderCmd) then error(string.format("Tried to start a render with a non-string renderCmd: %s: %q", type(renderCmd), tostring(renderCmd))) end
+    RenderCmd = renderCmd
 
     IsRendering = true
     SMH.Controller.SetRendering(IsRendering)

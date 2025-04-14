@@ -1,4 +1,5 @@
-local smh_startatone = CreateClientConVar("smh_startatone", "0", true, false, nil, 0, 1)
+local smh_startatone = CreateClientConVar("smh_startatone", "0", true, false, "Controls whether the timeline starts at 0 or 1.", 0, 1)
+local smh_render_cmd = CreateClientConVar("smh_render_cmd", "poster 1", true, false, "For smh_render, this string will be ran in the console for each frame.")
 CreateClientConVar("smh_currentpreset", "default", true, false)
 CreateClientConVar("smh_motionpathbone", "", true, true, "Set the bone that the motion path will track")
 CreateClientConVar("smh_motionpathrange", "0", true, false, "Set how many nodes to show around the current frame. 1 means show 2 nodes on the left and right of the current frame.", 0)
@@ -87,11 +88,13 @@ do
 
     concommand.Add("smh_next", function(_, _, _, argStr) 
         local n = tonumber(argStr)
+        ---@cast n number
         nextFrame(isnumber(n) and math.Round(math.abs(n)))
     end, suggestFrames, "Increment the playhead by n, where n is a whole number. If not specified, increment by 1")
 
     concommand.Add("smh_previous", function(_, _, _, argStr) 
         local n = tonumber(argStr)
+        ---@cast n number
         previousFrame(isnumber(n) and math.Round(math.abs(n)))
     end, suggestFrames, "Decrement the playhead by n, where n is a whole number. If not specified, decrement by 1")
 end
@@ -183,33 +186,30 @@ do
         }
     end
 
-    concommand.Add("smh_makejpeg", function(pl, cmd, args)
-        local startframe
-        if args[1] then
-            startframe = args[1] - smh_startatone:GetInt()
+    local function StartRender(startFrame, renderCmd)
+        if startFrame then
+            startFrame = startFrame - smh_startatone:GetInt() -- Implicit string->number. Normalizes startFrame to 0-indexed if smh_startatone is set.
+            if startFrame < 0 then startFrame = 0 end
         else
-            startframe = 0
+            startFrame = 0
         end
-        if startframe < 0 then startframe = 0 end
-        if startframe < SMH.State.PlaybackLength then
-            SMH.Controller.ToggleRendering(false, startframe)
+    
+        if startFrame < SMH.State.PlaybackLength then
+            SMH.Controller.ToggleRendering(renderCmd, startFrame)
         else
             print("Specified starting frame is outside of the current Frame Count!")
         end
+    end
+    
+    concommand.Add("smh_makejpeg", function(pl, cmd, args)
+        StartRender(args[1], "jpeg")
     end, suggestStartingFrame, "Generate a jpeg sequence containing all the frames in the SMH Timeline. Accepts a whole number between 0 and the current frame count to offset the jpeg sequence")
     
     concommand.Add("smh_makescreenshot", function(pl, cmd, args)
-        local startframe
-        if args[1] then
-            startframe = args[1] - smh_startatone:GetInt()
-        else
-            startframe = 0
-        end
-        if startframe < 0 then startframe = 0 end
-        if startframe < SMH.State.PlaybackLength then
-            SMH.Controller.ToggleRendering(true, startframe)
-        else
-            print("Specified starting frame is outside of the current Frame Count!")
-        end
+        StartRender(args[1], "screenshot")
     end, suggestStartingFrame, "Generate a tga sequence containing all the frames in the SMH Timeline. Accepts a whole number between 0 and the current frame count to offset the jpeg sequence")
+    
+    concommand.Add("smh_render", function(pl, cmd, args)
+        StartRender(args[1], smh_render_cmd:GetString())
+    end, suggestStartingFrame, "Generate an image sequence containing all the frames in the SMH Timeline, if smh_render_cmd makes an image. Accepts a whole number between 0 and the current frame count to offset the sequence")    
 end
