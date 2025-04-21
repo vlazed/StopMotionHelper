@@ -159,7 +159,7 @@ function MGR.GetModelName(path, modelName, player)
         if sEntity.Properties then
             if sEntity.Properties.Name == modelName then
                 local model, class
-                model = sEntity.Properties.Model
+                model = sEntity.Properties.Model or sEntity.Model or modelName
 
                 if not sEntity.Properties.Class then
                     class = "Error: No class found"
