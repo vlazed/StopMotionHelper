@@ -441,6 +441,7 @@ function MGR.RequestNodes(player)
                 end
             end
 
+            pos, ang = vector_origin, angle_zero
             for i = 1, #branch do
                 local lPos, lAng = defaultPoseTree[branch[i]].LocalPos, defaultPoseTree[branch[i]].LocalAng
                 local dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
