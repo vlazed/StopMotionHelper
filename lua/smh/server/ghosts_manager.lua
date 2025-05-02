@@ -424,8 +424,7 @@ function MGR.RequestNodes(player)
     local isPhysBone = bone and (bone == entity:TranslatePhysBoneToBone(physBone))
 
     for _, keyframe in pairs(keyframes) do
-        local pos = vector_origin
-        local ang = angle_zero
+        local pos, ang
         if isPhysBone and keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBone] then
             pos = keyframe.Modifiers.physbones[physBone].Pos 
             ang = keyframe.Modifiers.physbones[physBone].Ang 
@@ -459,7 +458,9 @@ function MGR.RequestNodes(player)
             ang = keyframe.Modifiers.position.Ang
         end
 
-        table.insert(nodes, {keyframe.Frame, pos, ang})
+        if pos and ang then
+            table.insert(nodes, {keyframe.Frame, pos, ang})
+        end
     end
 
     GhostData[player].PreviousName = boneName
