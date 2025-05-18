@@ -38,11 +38,10 @@ local function GetPosData(serializedKeyframes, model)
 end
 
 ---@param serializedKeyframes SMHFile
----@return table
+---@return FrameData
 local function GetDupeData(serializedKeyframes)
     local data = {}
-
-    for _, kframe in pairs(serializedKeyframes.Entities[1].Frames) do
+    for _, kframe in ipairs(serializedKeyframes.Entities[1].Frames) do
         for name, mod in pairs(kframe.EntityData) do
             if not data[name] or data[name].Frame > kframe.Position then
                 data[name] = {Modifiers = mod, Frame = kframe.Position}
@@ -172,6 +171,9 @@ function MGR.Spawn(model, settings, player, serializedKeyframes)
     return entity, tracepos
 end
 
+---@param player Player
+---@param entity Entity
+---@param offsetpos Vector
 function MGR.OffsetKeyframes(player, entity, offsetpos)
     for id, keyframe in pairs(SMH.KeyframeData.Players[player].Entities[entity]) do
         local hasphysics = keyframe.Modifiers["physbones"] and true or false
@@ -189,6 +191,9 @@ function MGR.OffsetKeyframes(player, entity, offsetpos)
     end
 end
 
+---@param player Player
+---@param entity Entity
+---@param serializedKeyframes SMHFile
 function MGR.DupeOffsetKeyframes(player, entity, serializedKeyframes)
     local originData = GetDupeData(serializedKeyframes)
 
@@ -208,6 +213,10 @@ function MGR.DupeOffsetKeyframes(player, entity, serializedKeyframes)
     end
 end
 
+---@param model string
+---@param player Player
+---@param serializedKeyframes SMHFile
+---@return nil
 function MGR.SetOrigin(model, player, serializedKeyframes)
     local class, modelpath, data = GetPosData(serializedKeyframes, model)
     if not class then
@@ -219,30 +228,53 @@ function MGR.SetOrigin(model, player, serializedKeyframes)
     return data
 end
 
+---@param player Player
 function MGR.SpawnReset(player)
     MGR.OriginData[player] = nil
 end
 
+---@param set any
+---@param player Player
 function MGR.SetOffsetMode(set, player)
     MGR.OffsetMode[player] = set
 end
 
+---@param pos Vector
+---@param player Player
 function MGR.SetPosOffset(pos, player)
     MGR.OffsetPos[player] = pos
 end
 
+---@param ang Angle
+---@param player Player
 function MGR.SetAngleOffset(ang, player)
     MGR.OffsetAng[player] = ang
 end
 
-function MGR.Pack(entities, serializedKeyframes)
+---@param entities {[string]: Entity}
+---@param serializedKeyframes SMHFile
+---@param savePath string
+function MGR.Pack(entities, serializedKeyframes, savePath)
+    local hasDupes = false
     for _,  data in ipairs(serializedKeyframes.Entities) do
         local entity = entities[data.Properties.Name]
         if not IsValid(entity) or entity:IsPlayer() then continue end
+        ---@cast entity Entity
 
+        if entity.smh_IsDupe then
+            hasDupes = true
+        end
         duplicator.ClearEntityModifier(entity, "SMHPackage")
-        duplicator.StoreEntityModifier(entity, "SMHPackage", table.Copy(data))
+        duplicator.StoreEntityModifier(entity, "SMHPackage", {
+            name = data.Properties.Name,
+            save = savePath,
+            isDupe = entity.smh_IsDupe ---@diagnostic disable-line
+        })
+        -- Only apply the dupe thing once, so that it only carries over once per packing operation.
+        entity.smh_IsDupe = nil
     end
+
+    return hasDupes
 end
 
 SMH.Spawner = MGR

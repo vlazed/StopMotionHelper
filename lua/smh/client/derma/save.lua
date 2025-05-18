@@ -68,7 +68,7 @@ function PANEL:Init()
     self.Pack = vgui.Create("DButton", self)
     self.Pack:SetText("Pack")
     self.Pack.DoClick = function()
-        self:OnPackRequested()
+        self:OnPackRequested(self.FileName:GetValue())
     end
 
     self.Delete = vgui.Create("DButton", self)

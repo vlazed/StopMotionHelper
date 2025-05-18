@@ -505,8 +505,10 @@ function CTRL.QuickSave()
     CTRL.Save(qs1)
 end
 
-function CTRL.RequestPack()
+---@param path string
+function CTRL.RequestPack(path)
     net.Start(SMH.MessageTypes.RequestPack)
+    net.WriteString(path)
     net.SendToServer()
 end
 

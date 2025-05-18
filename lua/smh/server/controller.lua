@@ -545,6 +545,14 @@ local function RequestPack(msgLength, player)
     local entities = SMH.PropertiesManager.GetAllEntitiesNames(player)
     if not next(entities) then return end
 
+    local path = net.ReadString()
+    local subpath = SMH.Saves.GetPath(player)
+    path = subpath .. path
+
+    if not SMH.Saves.CheckIfExists(path, NULL) then
+        return player:ChatPrint(Format("Stop Motion Helper: Failed to pack the following save path: %s; make sure that this save path exists (e.g. save the file) before attempting a pack.", path))
+    end
+
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
     local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
@@ -554,27 +562,35 @@ local function RequestPack(msgLength, player)
         rearrange[data.Name] = ent
     end
 
-    SMH.Spawner.Pack(rearrange, serializedKeyframes)
+    local hasDupes = SMH.Spawner.Pack(rearrange, serializedKeyframes, path)
+    if hasDupes then
+        player:ChatPrint(Format("Stop Motion Helper: This save path has been tagged for dupes! Click Pack again to remove the dupe tag.")) 
+    end
+    return player:ChatPrint(Format("Stop Motion Helper: Successfully packed the following save path: %s!"))
 end
 
 ---@param player Player
 ---@param entity SMHEntity
----@param data Data
+---@param packageData PackageData
 ---@return boolean?
-local function PackageApply(player, entity, data)
+local function PackageApply(player, entity, packageData)
     if not IsValid(entity) then return false end
 
-    SMH.PropertiesManager.AddEntity(player, {entity})
-    SMH.KeyframeManager.ImportSave(player, entity, data.Frames, data.Properties)
+    timer.Simple(0, function()
+        local frameData, properties = SMH.Saves.LoadPathForEntity(packageData.save, packageData.name)
+        if not frameData or not properties then return end
+        local smhFile = SMH.Saves.Load(packageData.save, NULL)
 
-    local serializedKeyframes = {
-        Entities = {data}
-    }
+        SMH.PropertiesManager.AddEntity(player, {entity})
+        SMH.KeyframeManager.ImportSave(player, entity, frameData, properties)
 
-    SMH.Spawner.DupeOffsetKeyframes(player, entity, serializedKeyframes)
+        if packageData.isDupe then
+            SMH.Spawner.DupeOffsetKeyframes(player, entity, smhFile)
+        end
 
-    duplicator.ClearEntityModifier(entity, "SMHPackage")
-    duplicator.StoreEntityModifier(entity, "SMHPackage", data)
+        duplicator.ClearEntityModifier(entity, "SMHPackage")
+        duplicator.StoreEntityModifier(entity, "SMHPackage", packageData)
+    end)
 
 end
 
@@ -803,7 +819,7 @@ local function SpawnEntity(msgLength, player)
 
     SMH.PropertiesManager.AddEntity(player, {entity})
     SMH.KeyframeManager.ImportSave(player, entity, serializedKeyframes, entityProperties)
-
+    ---@cast pos Vector
     SMH.Spawner.OffsetKeyframes(player, entity, pos)
 end
 
@@ -984,6 +1000,23 @@ hook.Add("ShutDown", "SMHExitSave", function()
         SMH.Saves.Save(saveName, serializedKeyframes, player)
     end
 end)
+
+if not duplicator.smh_Copy then
+    duplicator.smh_Copy = duplicator.Copy
+end
+
+---Override `duplicator.Copy` to label copied entities as dupes, so SMH can preserve animations in saves
+---@param Ent Entity
+---@param AddToTable table
+---@return table
+function duplicator.Copy(Ent, AddToTable)
+    Ent.smh_IsDupe = true
+    local ents = duplicator.GetAllConstrainedEntitiesAndConstraints(Ent, {}, {})
+    for _, ent in pairs(ents or {}) do
+        ent.smh_IsDupe = true
+    end
+    return duplicator.smh_Copy(Ent, AddToTable)
+end
 
 net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 

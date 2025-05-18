@@ -139,6 +139,23 @@ Alternatively, these settings can be changed in the console. The following table
 | `smh_motionpathsize`  | `d`       | Change the size of the nodes on the motion path.   |
 | `smh_motionpathoffset`| `d d d`   | Offset the position of the nodes with respect to the bone. |
 
+### Packing
+
+Packing allows entities to retain their animations into an SMH Package, which persists when duplicating or reloading a save. It can significantly reduce the time to "reload an animation session", especially when the animation involves multiple entities.
+
+SMH packages in this unofficial version of Stop Motion Helper differs significantly from the official version. In short, there is a process to ensuring that animations are packed properly; the tradeoff is the reduced likelihood of crashing when loading an animation package in a GMod save or from a duped entity (or set of entities).
+
+Earlier versions of the SMH Package included all the keyframe data per entity. In this version, the SMH Package now points to an SMH save file, and the custom name (from the Properties menu) which the entity took on for the save file. 
+
+To ensure SMH animations are saved in a GMod save:
+
+1. In the save menu, ensure that you have an existing save file, and the name of the save is the same as the existing save file.
+2. Click the "Pack" button. SMH will inform you in the chatbox if the packing was successful.
+
+To ensure SMH animations are saved in a GMod save, you must copy an entity with animations with the Duplicator. Copying an entity with animations add a duplicator tag to the SMH Package, allowing Stop Motion Helper to distinguish dupes from saves, and to apply duplicator offsets correctly. When you click the "Pack" button, SMH will also mention in the chatbox that the save has dupes, indicating that the duplicate is armed with an entity with animations, which you can place in any position that you choose. 
+
+If you are completely done with duplicating entities and plan to make a GMod save, **make sure to click the "Pack" button again**, to clear the duplicator tag from the SMH Package. Failure to do so will make Stop Motion Helper apply duplicate offsets to all entities in the GMod save. Note that while the animation will look odd, the save file exists, allowing you to fix these changes (with minor inconvenience).
+
 ### Miscellaneous
 
 There are more features in this version that value an explanation. However, we have decided to omit this explanation by listing them down for you to explore. In addition to the aforementioned features,

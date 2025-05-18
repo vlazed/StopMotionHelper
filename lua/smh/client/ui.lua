@@ -450,8 +450,8 @@ local function AddCallbacks()
     SaveMenu.OnGoToFolderRequested = function(_, path, toClient)
         SMH.Controller.RequestGoToFolder(path, toClient)
     end
-    SaveMenu.OnPackRequested = function()
-        SMH.Controller.RequestPack()
+    SaveMenu.OnPackRequested = function(_, path)
+        SMH.Controller.RequestPack(path)
     end
     SaveMenu.OnDeleteRequested = function(_, path, isFolder, deleteFromClient)
         SMH.Controller.DeleteSave(path, isFolder, deleteFromClient)

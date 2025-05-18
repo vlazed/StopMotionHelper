@@ -316,7 +316,7 @@ end
 
 ---@param player Player
 ---@param entity SMHEntity|Player
----@param serializedKeyframes SMHFile
+---@param serializedKeyframes SerializedFrameData[]
 ---@param entityProperties Properties
 function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
     if SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities[entity] then
@@ -333,16 +333,16 @@ function MGR.ImportSave(player, entity, serializedKeyframes, entityProperties)
 
         if keyframe ~= nil then
             for name, _ in pairs(skf.EntityData) do
-                keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn
-                keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut
+                keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn ---@diagnostic disable-line: assign-type-mismatch
+                keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut ---@diagnostic disable-line: assign-type-mismatch
                 keyframe.Modifiers[name] = skf.EntityData[name]
             end
         else
             local keyframe = SMH.KeyframeData:New(player, entity)
             keyframe.Frame = skf.Position
             for name, _ in pairs(skf.EntityData) do
-                keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn
-                keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut
+                keyframe.EaseIn[name] = type(skf.EaseIn) == "table" and skf.EaseIn[name] or skf.EaseIn ---@diagnostic disable-line: assign-type-mismatch
+                keyframe.EaseOut[name] = type(skf.EaseOut) == "table" and skf.EaseOut[name] or skf.EaseOut ---@diagnostic disable-line: assign-type-mismatch
                 keyframe.Modifiers[name] = skf.EntityData[name]
             end
         end

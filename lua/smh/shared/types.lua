@@ -173,6 +173,11 @@
 ---@field Properties Properties The animation properties of the entity
 ---@field IsWorld boolean?
 
+---@class PackageData SMH Package data
+---@field save string The path of the save file, with respect to smh/
+---@field name string The unique name of the entity referenced in the save file
+---@field isDupe boolean A field set from an overridden duplicator.Copy function, so dupes will offset while saves don't
+
 ---@class SMHFile The text file containing SMH animation data
 ---@field Map string The map where the animation takes place
 ---@field Entities Data[] The animation data for each entity

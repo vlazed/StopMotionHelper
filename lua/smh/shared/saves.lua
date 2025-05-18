@@ -204,6 +204,32 @@ function MGR.LoadForEntity(path, modelName, player)
     return nil
 end
 
+---@param path string
+---@param modelName string
+---@return SerializedFrameData[]?
+---@return Properties?
+---@return boolean?
+function MGR.LoadPathForEntity(path, modelName)
+    local serializedKeyframes = MGR.Load(path, NULL)
+    for _, sEntity in pairs(serializedKeyframes.Entities) do
+        if not sEntity.Properties then
+            if sEntity.Model == modelName then
+
+                sEntity.Properties = {
+                    Name = sEntity.Model,
+                }
+
+                return sEntity.Frames, sEntity.Properties
+            end
+        else
+            if sEntity.Properties.Name == modelName then
+                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld
+            end
+        end
+    end
+    return nil
+end
+
 ---@param keyframes FrameData[]
 ---@param properties Properties
 ---@param player Player

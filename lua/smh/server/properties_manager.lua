@@ -121,7 +121,7 @@ function MGR.GetAllProperties(player)
 end
 
 ---@param player Player
----@return table
+---@return table<Entity, {Name: string}>
 function MGR.GetAllEntitiesNames(player)
     if not SMH.Properties.Players[player] or not SMH.Properties.Players[player].Entities then return {} end
 
