@@ -566,7 +566,7 @@ local function RequestPack(msgLength, player)
     if hasDupes then
         player:ChatPrint(Format("Stop Motion Helper: This save path has been tagged for dupes! Click Pack again to remove the dupe tag.")) 
     end
-    return player:ChatPrint(Format("Stop Motion Helper: Successfully packed the following save path: %s!"))
+    return player:ChatPrint(Format("Stop Motion Helper: Successfully packed the following save path: %s!", path))
 end
 
 ---@param player Player
