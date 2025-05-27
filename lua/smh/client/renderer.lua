@@ -142,8 +142,8 @@ do
     local offset = GetConVar("smh_motionpathoffset")
     local currentFrameIndex = 1 
 
-    hook.Remove("PreDrawEffects", "SMHRenderMotionPath")
-    hook.Add("PreDrawEffects", "SMHRenderMotionPath", function()
+    hook.Remove("PostDrawHUD", "SMHRenderMotionPath")
+    hook.Add("PostDrawHUD", "SMHRenderMotionPath", function()
         name = name or GetConVar("smh_motionpathbone")
         nodeRange = nodeRange or GetConVar("smh_motionpathrange")
         sphereSize = sphereSize or GetConVar("smh_motionpathsize")
@@ -152,6 +152,8 @@ do
         if #name:GetString() == 0 then return end
         if #Nodes == 0 or IsRendering then return end
         if not next(SMH.State.Entity) then Nodes = {} return end
+
+        cam.Start3D()
 
         render.SetColorMaterialIgnoreZ()
         if nodeRange:GetInt() > 0 then
@@ -190,10 +192,10 @@ do
                 false
             )
         end
-    end)
 
-    hook.Remove("HUDPaint", "SMHDrawMotionPathText")
-    hook.Add("HUDPaint", "SMHDrawMotionPathText", function()
+        cam.End3D()
+
+
         offset = offset or GetConVar("smh_motionpathoffset")
         name = name or GetConVar("smh_motionpathbone")
 
