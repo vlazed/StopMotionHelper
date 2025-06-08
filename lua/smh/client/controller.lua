@@ -115,7 +115,7 @@ local CTRL = {}
 
 ---@param frame integer
 function CTRL.SetFrame(frame)
-    if SMH.PhysRecord.IsActive() then return end
+    if SMH.PhysRecord.IsActive() or (frame < 0) then return end
 
     local settings = SMH.Settings.GetAll()
     net.Start(SMH.MessageTypes.SetFrame)
