@@ -541,7 +541,16 @@ local function Append(msgLength, player)
 end
 
 ---@type Receiver
+local function RequestUnpack(msgLength, player)
+    for _, entity in ipairs(ents.GetAll()) do
+        duplicator.ClearEntityModifier(entity, "SMHPackage")
+    end
+end
+
+---@type Receiver
 local function RequestPack(msgLength, player)
+    RequestUnpack(msgLength, player)
+
     local entities = SMH.PropertiesManager.GetAllEntitiesNames(player)
     if not next(entities) then return end
 
@@ -1048,6 +1057,7 @@ net.Receive(SMH.MessageTypes.RequestGoToFolder, RequestGoToFolder)
 net.Receive(SMH.MessageTypes.RequestAppend, RequestAppend)
 net.Receive(SMH.MessageTypes.Append, Append)
 net.Receive(SMH.MessageTypes.RequestPack, RequestPack)
+net.Receive(SMH.MessageTypes.RequestUnpack, RequestUnpack)
 net.Receive(SMH.MessageTypes.DeleteSave, DeleteSave)
 
 net.Receive(SMH.MessageTypes.ApplyEntityName, ApplyEntityName)

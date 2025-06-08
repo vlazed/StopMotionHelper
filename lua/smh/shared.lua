@@ -54,6 +54,7 @@ SMH.MessageTypes = {
     "RequestAppendResponse",
     "Append",
     "RequestPack",
+    "RequestUnpack",
     "DeleteSave",
     "DeleteSaveResponse",
 

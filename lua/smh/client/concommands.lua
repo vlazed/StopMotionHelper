@@ -178,6 +178,10 @@ concommand.Add("smh_smoothall", function(_, _, args)
     SMH.Controller.Smooth(keyframes, passes)
 end, nil, "Apply smoothing to all keyframes", nil)
 
+concommand.Add("smh_unpack", function (ply, cmd, args, argStr)
+    SMH.Controller.RequestUnpack()
+end, nil, "Remove the SMH package from all entities, which prevents them from being saved or duplicated")
+
 do
     local function suggestStartingFrame(command)
         return {
