@@ -1,12 +1,19 @@
----@class SMHAudioClipPointer: DPanel
+---@class SMHAudioClipPointer: SMHFramePointer
 ---@field GetParent fun(self: SMHAudioClipPointer): SMHFramePanel
 local PANEL = {}
 
-local lockedHeight = 5
+local lockedHeightConVar = CreateClientConVar("smh_audioclip_scale", "50", true, false, "Set the relative height of the audio clip in the timeline. 100 means the clip takes up the full height of the timeline, and 0 disables its rendering completely.", 0, 100)
+local lockedHeight = lockedHeightConVar:GetFloat() / 100
+cvars.AddChangeCallback("smh_audioclip_scale", function (convar, oldValue, newValue)
+    lockedHeight = Either(tonumber(newValue) ~= nil, tonumber(newValue), oldValue)  / 100
+end)
+local framePanelHeight = 30
 local editHeight = 15
 -- local barWidth = 5 / 1000
 
-local COLOR_TRANSPARENT = Color(255, 255, 255, 200)
+local ENABLED_ALPHA, DISABLED_ALPHA = 200, 50
+local COLOR_TRANSPARENT = Color(255, 255, 255, ENABLED_ALPHA)
+local COLOR_TRANSPARENT_DISABLED = Color(255, 255, 255, DISABLED_ALPHA * 2)
 
 ---@param color Color
 ---@returns Color darkerColor
@@ -23,11 +30,12 @@ end
 function PANEL:Init()
 
     self:SetSize(8, 15)
-    self.Color = Color(math.Rand(50,255), math.Rand(50,100), math.Rand(50,255), 200)
+    self.Color = Color(math.Rand(50,255), math.Rand(50,100), math.Rand(50,255), ENABLED_ALPHA)
 	self:SetBackgroundColor(self.Color)
 	self:SetPaintBackground(true)
     self.OutlineColor = Color(0, 0, 0)
     self.DarkColor = Darken(self.Color, 40)
+    self.DisabledColor = ColorAlpha(self.Color, DISABLED_ALPHA)
     self.OutlineColorDragged = Color(255, 255, 255)
     self.VerticalPosition = 32
 	self.CursorOffsetX = 0
@@ -55,21 +63,30 @@ function PANEL:Setup(audioClip)
 	self:SetFrame(self._startFrame)
 end
 
+function PANEL:Think()
+    self:SetMouseInputEnabled(SMH.State.EditAudioTrack)
+end
+
 function PANEL:Paint(width, height) end
 
 function PANEL:PaintOverride()
+    if lockedHeight == 0 then return end
+    
+    local canEditAudioTrack = SMH.State.EditAudioTrack
+
 	if SMH.State.EditAudioTrack then
 		self:SetHeight(editHeight)
 	else
-		self:SetHeight(lockedHeight)
+		self:SetHeight(lockedHeight * framePanelHeight)
 	end
 	
 	local width = self:GetWide()
 	local height = self:GetTall()
-	
+
 	local outlineColor = ((self._selected or self._dragging) and self.OutlineColorDragged) or self.OutlineColor
 
-	surface.SetDrawColor(self.Color:Unpack())
+    local color = canEditAudioTrack and self.Color or self.DisabledColor
+	surface.SetDrawColor(color:Unpack())
 	surface.DrawRect(self.PosX+1, self.PosY+1, width - 1, height - 1)
 
 	surface.SetDrawColor(outlineColor:Unpack())
@@ -79,12 +96,13 @@ function PANEL:PaintOverride()
 	surface.DrawLine(self.PosX, self.PosY+height, self.PosX, self.PosY)
 
     if self._waveform and #self._waveform > 0 then
+        local waveColor = canEditAudioTrack and COLOR_TRANSPARENT or COLOR_TRANSPARENT_DISABLED
         for i = 1, #self._waveform-1 do
             local wave1 = self._waveform[i]
             local wave2 = self._waveform[i+1]
             local avg = math.max((wave1.Left + wave1.Right) * 0.5, 0.1)
             local barWidth = (wave2.Fraction - wave1.Fraction) * self:GetWide()
-            surface.SetDrawColor(COLOR_TRANSPARENT:Unpack())
+            surface.SetDrawColor(waveColor:Unpack())
             local y = (1 - avg) * height
             local x = self:GetWide() * wave1.Fraction
             surface.DrawRect(self.PosX + x, self.PosY + y / 2 + 1, barWidth, height - y)
@@ -153,7 +171,7 @@ end
 
 function PANEL:OnMousePressed(mousecode)
 	if not SMH.State.EditAudioTrack then
-		return
+		return false
 	end
 	
     if mousecode ~= MOUSE_LEFT then
