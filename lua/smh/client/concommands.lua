@@ -182,6 +182,28 @@ concommand.Add("smh_unpack", function (ply, cmd, args, argStr)
     SMH.Controller.RequestUnpack()
 end, nil, "Remove the SMH package from all entities, which prevents them from being saved or duplicated")
 
+concommand.Add("smh_stretch", function (ply, cmd, args, argStr)
+    local amount = tonumber(args[1])
+    if not amount or amount == 1 or amount <= 0 then
+        print("smh_stretch <amount>")
+        return
+    end
+
+    local selected = SMH.UI.GetSelected()
+    if not next(selected) then return end
+
+    local frames = {}
+    for _, panel in pairs(selected) do
+        table.insert(frames, {panel, panel:GetFrame()})
+        SMH.UI.ToggleSelect(panel)
+    end
+    table.sort(frames, function (a, b)
+        return a[2] < b[2]
+    end)
+
+    SMH.Controller.Stretch(frames, amount)
+end, nil, "Stretch keyframes of the current timeline by a scaling factor, using the leftmost keyframe on the timeline as the pivot.")
+
 do
     local function suggestStartingFrame(command)
         return {

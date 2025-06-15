@@ -13,6 +13,8 @@
 
 ---@class SMHFramePointer: DPanel
 ---@field GetParent fun(self: SMHFramePointer): SMHFramePanel
+---@field NewID integer
+---@field keyframeId integer
 local PANEL = {}
 
 function PANEL:Init()

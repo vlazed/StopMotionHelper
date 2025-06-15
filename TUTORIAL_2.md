@@ -30,6 +30,9 @@ Aside from that, it is uncertain if the official version will implement these fe
 | `smh_autosavetime`    | `d`       | Set how long, in minutes, it should take for the game to automatically save an animation. Set to 0 to disable                                                   |
 | `smh_majortickinterval`| `n`      | Set the interval which to distinguish frames by size. Set to 3 to disable                                                                                       |
 | `smh_ghostxray`        | `d`      | Set to 1 to enable XRay ghosts (ghosts are colored solid, bright, and ignores obstructions)                                                                     |
+| `smh_unpack`          | none      | Reverse the 'Pack' command by manually removing SMH data from a GMod save or a dupe                                                                             |
+| `smh_stretch`         | `f`       | Stretch (or compress) keyframes across timelines. This can replace existing keyframes                                                                           |
+| `smh_audioclip_scale` | `n`       | Set the thickness of the audioclips outside of Edit Audio Track mode                                                                                            |
 
 ## User Interface
 
@@ -68,6 +71,12 @@ In the video, we use the "Smoothness" slider to vary how much of an arc that we 
 Smoothing can also be done with multiple selected frames, as seen in the next video.
 
 https://github.com/user-attachments/assets/a8d6ac48-3177-4288-bb4b-5f11cfce5e88
+
+Next to smoothing, the animator can use the **Stretch** (or **Compress**) button to increase or decrease the length of time of an animation. This relies on selected keyframes to stretch or compress, making the selection buttons a natural application for this feature. The next video will showcase this feature in action.
+
+https://github.com/user-attachments/assets/4c11d8e9-6128-4391-8fc7-bbe7750fdcb8
+
+Beware that stretch and compress can replace keyframes on the timeline: stretching may replace unselected keyframes, while compressing may replace selected keyframes.
 
 The video also demonstrates some new navigation features in SMH. Like any console command, they can be binded them to a key or input button. They are summarized in the following table. Note that `n` is a whole number.
 

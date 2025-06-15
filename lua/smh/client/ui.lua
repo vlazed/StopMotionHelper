@@ -19,6 +19,7 @@ local KeyframeEasingData = {}
 local KeyframeIDs = {}
 ---@type FramePointerDictionary
 local SelectedPointers = {}
+---@type SMHFramePointer[]
 local OffsetPointers = {}
 local LocalIDs = 0
 
@@ -404,6 +405,10 @@ local function AddCallbacks()
 
     WorldClicker.KeyframeSettings.OnRequestSmooth = function(_)
         RunConsoleCommand("smh_smooth", tostring(WorldClicker.KeyframeSettings.Smoothing))
+    end
+
+    WorldClicker.KeyframeSettings.OnRequestStretch = function(_)
+        RunConsoleCommand("smh_stretch", tostring(WorldClicker.KeyframeSettings.Stretching))
     end
 
     WorldClicker.Settings.OnSettingsUpdated = function(_, newSettings)
@@ -872,7 +877,7 @@ function MGR.SetOffsets(pointer)
     pointer:SetOffsets(minimum, maximum)
 end
 
----@param pointer any
+---@param pointer SMHFramePointer
 ---@param frame integer
 function MGR.MoveChildren(pointer, frame)
     if next(OffsetPointers) then

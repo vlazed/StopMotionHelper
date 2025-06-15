@@ -14,7 +14,7 @@ function PANEL:Init()
 
     local function CreateSlider(label, min, max, default, func)
         local slider = vgui.Create("DNumSlider", self)
-
+        ---@diagnostic disable: undefined-field
         -- overriding default functions as it used to clamp result between mix and max, and we kinda want to go over the max if need be
         slider.SetValue = function(self, val)
 
@@ -45,6 +45,9 @@ function PANEL:Init()
         slider:SetText(label)
         slider.OnValueChanged = func
         slider:GetTextArea().OnValueChange = func
+
+        ---@diagnostic enable
+
         return slider
     end
 
@@ -65,6 +68,26 @@ function PANEL:Init()
         self:OnRequestSmooth()
     end
 
+    self.StretchButton = vgui.Create("DButton", self)
+    self.StretchButton:SetText("Stretch")
+    self.StretchButton.DoClick = function()
+        self:OnRequestStretch()
+    end
+
+    self.Stretching = 1
+    self.StretchSlider = CreateSlider("Stretch Amount", 0, 10, self.Smoothing, function(_, value)
+        value = tonumber(value)
+        if not value then return end
+        if value < 1 then
+            self.StretchButton:SetText("Compress")
+        else
+            self.StretchButton:SetText("Stretch")
+        end
+
+        self.Stretching = value
+    end)
+    self.StretchSlider:SetDecimals(3)
+
     self.SelectAllButton = vgui.Create("DButton", self)
     self.SelectAllButton:SetText("Select All")
     self.SelectAllButton.DoClick = function()
@@ -84,7 +107,7 @@ function PANEL:Init()
     end
 
     self.Width = 360
-    self.Height = 80
+    self.Height = 120
 
     self:SetSize(self.Width, self.Height)
 
@@ -96,35 +119,53 @@ end
 ---@param pos number Initial position
 ---@param offset number
 ---@return fun(panel: Panel)
-local function setPosition(pos, height, offset)
+local function setPositionX(pos, height, offset)
     return function(panel)
         panel:SetPos(pos, height)
         pos = pos + offset
     end
 end
 
+local function setPositionY(pos, height, offset)
+    return function(panel)
+        panel:SetPos(height, pos)
+        pos = pos + offset
+    end
+end
+
 function PANEL:PerformLayout(width, height)
 
-    local buttonWidth = 60
-    local setButtonPos = setPosition(width * 0.3 - buttonWidth, height * 0.375, 70)
+    local topMargin = 10
+    local topButtonWidth = width / 3 - topMargin * 0.75
+    local setButtonPos = setPositionX(topMargin, height * 0.275, topButtonWidth)
 
     ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
 
     setButtonPos(self.SelectLeftButton)
-    self.SelectAllButton:SetSize(buttonWidth, 20)
+    self.SelectLeftButton:SetSize(topButtonWidth, 20)
     setButtonPos(self.SelectAllButton)
-    self.SelectAllButton:SetSize(buttonWidth, 20)
+    self.SelectAllButton:SetSize(topButtonWidth, 20)
     setButtonPos(self.SelectRightButton)
-    self.SelectAllButton:SetSize(buttonWidth, 20)
-    setButtonPos(self.SmoothButton)
-    self.SmoothButton:SetSize(buttonWidth, 20)
+    self.SelectRightButton:SetSize(topButtonWidth, 20)
 
-    self.SmoothSlider:SetPos(width * 0.08, height * 0.65)
-    self.SmoothSlider:SetSize(self:GetWide() - 5, 25)
+    local buttonWidth = 60
+    local sliderMargin = 90
+    local sliderOffset = 30
+    self.SmoothSlider:SetPos(width * 0.08, height * 0.50)
+    self.SmoothSlider:SetSize(self:GetWide() - sliderMargin, 25)
+    self.SmoothButton:SetSize(buttonWidth, 20)
+    self.SmoothButton:SetPos(width - buttonWidth - 10, self.SmoothSlider:GetY())
+
+    local setHeightPos = setPositionY(self.SmoothSlider:GetY() + sliderOffset, self.SmoothSlider:GetX(), sliderOffset)
+    setHeightPos(self.StretchSlider)
+    self.StretchSlider:SetSize(self:GetWide() - sliderMargin, 25)
+    self.StretchButton:SetSize(buttonWidth, 20)
+    self.StretchButton:SetPos(width - buttonWidth - 10, self.StretchSlider:GetY())
 end
 
 function PANEL:OnRequestSelectFrames(increment) end
 function PANEL:OnRequestSmooth() end
+function PANEL:OnRequestStretch() end
 
 vgui.Register("SMHKeyframeSettings", PANEL, "DFrame")

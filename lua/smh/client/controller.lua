@@ -209,10 +209,62 @@ function CTRL.Record(frame)
     net.SendToServer()
 end
 
+---@param frames {[1]: SMHFramePointer, [2]: integer}[]
+---@param amount number
+function CTRL.Stretch(frames, amount)
+    local firstFrame = frames[1][2]
+    local start, last, interval = #frames, 2, -1
+    if amount < 1 then
+        start, last, interval = 2, #frames, 1
+    end
+
+    local co = coroutine.wrap(function()
+        local taken = table.Flip(frames)
+        for i = start, last, interval do
+            local newPosition = math.floor((frames[i][2] - firstFrame) * amount) + firstFrame
+            local pointer = frames[i][1]
+
+            if taken[newPosition] then
+                ---@type integer[]
+                local data = {}
+                if amount > 1 then
+                    data = SMH.UI.GetKeyframesOnFrame(newPosition) or {}
+                else
+                    for id, _ in pairs(pointer:GetIDs()) do
+                        table.insert(data, id)
+                    end
+                    taken[i] = nil
+                end
+                if data[1] ~= nil then
+                    SMH.Controller.DeleteKeyframe(data)
+                end
+                continue
+            end
+            pointer:SetFrame(newPosition)
+            pointer:OnPointerReleased(newPosition)
+            taken[newPosition] = true
+            taken[i] = nil
+
+            coroutine.yield(false)
+        end
+
+        coroutine.yield(true)
+    end)
+
+    timer.Remove("SMH_Stretching_Timer")
+    timer.Create("SMH_Stretching_Timer", 0, -1, function()
+        local done = co()
+        if done then
+            timer.Remove("SMH_Stretching_Timer")
+        end
+    end)
+
+    timer.Start("SMH_Stretching_Timer")
+end
+
 ---@param frames integer[]
 ---@param maxPasses integer
 function CTRL.Smooth(frames, maxPasses)
-    local done = false
     local co = coroutine.wrap(function()
         for p = 1, maxPasses do
             local smoothingFrames = {}
@@ -241,17 +293,17 @@ function CTRL.Smooth(frames, maxPasses)
                 table.sort(frames)
             end
 
-            coroutine.yield()
+            coroutine.yield(false)
         end
-        done = true
+        coroutine.yield(true)
     end)
+
     timer.Remove("SMH_Smoothing_Timer")
     timer.Create("SMH_Smoothing_Timer", 0, -1, function()
+        local done = co()
         if done then
             chat.AddText("SMH Smoothing stopped.")
             timer.Remove("SMH_Smoothing_Timer")
-        else
-            co()
         end
     end)
 
