@@ -1,7 +1,7 @@
 ---Current date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-06-27T14:40:20Z"
+local DATE = "2025-06-27T14:46:20Z"
 local changelog = ""
 
 local RED = Color(255, 0, 0)
@@ -39,14 +39,18 @@ local function versionCheck()
         if code == 200 then
             local isUpToDate = true
             local response = util.JSONToTable(body)
-            if response and #response > 0 then
-                isUpToDate = false
-                for _, commitInfo in ipairs(response) do
-                    if commitInfo.commit and commitInfo.commit.message and commitInfo.commit.committer then
-                        changelog = Format("%s[%s]: %s\n\n", changelog, commitInfo.commit.committer.date or "unknown", commitInfo.commit.message)
+            if response then
+                if #response > 0 then
+                    isUpToDate = false
+                    for _, commitInfo in ipairs(response) do
+                        if commitInfo.commit and commitInfo.commit.message and commitInfo.commit.committer then
+                            changelog = Format("%s[%s]: %s\n\n", changelog, commitInfo.commit.committer.date or "unknown", commitInfo.commit.message)
+                        end
                     end
+                    MsgC(GREEN, "[SMH Unofficial]: Successfully fetched commits since this version was pushed\n")
+                else
+                    changelog = "SMH is up-to-date"
                 end
-                MsgC(GREEN, "[SMH Unofficial]: Successfully fetched commits since this version was pushed\n")
             end
             versionCheckResponse(isUpToDate)
         else
