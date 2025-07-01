@@ -24,7 +24,7 @@ function PANEL:Init()
 	self.FileList:SetBaseFolder("sound")
 	self.FileList:SetCurrentFolder("sound")
 	self.FileList:SetOpen( true )
-	self.FileList:SetFileTypes( "*.wav *.mp3" )
+	self.FileList:SetFileTypes( "*.wav *.mp3 *.ogg" )
 	self.FileList.OnDoubleClick = function()
 		self:LoadSelected()
 	end

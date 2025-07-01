@@ -1,7 +1,7 @@
 ---Current date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-06-27T14:46:20Z"
+local DATE = "2025-07-01T14:38:05Z"
 local changelog = ""
 
 local RED = Color(255, 0, 0)
@@ -49,7 +49,7 @@ local function versionCheck()
                     end
                     MsgC(GREEN, "[SMH Unofficial]: Successfully fetched commits since this version was pushed\n")
                 else
-                    changelog = "SMH is up-to-date"
+                    changelog = "SMH is up-to-date\n"
                 end
             end
             versionCheckResponse(isUpToDate)
