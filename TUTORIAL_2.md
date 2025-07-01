@@ -98,8 +98,12 @@ The next set of UI enables audio playback. The four buttons on the timeline tab 
 
 To add your own audio to use, you must do the following:
 - Add them into the `garrysmod/sound` directory or in an addon folder in `garrysmod/addons/your-sounds/sound/` (addon folder name can be whatever).
-- Ensure they are in .mp3 or .wav (I recommend .mp3 to save on file size).
+- Ensure they are in .mp3, .wav, or .ogg (I recommend .mp3 to save on file size).
 - Ensure they do not contain unicode characters.
+- Ensure they are in the following sample rates ([reference](https://wiki.facepunch.com/gmod/sound_basics). See also [WAV](https://developer.valvesoftware.com/wiki/WAV) and [MP3](https://developer.valvesoftware.com/wiki/WAV))
+  - 11025 hz
+  - 22050 hz
+  - 44100 hz
 
 ![Stop Motion Helper Audio Windows](./docs/smh_audioplayback_3.png)
 
