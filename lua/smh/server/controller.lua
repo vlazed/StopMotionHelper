@@ -164,7 +164,7 @@ local function SelectEntity(msgLength, player)
     end
 
     if player ~= entity then
-        SMH.GhostsManager.SelectEntity(player, entities)
+        SMH.GhostsManager.SelectEntity(player, {entity})
     else
         SMH.GhostsManager.SelectEntity(player, {})
     end
