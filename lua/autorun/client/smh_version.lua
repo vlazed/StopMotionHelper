@@ -1,7 +1,7 @@
 ---Current date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-09-03T14:35:24Z"
+local DATE = "2025-09-03T17:40:13Z"
 local changelog = ""
 
 local RED = Color(255, 0, 0)
@@ -55,6 +55,7 @@ local function versionCheck()
             versionCheckResponse(isUpToDate)
         else
             MsgC(RED, "[SMH Unofficial]: Failed to fetch from given url: ", statusCodes[code], "\n")
+            MsgC(RED, "Try running smh_versioncheck again\n")
         end
     end, function (error)
         MsgC(RED, "[SMH Unofficial]: Failed to check versions: ", error, "\n")
@@ -65,5 +66,7 @@ concommand.Add("smh_versioncheck", versionCheck, nil, "Check if SMH is up-to-dat
 local cvar = CreateClientConVar("smh_versioncheck_enabled", "1", true, false, "If enabled, version checking will occur whenever one loads into a map", 0, 1)
 
 if cvar:GetBool() then
-    versionCheck()
+    timer.Simple(1, function()
+        versionCheck()
+    end)
 end
