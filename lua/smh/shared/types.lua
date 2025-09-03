@@ -73,7 +73,7 @@
 ---@field Entity Entity If the entity is an SMHGhost, select the pointed entity
 ---@field EyeVec Vector
 ---@field GetEyeVector fun(self: SMHEntity): Vector Returns where the entity is looking
----@field AttachedEntity Entity
+---@field AttachedEntity SMHEntity
 ---@field Frame integer
 ---@field Physbones boolean
 ---@field RagdollWeightData number[]
@@ -185,8 +185,8 @@
 ---@alias Entities table<integer, SMHEntity|Player>
 
 ---@class GhostDatum
----@field Entity table<SMHEntity>
----@field Ghosts table<SMHEntity>
+---@field Entity SMHEntity[]
+---@field Ghosts SMHEntity[]
 ---@field Nodes table
 ---@field PreviousName string
 ---@field LastEntity Entity

@@ -420,8 +420,9 @@ function MGR.RequestNodes(player)
     table.Empty(nodes)
 
     local bone = entity:LookupBone(boneName)
-    local physBone = bone and entity:TranslateBoneToPhysBone(bone)
-    local isPhysBone = bone and (bone == entity:TranslatePhysBoneToBone(physBone))
+    local physBone = bone and BoneToPhysBone(entity, bone)
+    local physBoneParent = bone and GetPhysBoneParentFromBone(entity, bone)
+    local isPhysBone = bone and physBone >= 0
 
     for _, keyframe in pairs(keyframes) do
         local pos, ang
@@ -434,7 +435,8 @@ function MGR.RequestNodes(player)
             do
                 local id = bone
                 local pose = defaultPoseTree[bone]
-                while pose and not pose.IsPhysBone do
+                local boneParent = PhysBoneToBone(entity, physBoneParent)
+                while pose and id ~= boneParent do
                     table.insert(branch, id)
                     id = pose.Parent
                     pose = defaultPoseTree[id]
@@ -449,8 +451,8 @@ function MGR.RequestNodes(player)
                 pos, ang = LocalToWorld(pos, ang, finalPos, finalAng)
             end
             
-            if keyframe.Modifiers.physbones then
-                pos = LocalToWorld(pos, ang, keyframe.Modifiers.physbones[physBone].Pos, keyframe.Modifiers.physbones[physBone].Ang)
+            if keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBoneParent] then
+                pos = LocalToWorld(pos, ang, keyframe.Modifiers.physbones[physBoneParent].Pos, keyframe.Modifiers.physbones[physBoneParent].Ang)
             elseif keyframe.Modifiers.position then
                 pos = LocalToWorld(pos, ang, keyframe.Modifiers.position.Pos, angle_zero)
             end
