@@ -1,7 +1,7 @@
----Current date since this has been versioned.
+---Current ISO date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-09-03T17:40:13Z"
+local DATE = "2025-09-16T16:05:56Z"
 local changelog = ""
 
 local RED = Color(255, 0, 0)

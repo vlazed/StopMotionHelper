@@ -1,5 +1,7 @@
 -- Bone translation functions, so we can change their functionality here in case the original ones fuck up even more
 
+local MAX_BONE_COUNT = 255
+
 ---@type {[string]: {[integer]: integer}}
 local bonePhysBoneParents = {}
 
@@ -27,7 +29,7 @@ function GetPhysBoneParentFromBone(entity, bone)
 		end
 		table.insert(bones, b)
 		i = i + 1
-		if i > 128 then --We've gone through all possible bones, so we get out.
+		if i > MAX_BONE_COUNT then --We've gone through all possible bones, so we get out.
 			break
 		end
 	end
@@ -57,7 +59,7 @@ function GetPhysBoneParent(entity, bone)
 			return parent
 		end
 		i = i + 1
-		if i > 128 then --We've gone through all possible bones, so we get out.
+		if i > MAX_BONE_COUNT then --We've gone through all possible bones, so we get out.
 			break
 		end
 	end
