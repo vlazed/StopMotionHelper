@@ -33,6 +33,8 @@ Aside from that, it is uncertain if the official version will implement these fe
 | `smh_unpack`          | none      | Reverse the 'Pack' command by manually removing SMH data from a GMod save or a dupe                                                                             |
 | `smh_stretch`         | `f`       | Stretch (or compress) keyframes across timelines. This can replace existing keyframes                                                                           |
 | `smh_audioclip_scale` | `n`       | Set the thickness of the audioclips outside of Edit Audio Track mode                                                                                            |
+| `smh_cycleselected` | `0` or `1`       | Cycle through all bonemerged (child) entities of the selected entity, when right-clicked mode                                                                                            |
+| `smh_lockselected` | `0` or `1`       | Prevent the selection of other entities                                                                                            |
 
 ## User Interface
 
@@ -130,8 +132,10 @@ Once you have selected the bonemerged entity, you can start animating the boneme
 
 There are a few behavior quirks to be aware of when animating bonemerged entities with either the Advanced Bonemerge Tool (ABT) or the Composite Bonemerge Tool (CBT). The following bulletpoints list some gotchas when working with these entities, assuming the user also uses Ragdoll Mover (RGM).
 
-- CBT uses the same bone manipulation features (inflating bone scale, moving the bones with Edit Bones, using RGM) as Stop Motion Helper. If you are parenting an entity onto a bone using CBT, SMH will override your settings. It is recommended that you use ABT to parent the entity instead, as it stores its own offsets. 
+- CBT uses the same bone manipulation features (inflating bone scale, moving the bones with Edit Bones, using RGM) as Stop Motion Helper. If you are parenting an entity onto a bone using CBT, SMH will override your settings. It is recommended that you use ABT to parent the entity instead, as it stores its own offsets.
 - With ABT, Ragdoll Mover does not update its gizmo position when going between keyframes on SMH. You will need to reselect the bone (press R twice) to update the gizmo position.
+
+You can disable the selection of bonemerged entities with `smh_cycleselected 0`. `smh_lockselected 0` will disable entity selection altogether.
 
 ### Visualizing Bone Motion Paths
 
