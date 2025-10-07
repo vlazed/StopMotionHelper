@@ -25,6 +25,8 @@ cvars.AddChangeCallback("smh_autosavetime", function (convar, oldValue, newValue
     end
 end)
 CreateClientConVar("smh_scrollmultiplier", "1", true, false, "Set how much scrolling should affect the timeline", 0, 100)
+CreateClientConVar("smh_cycleselected", "1", true, false, "Controls the new behavior of selecting child (bonemerged) entities", 0, 1)
+CreateClientConVar("smh_lockselected", "0", true, false, "Controls the selection of other entities", 0, 1)
 
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()

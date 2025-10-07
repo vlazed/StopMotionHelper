@@ -250,10 +250,11 @@ local function AddCallbacks()
     local lastEntity = NULL
     local entityCount = 1
     WorldClicker.OnEntitySelected = function(_, entity, multiselect)
+        if GetConVar("smh_lockselected"):GetBool() then return end
         if entity:GetNW2Bool("SMHGhost") and entity:GetNW2Entity("Entity") then entity = entity:GetNW2Entity("Entity") end
         
         -- Cycle through an entity's bonemerged items with the WorldClicker
-        if lastEntity == entity then
+        if GetConVar("smh_cycleselected"):GetBool() and lastEntity == entity then
             local n = #entity:GetChildren() + 1
             local newEntity = entity:GetChildren()[entityCount]
             entityCount = n > 0 and (entityCount + 1) % n or 1
