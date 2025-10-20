@@ -144,6 +144,9 @@ do
 
     hook.Remove("PostDrawHUD", "SMHRenderMotionPath")
     hook.Add("PostDrawHUD", "SMHRenderMotionPath", function()
+        local hud = GetHUDPanel()
+        if not hud:IsVisible() then return end
+
         name = name or GetConVar("smh_motionpathbone")
         nodeRange = nodeRange or GetConVar("smh_motionpathrange")
         sphereSize = sphereSize or GetConVar("smh_motionpathsize")
