@@ -14,7 +14,7 @@ CreateMaterial("SMH_XRay", "UnlitGeneric", {
 ---@type Node[]
 local Nodes = {}
 ---This stores the existing nodes indexed by frame, for easy access
----@type Node[]
+---@type SerializedNode[]
 local NodeSet = {}
 
 local MGR = {}
@@ -71,6 +71,13 @@ function MGR.Start(renderCmd, StartFrame)
     timer.Simple(1, RenderTick)
 end
 
+---@param nodeSet SerializedNode[]
+local function updateNodes(nodeSet)
+    for frame, pose in SortedPairs(nodeSet) do
+        table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
+    end
+end
+
 function MGR.SetNodes(newNodes)
     Nodes = {}
     NodeSet = {}
@@ -80,14 +87,24 @@ function MGR.SetNodes(newNodes)
     for i = 1, #newNodes do
         sortedNodes[newNodes[i][1]] = {newNodes[i][2], newNodes[i][3]}
     end
-    for frame, pose in SortedPairs(sortedNodes) do
-        table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
-    end
+    updateNodes(sortedNodes)
     NodeSet = sortedNodes
 end
 
 function MGR.GetNodes()
     return Nodes
+end
+
+---@param frame integer
+---@param frameData SerializedNode
+function MGR.UpdateNode(frame, frameData)
+    if not frameData then return end
+    if NodeSet[frame] then
+        NodeSet[frame][1], NodeSet[frame][2] = frameData[1], frameData[2]
+    else
+        NodeSet[frame] = {frameData[1], frameData[2]}
+    end
+    updateNodes(NodeSet)
 end
 
 ---@return Vector

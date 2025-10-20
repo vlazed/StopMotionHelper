@@ -220,6 +220,8 @@
 ---@field Ang Angle
 ---@field Frame integer
 
+---@alias SerializedNode {[1]: Vector, [2]: Angle}
+
 ---@class SMHWorldClicker: SMHWorldClickerPanel
 ---@field MainMenu SMHMenu
 ---@field PhysRecorder SMHPhysRecord

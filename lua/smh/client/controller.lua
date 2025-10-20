@@ -931,6 +931,13 @@ local function UpdateKeyframeResponse(msgLength)
 end
 
 ---@type Receiver
+local function UpdateNode(msgLength)
+    local frame = net.ReadUInt(INT_BITCOUNT)
+    local node = net.ReadTable(true)
+    SMH.Renderer.UpdateNode(frame, node)
+end
+
+---@type Receiver
 local function DeleteKeyframeResponse(msgLength)
     local keyframeId = net.ReadUInt(INT_BITCOUNT)
     SMH.UI.DeleteKeyframe(keyframeId)
@@ -1188,6 +1195,7 @@ local function Setup()
 	net.Receive(SMH.MessageTypes.StopAllAudio, StopAllAudio)
 
     net.Receive(SMH.MessageTypes.RequestDefaultPose, RequestDefaultPose)
+    net.Receive(SMH.MessageTypes.UpdateNode, UpdateNode)
 
     if game.SinglePlayer() then
         local lastUpdate = SMH.State.TimeStamp

@@ -205,6 +205,14 @@ local function CreateKeyframe(msgLength, player)
     SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.Send(player)
 
+    local node = SMH.GhostsManager.RequestNode(player)
+    if node then
+        net.Start(SMH.MessageTypes.UpdateNode)
+        net.WriteUInt(frame, INT_BITCOUNT)
+        net.WriteTable(node, true)
+        net.Send(player)
+    end
+
     SMH.GhostsManager.UpdateKeyframe(player)
 end
 
