@@ -929,7 +929,8 @@ local function StopPhysicsRecord(msgLength, player)
 end
 
 local function RequestNodes(msgLength, player)
-    local nodes = SMH.GhostsManager.RequestNodes(player)
+    local settings = net.ReadTable()
+    local nodes = SMH.GhostsManager.RequestNodes(player, settings)
 
     if not nodes then return end
     net.Start(SMH.MessageTypes.RequestNodesResponse)

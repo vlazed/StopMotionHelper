@@ -2,6 +2,7 @@
 local GhostData = {}
 local LastFrame = 0
 local LastTimeline = 1
+---@type SpawnGhost, SpawnGhostData, GhostSettings
 local SpawnGhost, SpawnGhostData, GhostSettings = {}, {}, {}
 local SpawnOffsetOn, SpawnOriginData, OffsetPos, OffsetAng = {}, {}, {}, {}
 ---@type PoseTrees
@@ -378,7 +379,14 @@ function MGR.UpdateKeyframe(player)
     GhostData[player].Updated = true
 end
 
-local function lerpTransform(keyframes, frame, modifier, index)
+---@param keyframes FrameData[]
+---@param frame integer
+---@param modifier string
+---@param tweening boolean
+---@param index integer?
+---@return Vector
+---@return Angle
+local function lerpTransform(keyframes, frame, modifier, tweening, index)
     local pos, ang = vector_origin, angle_zero
     local prevFrame, nextFrame, lerp = SMH.GetClosestKeyframes(keyframes, frame, true, modifier)
     if prevFrame and nextFrame then
@@ -388,8 +396,8 @@ local function lerpTransform(keyframes, frame, modifier, index)
         else
             prevData, nextData = prevFrame.Modifiers[modifier], nextFrame.Modifiers[modifier]
         end
-        pos = SMH.LerpLinearVector(prevData.Pos, nextData.Pos, lerp)
-        ang = SMH.LerpLinearAngle(prevData.Ang, nextData.Ang, lerp)
+        pos = SMH.LerpLinearVector(prevData.Pos, nextData.Pos, tweening and lerp or 0)
+        ang = SMH.LerpLinearAngle(prevData.Ang, nextData.Ang, tweening and lerp or 0)
     end
     return pos, ang
 end
@@ -457,8 +465,9 @@ function MGR.RequestNode(player)
 end
 
 ---@param player Player
+---@param settings Settings
 ---@return table?
-function MGR.RequestNodes(player)
+function MGR.RequestNodes(player, settings)
     if not GhostData[player] then return end
 
     local nodes = GhostData[player].Nodes
@@ -466,6 +475,7 @@ function MGR.RequestNodes(player)
     local previousName = GhostData[player].PreviousName
     local lastEntity = GhostData[player].LastEntity
     local updated = GhostData[player].Updated
+    local tweening = not settings.TweenDisable
 
     local entities = SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities
 
@@ -509,7 +519,7 @@ function MGR.RequestNodes(player)
                 pos = keyframe.Modifiers.physbones[physBone].Pos
                 ang = keyframe.Modifiers.physbones[physBone].Ang
             else
-                pos, ang = lerpTransform(keyframes, keyframe.Frame, "physbones", physBone)
+                pos, ang = lerpTransform(keyframes, keyframe.Frame, "physbones", tweening, physBone)
             end
         elseif bone and DefaultPoseTrees[entity:GetModel()] then
             local defaultPoseTree = DefaultPoseTrees[entity:GetModel()]
@@ -532,7 +542,7 @@ function MGR.RequestNodes(player)
                 if keyframe.Modifiers.bones then
                     dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
                 else
-                    dataPos, dataAng = lerpTransform(keyframes, keyframe.Frame, "bones", bone)
+                    dataPos, dataAng = lerpTransform(keyframes, keyframe.Frame, "bones", tweening, bone)
                 end
                 local finalPos, finalAng = LocalToWorld(dataPos, dataAng, lPos, lAng)
                 pos, ang = LocalToWorld(pos, ang, finalPos, finalAng)
@@ -542,7 +552,7 @@ function MGR.RequestNodes(player)
             if keyframe.Modifiers.physbones and keyframe.Modifiers.physbones[physBoneParent] then
                 parentPos, parentAng = keyframe.Modifiers.physbones[physBoneParent].Pos, keyframe.Modifiers.physbones[physBoneParent].Ang
             elseif physBoneParent then
-                parentPos, parentAng = lerpTransform(keyframes, keyframe.Frame, "physbones", physBoneParent)
+                parentPos, parentAng = lerpTransform(keyframes, keyframe.Frame, "physbones", tweening, physBoneParent)
             else
                 if keyframe.Modifiers.position then
                     parentPos, parentAng = keyframe.Modifiers.position.Pos or parentPos, keyframe.Modifiers.position.Ang or parentAng
@@ -554,7 +564,7 @@ function MGR.RequestNodes(player)
                 pos = keyframe.Modifiers.position.Pos
                 ang = keyframe.Modifiers.position.Ang
             else
-                pos, ang = lerpTransform(keyframes, keyframe.Frame, "position")
+                pos, ang = lerpTransform(keyframes, keyframe.Frame, "position", tweening)
             end
         end
 

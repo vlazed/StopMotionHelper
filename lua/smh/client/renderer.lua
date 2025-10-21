@@ -104,6 +104,7 @@ function MGR.UpdateNode(frame, frameData)
     else
         NodeSet[frame] = {frameData[1], frameData[2]}
     end
+    Nodes = {}
     updateNodes(NodeSet)
 end
 

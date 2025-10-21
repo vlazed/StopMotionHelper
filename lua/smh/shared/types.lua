@@ -192,6 +192,10 @@
 ---@field LastEntity Entity
 ---@field Updated boolean
 
+---@alias GhostSettings {[Player]: Settings}
+---@alias SpawnGhost {[Player]: Entity}
+---@alias SpawnGhostData {[Player]: table}
+
 ---@alias GhostData table<Player, GhostDatum>
 
 ---@class Pose

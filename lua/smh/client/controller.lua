@@ -46,6 +46,7 @@ end
 
 local function RequestNodes()
     net.Start(SMH.MessageTypes.RequestNodes)
+    net.WriteTable(SMH.Settings.GetAll())
     net.SendToServer()
 end
 
