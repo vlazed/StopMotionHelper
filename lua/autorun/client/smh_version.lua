@@ -1,7 +1,7 @@
 ---Current ISO date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-10-21T17:19:42Z"
+local DATE = "2025-10-22T18:16:42Z"
 local changelog = ""
 
 local RED = Color(255, 0, 0)
@@ -63,10 +63,17 @@ local function versionCheck()
 end
 
 concommand.Add("smh_versioncheck", versionCheck, nil, "Check if SMH is up-to-date")
+concommand.Add("smh_versioncheck_refresh", function()
+    changelog = ""
+    versionCheck()
+end, nil, "Clears the changelog and checks if SMH is up-to-date")
 local cvar = CreateClientConVar("smh_versioncheck_enabled", "1", true, false, "If enabled, version checking will occur whenever one loads into a map", 0, 1)
 
 if cvar:GetBool() then
-    timer.Simple(1, function()
-        versionCheck()
+    hook.Add("CreateMove", "smh_versioncheck", function(move)
+        if move:GetButtons() ~= 0 then 
+            versionCheck()            
+            hook.Remove("CreateMove", "smh_versioncheck")
+        end
     end)
 end
