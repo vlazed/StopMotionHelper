@@ -26,7 +26,7 @@ local function RenderHalo(entities)
 
         render.SetStencilEnable( true )
             render.SuppressEngineLighting(true)
-            cam.IgnoreZ( false )
+            cam.IgnoreZ( true )
 
             render.SetStencilWriteMask( 1 )
             render.SetStencilTestMask( 1 )
@@ -51,6 +51,7 @@ local function RenderHalo(entities)
                 surface.DrawRect(0, 0, ScrW(), ScrH())
             cam.End2D()
 
+            cam.IgnoreZ( false )
             render.SuppressEngineLighting(false)
         render.SetStencilEnable(false)
     cam.End3D()

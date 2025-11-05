@@ -520,9 +520,17 @@ local function AddCallbacks()
     PropertiesMenu.ApplyName = function(_, ent, name)
         SMH.Controller.ApplyEntityName(ent, name)
     end
-    PropertiesMenu.SelectEntity = function(_, ent)
-        local enttable = {}
-        enttable[ent] = true
+    PropertiesMenu.SelectEntity = function(_, ent, multiselect)
+        local enttable = table.Copy(SMH.State.Entity)
+        if multiselect == 1 then
+            enttable[ent] = true
+        elseif multiselect == 2 then
+            enttable[ent] = nil
+            ent = nil
+        else
+            enttable = {}
+            enttable[ent] = true
+        end
         SMH.Controller.SelectEntity(ent, enttable)
     end
     PropertiesMenu.OnAddTimelineRequested = function()

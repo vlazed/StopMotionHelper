@@ -112,7 +112,7 @@ function PANEL:Init()
         ---@cast selectedName DListView_Line
         local selectedEntity = FindEntity(selectedName:GetValue(1))
         if not IsValid(selectedEntity) then return end
-        self:SelectEntity(selectedEntity)
+        self:SelectEntity(selectedEntity, input.IsKeyDown(KEY_LSHIFT) and 1 or 0)
     end
 
     self.BonemergedList.OnRowSelected = function(_, rowIndex, row)
@@ -121,7 +121,8 @@ function PANEL:Init()
         ---@cast selectedName DListView_Line
         local selectedEntity = FindBonemergedEntity(selectedName:GetValue(1))
         if not IsValid(selectedEntity) then return end
-        self:SelectEntity(selectedEntity)
+
+        self:SelectEntity(selectedEntity, input.IsKeyDown(KEY_LSHIFT) and 1 or 0)
     end
 
     self.TimelinesPanel = vgui.Create("DPanel", self)
@@ -532,7 +533,7 @@ function PANEL:InitTimelineSettings()
 end
 
 function PANEL:ApplyName(ent, name) end
-function PANEL:SelectEntity(entity) end
+function PANEL:SelectEntity(entity, setting) end
 function PANEL:SelectWorld() end
 function PANEL:OnAddTimelineRequested() end
 function PANEL:OnRemoveTimelineRequested() end
