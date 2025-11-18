@@ -473,11 +473,12 @@ function CTRL.Load(path, modelName, loadFromClient)
     if loadFromClient then
         local serializedKeyframes, _, _, settings = SMH.Saves.LoadForEntity(path, modelName, LocalPlayer())
         ---@cast serializedKeyframes SMHFile
-        ---@cast settings SMHSettings
+        ---@cast settings Settings
         if settings then
             SMH.Settings.Update(settings, SMH.State.Entity)
         end
         net.WriteTable(serializedKeyframes)
+        net.WriteTable(settings)
     else
         net.WriteString(path)
         net.WriteString(modelName)
@@ -1007,6 +1008,12 @@ local function LoadResponse(msgLength)
     end
 end
 
+local function LoadResponseSettings(msgLength)
+    local entity = net.ReadEntity()
+    local settings = net.ReadTable()
+    SMH.Settings.Initialize(entity, settings)
+end
+
 ---@type Receiver
 local function GetModelInfoResponse(msgLength)
     local name, class = net.ReadString(), net.ReadString()
@@ -1180,6 +1187,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
     net.Receive(SMH.MessageTypes.GetServerEntitiesResponse, GetServerEntitiesResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
+    net.Receive(SMH.MessageTypes.LoadResponseSettings, LoadResponseSettings)
     net.Receive(SMH.MessageTypes.GetModelInfoResponse, GetModelInfoResponse)
     net.Receive(SMH.MessageTypes.SaveExists, SaveExists)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)

@@ -111,6 +111,7 @@ local function SetFrame(msgLength, player)
 
     SMH.PlaybackManager.SetFrame(player, newFrame, settings)
     SMH.GhostsManager.UpdateState(player, newFrame, settings, timeline, timelineset)
+    SMH.SettingsManager.StorePlayerSettings(player, settings)
 
     net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)
@@ -310,6 +311,7 @@ local function StartPlayback(msgLength, player)
     local settings = net.ReadTable()
 
     SMH.PlaybackManager.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
+    SMH.SettingsManager.StorePlayerSettings(player, settings)
 
     net.Start(SMH.MessageTypes.PlaybackResponse)
     net.WriteBool(true)
@@ -331,6 +333,7 @@ local function UpdateGhostState(msgLength, player)
     local timeline = SMH.PropertiesManager.GetTimelinesInfo(player)
 
     SMH.GhostsManager.UpdateSettings(player, timeline, settings)
+    SMH.SettingsManager.StorePlayerSettings(player, settings)
 
     net.Start(SMH.MessageTypes.UpdateGhostStateResponse)
     net.Send(player)
@@ -378,7 +381,8 @@ local function Load(msgLength, player)
 
     local serializedKeyframes, entityProperties, isWorld, settings
     if loadFromClient then
-        serializedKeyframes, _, _, settings = net.ReadTable()
+        serializedKeyframes = net.ReadTable()
+        settings = net.ReadTable()
     else
         local path = net.ReadString()
         local modelName = net.ReadString()
@@ -567,6 +571,8 @@ local function RequestPack(msgLength, player)
     if not next(entities) then return end
 
     local path = net.ReadString()
+    local settings = net.ReadTable()
+    
     local subpath = SMH.Saves.GetPath(player)
     path = subpath .. path
 
@@ -576,7 +582,7 @@ local function RequestPack(msgLength, player)
 
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
-    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
+    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player, settings)
 
     local rearrange = {}
     for ent, data in pairs(entities) do
@@ -598,7 +604,7 @@ local function PackageApply(player, entity, packageData)
     if not IsValid(entity) then return false end
 
     timer.Simple(0, function()
-        local frameData, properties = SMH.Saves.LoadPathForEntity(packageData.save, packageData.name)
+        local frameData, properties, _, settings = SMH.Saves.LoadPathForEntity(packageData.save, packageData.name)
         if not frameData or not properties then return end
         local smhFile = SMH.Saves.Load(packageData.save, NULL)
 
@@ -611,6 +617,11 @@ local function PackageApply(player, entity, packageData)
 
         duplicator.ClearEntityModifier(entity, "SMHPackage")
         duplicator.StoreEntityModifier(entity, "SMHPackage", packageData)
+
+        net.Start(SMH.MessageTypes.LoadResponseSettings)
+        net.WriteEntity(entity)
+        net.WriteTable(settings or {})
+        net.Send(player)
     end)
 
 end
@@ -1008,10 +1019,11 @@ hook.Add("ShutDown", "SMHExitSave", function()
     for _, player in player.Iterator() do
         local properties = SMH.PropertiesManager.GetAllProperties(player)
         local keyframes = SMH.KeyframeManager.GetAll(player)
+        local settings = SMH.SettingsManager.GetPlayerSettings(player)
         -- Don't replace the exit save file if we don't have any entities
         if #keyframes == 0 then return end
 
-        local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
+        local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player, settings)
     
         -- Save to the root smh/ folder
         SMH.Saves.SetPath("", player)

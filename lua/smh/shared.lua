@@ -44,6 +44,7 @@ SMH.MessageTypes = {
     "GetServerEntitiesResponse",
     "Load",
     "LoadResponse",
+    "LoadResponseSettings",
     "RequestSave",
     "SaveExists",
     "Save",

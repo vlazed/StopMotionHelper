@@ -213,6 +213,7 @@ end
 ---@return SerializedFrameData[]?
 ---@return Properties?
 ---@return boolean?
+---@return Settings?
 function MGR.LoadPathForEntity(path, modelName)
     local serializedKeyframes = MGR.Load(path, NULL)
     for _, sEntity in pairs(serializedKeyframes.Entities) do
@@ -223,11 +224,11 @@ function MGR.LoadPathForEntity(path, modelName)
                     Name = sEntity.Model,
                 }
 
-                return sEntity.Frames, sEntity.Properties
+                return sEntity.Frames, sEntity.Properties, false, sEntity.Settings
             end
         else
             if sEntity.Properties.Name == modelName then
-                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld
+                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld, sEntity.Settings
             end
         end
     end

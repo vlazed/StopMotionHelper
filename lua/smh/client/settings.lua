@@ -94,7 +94,7 @@ function MGR.Initialize(entity, settings)
     end
 end
 
----@param isSave boolean
+---@param isSave boolean?
 ---@return Settings
 function MGR.GetAll(isSave)
     local settings = {}
