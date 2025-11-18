@@ -28,6 +28,8 @@ CreateClientConVar("smh_scrollmultiplier", "1", true, false, "Set how much scrol
 CreateClientConVar("smh_cycleselected", "1", true, false, "Controls the new behavior of selecting child (bonemerged) entities", 0, 1)
 CreateClientConVar("smh_lockselected", "0", true, false, "Controls the selection of other entities", 0, 1)
 
+local smh_entity_settings = CreateClientConVar("smh_entity_settings", "0", true, false, "Stores settings per entity. For example, Disable Tweening can disable tweening for one entity")
+
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
 end)

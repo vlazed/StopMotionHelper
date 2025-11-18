@@ -1,6 +1,7 @@
 include("shared.lua")
 
 include("server/controller.lua")
+include("server/settings_manager.lua")
 include("server/easing.lua")
 include("server/eyetarget.lua")
 include("server/ghosts_manager.lua")

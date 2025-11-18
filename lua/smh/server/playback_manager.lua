@@ -3,6 +3,9 @@ local ActivePlaybacks = {}
 
 local MGR = {}
 
+local check = SMH.SettingsManager.CheckSetting
+local getSetting = SMH.SettingsManager.GetSetting
+
 ---@param player Player
 ---@param playback Playback
 ---@param settings Settings
@@ -32,19 +35,21 @@ local function PlaybackSmooth(player, playback, settings)
 
                 if prevKeyframe.Frame == nextKeyframe.Frame then
                     if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                        mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity));
                     end
                 else
                     local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
                     lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut[name], nextKeyframe.EaseIn[name])
 
-                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                    if lerpMultiplier <= 0 or check(settings, "TweenDisable", entity) then
+                        mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity))
+                    elseif prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, getSetting(settings, entity));
                     end
                 end
             end
         else
-            if settings.EnableWorld then
+            if check(settings, "EnableWorld", entity) then
                 SMH.WorldKeyframesManager.Load(player, math.Round(playback.CurrentFrame), keyframes)
             end
         end
@@ -69,16 +74,16 @@ function MGR.SetFrame(player, newFrame, settings)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
 
-                if lerpMultiplier <= 0 or settings.TweenDisable then
-                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                if lerpMultiplier <= 0 or check(settings, "TweenDisable", entity) then
+                    mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity));
                 elseif lerpMultiplier >= 1 then
-                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                    mod:Load(entity, nextKeyframe.Modifiers[name], getSetting(settings, entity));
                 else
-                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, getSetting(settings, entity));
                 end
             end
         else
-            if settings.EnableWorld then
+            if check(settings, "EnableWorld", entity) then
                 SMH.WorldKeyframesManager.Load(player, newFrame, keyframes)
             end
         end
@@ -104,12 +109,12 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
             ---@cast prevKeyframe FrameData
             ---@cast nextKeyframe FrameData
 
-            if lerpMultiplier <= 0 or settings.TweenDisable then
-                mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+            if lerpMultiplier <= 0 or check(settings, "TweenDisable", entity) then
+                mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity));
             elseif lerpMultiplier >= 1 then
-                mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                mod:Load(entity, nextKeyframe.Modifiers[name], getSetting(settings, entity));
             else
-                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, getSetting(settings, entity));
             end
         end
     end

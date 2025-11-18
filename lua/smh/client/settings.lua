@@ -63,6 +63,8 @@ local function CreateTypedConVar(type, name, defaultValue, helptext)
     return cv
 end
 
+local EntitySettings = {}
+
 local ConVars = {
     FreezeAll = CreateTypedConVar(ConVarType.Bool, "smh_freezeall", true),
     LocalizePhysBones = CreateTypedConVar(ConVarType.Bool, "smh_localizephysbones", false),
@@ -81,24 +83,56 @@ local ConVars = {
 
 local MGR = {}
 
+function MGR.Initialize(entity, settings)
+    if IsValid(entity) then
+        for name, convar in pairs(ConVars) do
+            if not EntitySettings[entity] then
+                EntitySettings[entity] = {}
+            end
+            EntitySettings[entity][name] = settings[name] or convar:GetValue()
+        end
+    end
+end
+
+---@param isSave boolean
 ---@return Settings
-function MGR.GetAll()
+function MGR.GetAll(isSave)
     local settings = {}
 
     for name, convar in pairs(ConVars) do
         settings[name] = convar:GetValue()
     end
 
+    if GetConVar("smh_entity_settings"):GetBool() then
+        local newSettings = table.Merge(EntitySettings, not isSave and settings or {})
+        return newSettings
+    end
+
     return settings
 end
 
-function MGR.Update(newSettings)
+function MGR.Update(newSettings, entities)
     for name, value in pairs(newSettings) do
         if not ConVars[name] then
             continue
         end
-        ConVars[name]:SetValue(value)
+        if istable(entities) then
+            for entity, _ in pairs(entities) do
+                if IsValid(entity) then
+                    if not EntitySettings[entity] then
+                        EntitySettings[entity] = {}
+                    end
+                    EntitySettings[entity][name] = value
+                end
+            end
+        else
+            ConVars[name]:SetValue(value)
+        end
     end
 end
+
+hook.Add("EntityRemoved", "SMHSettingsEntityRemoved", function(entity)
+    EntitySettings[entity] = nil
+end)
 
 SMH.Settings = MGR

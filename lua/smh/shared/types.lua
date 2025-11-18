@@ -172,6 +172,7 @@
 ---@field Model string The model path of the entity
 ---@field Properties Properties The animation properties of the entity
 ---@field IsWorld boolean?
+---@field Settings Settings
 
 ---@class PackageData SMH Package data
 ---@field save string The path of the save file, with respect to smh/
