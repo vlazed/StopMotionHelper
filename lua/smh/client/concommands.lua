@@ -2,6 +2,8 @@ local smh_startatone = CreateClientConVar("smh_startatone", 0, true, false, "Con
 local smh_render_cmd = CreateClientConVar("smh_render_cmd", "poster 1", true, false, "For smh_render, this string will be ran in the console for each frame.")
 CreateClientConVar("smh_currentpreset", "default", true, false)
 
+local smh_entity_settings = CreateClientConVar("smh_entity_settings", "0", true, false, "Stores settings per entity. For example, Disable Tweening can disable tweening for one entity")
+
 concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
 end)

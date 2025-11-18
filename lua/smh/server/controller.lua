@@ -288,13 +288,13 @@ local function Load(msgLength, player)
     local entity = net.ReadEntity()
     local loadFromClient = net.ReadBool()
 
-    local serializedKeyframes, entityProperties, isWorld
+    local serializedKeyframes, entityProperties, isWorld, settings
     if loadFromClient then
-        serializedKeyframes = net.ReadTable()
+        serializedKeyframes, _, _, settings = net.ReadTable()
     else
         local path = net.ReadString()
         local modelName = net.ReadString()
-        serializedKeyframes, entityProperties, isWorld = SMH.Saves.LoadForEntity(path, modelName, player)
+        serializedKeyframes, entityProperties, isWorld, settings = SMH.Saves.LoadForEntity(path, modelName, player)
     end
 
     if isWorld then entity = player end
@@ -308,6 +308,7 @@ local function Load(msgLength, player)
     net.Start(SMH.MessageTypes.LoadResponse)
     framecount = SendKeyframes(framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
     net.WriteEntity(entity)
+    net.WriteTable(settings or {})
     net.Send(player)
 
     SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
@@ -329,6 +330,7 @@ local function RequestSave(msgLength, player)
     local saveToClient = net.ReadBool()
     local isFolder = net.ReadBool()
     local path = net.ReadString()
+    local settings = net.ReadTable()
 
     if not isFolder then
         local properties = SMH.PropertiesManager.GetAllProperties(player)
@@ -350,7 +352,7 @@ local function RequestSave(msgLength, player)
         end
 
         local keyframes = SMH.KeyframeManager.GetAll(player)
-        local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
+        local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player, settings)
 
         if not saveToClient then
             SMH.Saves.Save(path, serializedKeyframes, player)
@@ -378,10 +380,11 @@ end
 
 local function Save(msgLength, player)
     local path = net.ReadString()
+    local settings = net.ReadTable()
 
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
-    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player)
+    local serializedKeyframes = SMH.Saves.Serialize(keyframes, properties, player, settings)
 
     SMH.Saves.Save(path, serializedKeyframes, player)
 
@@ -426,6 +429,7 @@ end
 
 local function Append(msgLength, player)
     local path = net.ReadString()
+    local settings = net.ReadTable()
     local savenames, gamenames = {}, {}
 
     for i = 1, net.ReadUInt(INT_BITCOUNT) do
@@ -438,7 +442,7 @@ local function Append(msgLength, player)
     local properties = SMH.PropertiesManager.GetAllProperties(player)
     local keyframes = SMH.KeyframeManager.GetAll(player)
 
-    local serializedKeyframes = SMH.Saves.SerializeAndAppend(path, keyframes, properties, player, savenames, gamenames)
+    local serializedKeyframes = SMH.Saves.SerializeAndAppend(path, keyframes, properties, player, savenames, gamenames, settings)
 
     SMH.Saves.Save(path, serializedKeyframes, player)
 

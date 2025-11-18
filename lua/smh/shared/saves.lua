@@ -21,7 +21,7 @@ local function SetUniqueName(name, usedModelNames)
     return name
 end
 
-local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player)
+local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player, settings)
     for _, keyframe in pairs(keyframes) do
         local entity = keyframe.Entity
         if not IsValid(entity) then
@@ -39,6 +39,7 @@ local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, pl
                         Class = properties[entity].Class,
                         Model = properties[entity].Model,
                     },
+                    Settings = settings[entity],
                     Frames = {},
                 }
             end
@@ -52,6 +53,7 @@ local function ProcessKeyframes(keyframes, entityMappedKeyframes, properties, pl
                         Name = properties[entity].Name,
                         IsWorld = true,
                     },
+                    Settings = settings[entity],
                     Frames = {},
                 }
             end
@@ -161,21 +163,21 @@ function MGR.LoadForEntity(path, modelName, player)
                     Name = sEntity.Model,
                 }
 
-                return sEntity.Frames, sEntity.Properties
+                return sEntity.Frames, sEntity.Properties, false, sEntity.Settings
             end
         else
             if sEntity.Properties.Name == modelName then
-                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld
+                return sEntity.Frames, sEntity.Properties, sEntity.Properties.IsWorld, sEntity.Settings
             end
         end
     end
     return nil
 end
 
-function MGR.Serialize(keyframes, properties, player)
+function MGR.Serialize(keyframes, properties, player, settings)
     local entityMappedKeyframes = {}
 
-    ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player)
+    ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player, settings)
 
     local serializedKeyframes = {
         Map = game.GetMap(),
@@ -223,7 +225,7 @@ function MGR.GetUnusedNames(path, properties, player)
     return entityNames
 end
 
-function MGR.SerializeAndAppend(path, keyframes, properties, player, saveNames, gameNames)
+function MGR.SerializeAndAppend(path, keyframes, properties, player, saveNames, gameNames, settings)
     if not file.Exists(SaveDir, "DATA") or not file.IsDir(SaveDir, "DATA") then
         file.CreateDir(SaveDir)
     end
@@ -251,7 +253,7 @@ function MGR.SerializeAndAppend(path, keyframes, properties, player, saveNames, 
         usedModelNames[name] = true
     end
 
-    ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player)
+    ProcessKeyframes(keyframes, entityMappedKeyframes, properties, player, settings)
 
     for _, skf in pairs(entityMappedKeyframes) do
         if gameNames[skf.Properties.Name] then

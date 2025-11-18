@@ -124,6 +124,13 @@ function PANEL:ApplySettings(settings)
 end
 
 function PANEL:OnSettingsUpdated(settings) end
+function PANEL:UpdateSelectedEnt(entity)
+    local settings = SMH.Settings.GetAll()
+    if settings[entity] then
+        settings = settings[entity]
+    end
+    self:ApplySettings(settings)
+end
 function PANEL:OnRequestOpenHelp() end
 function PANEL:OnRequestOpenPhysRecorder() end
 

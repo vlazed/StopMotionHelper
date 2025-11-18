@@ -269,7 +269,12 @@ local function AddCallbacks()
         SMH.Controller.GetServerSaves()
     end
     WorldClicker.MainMenu.OnRequestOpenSettings = function()
-        WorldClicker.Settings:ApplySettings(SMH.Settings.GetAll())
+        local entity = next(SMH.State.Entity)
+        local settings = SMH.Settings.GetAll()
+        if settings[entity] then
+            settings = settings[entity]
+        end
+        WorldClicker.Settings:ApplySettings(settings)
         WorldClicker.Settings:SetVisible(true)
     end
 
@@ -754,6 +759,7 @@ function MGR.SetSelectedEntity(entities)
     LoadMenu:UpdateSelectedEnt(entity)
     PropertiesMenu:UpdateSelectedEnt(entity)
     WorldClicker.PhysRecorder:UpdateSelectedEnt(entity)
+    WorldClicker.Settings:UpdateSelectedEnt(entity)
     ClickerEntity = entities
 end
 
@@ -806,6 +812,11 @@ end
 function MGR.UpdateUISetting(setting, value)
     local settings = {}
     settings[setting] = value
+    WorldClicker.Settings:ApplySettings(settings)
+end
+
+
+function MGR.UpdateUISettings(settings)
     WorldClicker.Settings:ApplySettings(settings)
 end
 
