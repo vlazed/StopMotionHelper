@@ -4,6 +4,10 @@ local disableNetworking = CreateConVar("smh_disablenetworking", "0", FCVAR_PROTE
 local INT_BITCOUNT = 32
 local KFRAMES_PER_MSG = 250
 
+SMH.GLOBAL_isOrgKeysNeeded = true
+SMH.GLOBAL_InterpolationMode = 2 -- 2 = cubic, 1 = linear
+
+
 ---@param framecount number
 ---@param IDs table<integer, number>
 ---@param ents table<number, Entity>
@@ -182,6 +186,16 @@ local function SelectEntity(msgLength, player)
 
     SendLeftoverKeyframes(player, framecount, IDs, ents, Frame, In, Out, KModCount, KModifiers)
 end
+
+
+local function SetInterpolationMode(msgLength, player)
+
+    local mode = net.ReadUInt(INT_BITCOUNT)
+
+    SMH.GLOBAL_InterpolationMode = mode
+
+end
+
 
 ---@type Receiver
 local function CreateKeyframe(msgLength, player)
@@ -1040,6 +1054,8 @@ net.Receive(SMH.MessageTypes.SetFrame, SetFrame)
 
 net.Receive(SMH.MessageTypes.SelectEntity, SelectEntity)
 
+
+net.Receive(SMH.MessageTypes.SetInterpolationMode, SetInterpolationMode) -- INTERPOLATIONMODE
 net.Receive(SMH.MessageTypes.CreateKeyframe, CreateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframe, UpdateKeyframe)
 net.Receive(SMH.MessageTypes.UpdateKeyframeExecute, UpdateKeyframeExecute)

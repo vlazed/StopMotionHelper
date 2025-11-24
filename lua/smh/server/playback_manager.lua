@@ -3,6 +3,7 @@ local ActivePlaybacks = {}
 
 local MGR = {}
 
+
 ---@param player Player
 ---@param playback Playback
 ---@param settings Settings
@@ -10,6 +11,13 @@ local function PlaybackSmooth(player, playback, settings)
     if not SMH.KeyframeData.Players[player] then
         return
     end
+    if SMH.GLOBAL_isOrgKeysNeeded then
+        SMH.KeyframeManager.OrganizeKeyframes(player)
+        SMH.GLOBAL_isOrgKeysNeeded = false
+        --print("OrgKeysbool activado")
+    end
+
+    
 
     playback.Timer = playback.Timer + FrameTime()
     local timePerFrame = 1 / playback.PlaybackRate
@@ -23,24 +31,47 @@ local function PlaybackSmooth(player, playback, settings)
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
+
+            local allFrames = {}
+            for k, v in pairs(keyframes) do
+                table.insert(allFrames, v.Frame)
+            end
+            table.sort(allFrames)
+
             for name, mod in pairs(SMH.Modifiers) do
                 local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
 
+                local modkeys = {}
+
+
                 if not prevKeyframe then continue end
-
-                if prevKeyframe.Frame == nextKeyframe.Frame then
-                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                
+                if mod.LoadBetweenCubic and SMH.GLOBAL_InterpolationMode == 2 then
+                    
+                    modkeys["Keydata"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModData[name]
+                    modkeys["Frames"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModFrames[name]
+        
+                    if (next(modkeys.Frames) == nil or next(modkeys.Keydata) == nil) then
+                        continue
                     end
+
+                    mod:LoadBetweenCubic(entity, prevKeyframe.Modifiers[name], modkeys, playback.CurrentFrame, settings);
                 else
-                    local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
-                    lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut[name], nextKeyframe.EaseIn[name])
+                    if prevKeyframe.Frame == nextKeyframe.Frame then
+                        if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                            mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                        end
+                    else
+                        local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
+                        lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut[name], nextKeyframe.EaseIn[name])
 
-                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                        if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
+                            mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                        end
                     end
+            
                 end
             end
         else
@@ -58,6 +89,11 @@ function MGR.SetFrame(player, newFrame, settings)
     if not SMH.KeyframeData.Players[player] then
         return
     end
+    if SMH.GLOBAL_isOrgKeysNeeded then
+        SMH.KeyframeManager.OrganizeKeyframes(player)
+        SMH.GLOBAL_isOrgKeysNeeded = false
+        --print("OrgKeysbool activado")
+    end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
@@ -69,12 +105,27 @@ function MGR.SetFrame(player, newFrame, settings)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
 
-                if lerpMultiplier <= 0 or settings.TweenDisable then
-                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
-                elseif lerpMultiplier >= 1 then
-                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                local modkeys = {}
+                modkeys["Keydata"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModData[name]
+                modkeys["Frames"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModFrames[name]
+
+                if mod.LoadBetweenCubic and SMH.GLOBAL_InterpolationMode == 2 then
+                    if (next(modkeys.Frames) == nil or next(modkeys.Keydata) == nil) then
+                        continue
+                    end
+                    if lerpMultiplier <= 0 or settings.TweenDisable then
+                        mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                    else
+                        mod:LoadBetweenCubic(entity, prevKeyframe.Modifiers[name], modkeys, newFrame, settings);
+                    end
                 else
-                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                    if lerpMultiplier <= 0 or settings.TweenDisable then
+                        mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                    elseif lerpMultiplier >= 1 then
+                        mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                    else
+                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                    end
                 end
             end
         else
@@ -93,6 +144,11 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
     if not SMH.KeyframeData.Players[player] then
         return
     end
+    if SMH.GLOBAL_isOrgKeysNeeded then
+        SMH.KeyframeManager.OrganizeKeyframes(player)
+        SMH.GLOBAL_isOrgKeysNeeded = false
+        --print("OrgKeysbool activado")
+    end
 
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if ignored[entity] then continue end
@@ -104,12 +160,27 @@ function MGR.SetFrameIgnore(player, newFrame, settings, ignored)
             ---@cast prevKeyframe FrameData
             ---@cast nextKeyframe FrameData
 
-            if lerpMultiplier <= 0 or settings.TweenDisable then
-                mod:Load(entity, prevKeyframe.Modifiers[name], settings);
-            elseif lerpMultiplier >= 1 then
-                mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+            local modkeys = {}
+            modkeys["Keydata"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModData[name]
+            modkeys["Frames"] = SMH.KeyframeData.Players[player].Modkeys.Entities[entity].ModFrames[name]
+            
+            if mod.LoadBetweenCubic and SMH.GLOBAL_InterpolationMode == 2 then
+                if (next(modkeys.Frames) == nil or next(modkeys.Keydata) == nil) then
+                    continue
+                end
+                if lerpMultiplier <= 0 or settings.TweenDisable then
+                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                else
+                    mod:LoadBetweenCubic(entity, prevKeyframe.Modifiers[name], modkeys, newFrame, settings);
+                end
             else
-                mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                if lerpMultiplier <= 0 or settings.TweenDisable then
+                    mod:Load(entity, prevKeyframe.Modifiers[name], settings);
+                elseif lerpMultiplier >= 1 then
+                    mod:Load(entity, nextKeyframe.Modifiers[name], settings);
+                else
+                    mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, settings);
+                end
             end
         end
     end

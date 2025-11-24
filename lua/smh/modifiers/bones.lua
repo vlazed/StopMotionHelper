@@ -73,6 +73,37 @@ function MOD:Load(entity, data)
     networkFingerVariables(entity)
 end
 
+function MOD:OrganizeData(args)
+    local entity = args.entity
+    local data = args.data
+    
+    local n = entity:GetBoneCount();
+    local bonetabla = {}
+    local lang
+
+    for b = 0, n-1 do
+        
+        local bpos = {}
+        local bang = {}
+        local bscale = {}
+
+        for f = 1, #data do
+
+            lang = SMH.AngleToQuaternion(data[f][b].Ang)
+
+            table.insert(bpos, data[f][b].Pos)
+            table.insert(bang, lang)
+            table.insert(bscale, data[f][b].Scale)
+
+        end
+
+        bonetabla[b] = bonetabla[b] or {}  
+        bonetabla[b] = {Pos = bpos, Ang = bang, Scale = bscale}
+        
+    end
+    return bonetabla
+end
+
 function MOD:LoadBetween(entity, data1, data2, percentage)
 
     if self:IsEffect(entity) then
@@ -97,4 +128,23 @@ function MOD:LoadBetween(entity, data1, data2, percentage)
     end
 
     networkFingerVariables(entity)
+end
+
+function MOD:LoadBetweenCubic(entity, data1, data2, percentage)
+
+    if self:IsEffect(entity) then
+        entity = entity.AttachedEntity;
+    end
+  
+    for i = 0, #data2.Keydata do
+        local Pos = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Pos, percentage);
+        local Ang = SMH.LerpCubicAngle(data2.Frames, data2.Keydata[i].Ang, percentage);
+        local Scale = SMH.LerpCubicVector(data2.Frames, data2.Keydata[i].Scale, percentage);
+
+        entity:ManipulateBonePosition(i, Pos);
+        entity:ManipulateBoneAngles(i, Ang);
+        entity:ManipulateBoneScale(i, Scale);
+
+    end
+    
 end
