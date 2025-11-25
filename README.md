@@ -1,11 +1,12 @@
-Stop Motion Helper
-==================
+# Stop Motion Helper
+
 Stop Motion Helper is a tool for Garry's Mod designed to make stop motion animation easier and more manageable.
 It can also be used for recorded animation, but it is mainly designed around stop motion.
 
 ## Fork Details
 
 This unofficial version of SMH adds:
+
 - Support for animating bonemerged entities
 - Bone motion paths with offsetting
 - Audio playback from this [fork](https://github.com/smg4tech/StopMotionHelper)
@@ -32,3 +33,11 @@ To stay updated to the latest version of this fork, either a) do step 2a again, 
 
 > [!TIP]
 You do not need to unsubscribe from the workshop version of Stop Motion Helper. This fork will override the functionality of the workshop version with the new features from this fork.
+
+## Upload Policy
+
+Please do not upload this version of Stop Motion Helper on the Steam Workshop. If you would like to share this version, please use the following link:
+
+`https://github.com/vlazed/StopMotionHelper/tree/develop`
+
+I wish to respect the roadmap for the official Stop Motion Helper addon and prevent any unnecessary competition related to having multiple versions of an addon. Uploading my version to Github is a good compromise; this version is meant to work independently from the Workshop by checking for updates, and it is not readily available to the common Steam user
