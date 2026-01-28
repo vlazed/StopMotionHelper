@@ -116,7 +116,7 @@ function MGR.Update(newSettings, entities)
         if not ConVars[name] then
             continue
         end
-        if istable(entities) then
+        if istable(entities) and GetConVar("smh_entity_settings"):GetBool() then
             for entity, _ in pairs(entities) do
                 if IsValid(entity) then
                     if not EntitySettings[entity] then
