@@ -245,6 +245,24 @@ local function NewAudioClipPointer(audioClip)
 end
 -- =================================================
 
+---@param increment integer
+local function selectFrames(increment)
+    local start = increment == 0 and 0 or SMH.State.Frame
+    local checkLeft = increment < 0
+    for _, kpointer in pairs(KeyframePointers) do
+        if Either(checkLeft, start >= kpointer:GetFrame(), start <= kpointer:GetFrame()) then
+            SMH.UI.ToggleSelect(kpointer)
+            -- HACK: ToggleSelect does not finalize the timeline placement of keyframes 
+            -- during offsetting, which results in "ghost" keyframes 
+            -- (EaseIn and EaseOut UI appear when no keyframes are present). 
+            -- This workaround fixes that issue.
+            if not kpointer:GetSelected() then
+                kpointer:OnPointerReleased(kpointer:GetFrame())
+            end
+        end
+    end
+end
+
 local function AddCallbacks()
 
     local lastEntity = NULL
@@ -318,6 +336,31 @@ local function AddCallbacks()
     WorldClicker.MainMenu.OnRequestRecord = function()
         SMH.Controller.Record()
     end
+    WorldClicker.MainMenu.OnRequestOpenSmoothMenu = function ()
+        WorldClicker.SmoothMenu:ToggleVisible()
+    end
+    WorldClicker.MainMenu.OnRequestOpenStretchMenu = function ()
+        WorldClicker.StretchMenu:ToggleVisible()
+    end
+    WorldClicker.MainMenu.OnRequestOpenHelp = function()
+        SMH.Controller.OpenHelp()
+    end
+    WorldClicker.MainMenu.OnRequestOpenPhysRecorder = function()
+        WorldClicker.PhysRecorder:SetVisible(true)
+    end
+    WorldClicker.MainMenu.OnRequestOpenMotionPaths = function()
+        WorldClicker.MotionPaths:SetVisible(true)
+    end
+    
+    WorldClicker.MainMenu.OnSelectPrevious = function()
+        selectFrames(-1)
+    end
+    WorldClicker.MainMenu.OnSelectNext = function()
+        selectFrames(1)
+    end
+    WorldClicker.MainMenu.OnSelectAll = function()
+        selectFrames(0)
+    end
 	
 	-- AUDIO MENUS =======================================================
 	WorldClicker.MainMenu.OnRequestInsertAudioMenu = function()
@@ -329,7 +372,7 @@ local function AddCallbacks()
 	end
 	
 	WorldClicker.MainMenu.OnRequestEditAudioTrack = function()
-		local bool = WorldClicker.MainMenu.EditAudioTrack:GetChecked()
+		local bool = WorldClicker.MainMenu.EditAudioTrack
 		WorldClicker.MainMenu:UpdateAudioTrackEditMode(bool)
 		WorldClicker.AudioClipToolsMenu:SetEnabled(bool)
 		SMH.State.EditAudioTrack = bool
@@ -388,28 +431,15 @@ local function AddCallbacks()
     end
 
     WorldClicker.KeyframeSettings.OnRequestSelectFrames = function(_, increment)
-        local start = increment == 0 and 0 or SMH.State.Frame
-        local checkLeft = increment < 0
-        for _, kpointer in pairs(KeyframePointers) do
-            if Either(checkLeft, start >= kpointer:GetFrame(), start <= kpointer:GetFrame()) then
-                SMH.UI.ToggleSelect(kpointer)
-                -- HACK: ToggleSelect does not finalize the timeline placement of keyframes 
-                -- during offsetting, which results in "ghost" keyframes 
-                -- (EaseIn and EaseOut UI appear when no keyframes are present). 
-                -- This workaround fixes that issue.
-                if not kpointer:GetSelected() then
-                    kpointer:OnPointerReleased(kpointer:GetFrame())
-                end
-            end
-        end
+        selectFrames(increment)
     end
 
-    WorldClicker.KeyframeSettings.OnRequestSmooth = function(_)
-        RunConsoleCommand("smh_smooth", tostring(WorldClicker.KeyframeSettings.Smoothing))
+    WorldClicker.SmoothMenu.OnRequestSmooth = function(menu)
+        RunConsoleCommand("smh_smooth", tostring(menu.Smoothing))
     end
 
-    WorldClicker.KeyframeSettings.OnRequestStretch = function(_)
-        RunConsoleCommand("smh_stretch", tostring(WorldClicker.KeyframeSettings.Stretching))
+    WorldClicker.StretchMenu.OnRequestStretch = function(menu)
+        RunConsoleCommand("smh_stretch", tostring(menu.Stretching))
     end
 
     WorldClicker.Settings.OnSettingsUpdated = function(_, newSettings)
@@ -427,15 +457,6 @@ local function AddCallbacks()
                 break
             end
         end
-    end
-    WorldClicker.Settings.OnRequestOpenPhysRecorder = function()
-        WorldClicker.PhysRecorder:SetVisible(true)
-    end
-    WorldClicker.Settings.OnRequestOpenMotionPaths = function()
-        WorldClicker.MotionPaths:SetVisible(true)
-    end
-    WorldClicker.Settings.OnRequestOpenHelp = function()
-        SMH.Controller.OpenHelp()
     end
 
     SaveMenu.OnSaveRequested = function(_, path, saveToClient)
@@ -571,6 +592,7 @@ local function setupUI()
 
     WorldClicker.KeyframeSettings = vgui.Create("SMHKeyframeSettings", WorldClicker)
     WorldClicker.KeyframeSettings:SetPos(ScrW() * 0.5 - WorldClicker.KeyframeSettings.Width * 0.5, ScrH() - 90 - WorldClicker.KeyframeSettings.Height)
+    WorldClicker.KeyframeSettings:SetVisible(false)
 
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
     WorldClicker.Settings:SetPos(ScrW() - WorldClicker.Settings.Width, ScrH() - 90 - WorldClicker.Settings.Height)
@@ -583,6 +605,13 @@ local function setupUI()
     WorldClicker.MotionPaths = vgui.Create("SMHMotionPaths", WorldClicker)
     WorldClicker.MotionPaths:SetPos(ScrW() - 250 - WorldClicker.MotionPaths.Width, ScrH() - 90 - WorldClicker.MotionPaths.Height)
     WorldClicker.MotionPaths:SetVisible(false)
+    
+    WorldClicker.SmoothMenu = vgui.Create("SMHSmoothMenu", WorldClicker)
+    WorldClicker.SmoothMenu:SetVisible(false)
+    WorldClicker.StretchMenu = vgui.Create("SMHStretchMenu", WorldClicker)
+    WorldClicker.StretchMenu:SetVisible(false)
+
+    -- WorldClicker.SmoothMenu:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
     SaveMenu:MakePopup()
@@ -653,10 +682,12 @@ function MGR.Open()
     end
 
     WorldClicker:SetVisible(true)
+    WorldClicker.MainMenu:SetVisible(true)
 end
 
 function MGR.Close()
     WorldClicker:SetVisible(false)
+    WorldClicker.MainMenu:SetVisible(false)
 end
 
 function MGR.ScrubAudio(frame, lastFrame, sampleTime)

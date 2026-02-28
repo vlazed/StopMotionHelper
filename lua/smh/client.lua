@@ -2,30 +2,16 @@ include("shared.lua")
 
 include("client/state.lua")
 
-include("client/derma/frame_panel.lua")
-include("client/derma/frame_pointer.lua")
-include("client/derma/keyframe_settings.lua")
-include("client/derma/load.lua")
-include("client/derma/motionpaths.lua")
-include("client/derma/physrecord.lua")
-include("client/derma/properties.lua")
-include("client/derma/save.lua")
-include("client/derma/settings.lua")
-include("client/derma/smh_menu.lua")
-include("client/derma/spawn.lua")
-include("client/derma/tooltip.lua")
-include("client/derma/world_clicker.lua")
-include("client/derma/audioclip_pointer.lua")
-include("client/derma/audioclip_tools.lua")
-include("client/derma/audioclip_insert.lua")
-include("client/derma/audioseq_save.lua")
-include("client/derma/audioseq_load.lua")
-
-include("client/derma/audioclip_pointer.lua")
-include("client/derma/audioclip_tools.lua")
-include("client/derma/audioclip_insert.lua")
-include("client/derma/audioseq_save.lua")
-include("client/derma/audioseq_load.lua")
+local files = file.Find("smh/client/derma/*.lua", "lcl")
+for _, dermaFile in ipairs(files) do
+    local success, errMsg = pcall(function ()
+        print(dermaFile)
+        include("client/derma/" .. dermaFile)
+    end)
+    if not success then
+        ErrorNoHalt(errMsg)
+    end
+end
 
 include("client/concommands.lua")
 include("client/controller.lua")

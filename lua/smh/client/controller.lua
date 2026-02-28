@@ -681,7 +681,7 @@ function CTRL.UpdateUISetting(setting, value)
 end
 
 function CTRL.OpenHelp()
-    gui.OpenURL("https://github.com/Winded/StopMotionHelper/blob/master/TUTORIAL.md")
+    gui.OpenURL("https://github.com/vlazed/StopMotionHelper/blob/develop/TUTORIAL.md")
 end
 
 ---@param rendering boolean

@@ -2,6 +2,96 @@
 ---@field BaseClass DFrame
 local PANEL = {}
 
+---@param parentMenu DMenu
+---@param label string
+---@param callback function?
+---@return DMenu
+function PANEL:AddSubMenu(parentMenu, label, callback)
+    local m = parentMenu:AddSubMenu(label, callback)
+    self.SubMenus[label] = m
+    return m
+end
+
+function PANEL:AddMenu(label, callback)
+	local m = DermaMenu()
+	m:SetDeleteSelf( false )
+	m:SetDrawColumn( true )
+	self.Menus[ label ] = m
+	self.SubMenus[ label ] = m
+
+	local b = self.MenuBar:Add( "DButton" )
+	b:SetText( label )
+	b:Dock( RIGHT )
+	b:DockMargin( 0, 0, 2, 0 )
+	b:SetIsMenu( true )
+	b:SetPaintBackground( true )
+	b:SizeToContentsX( 16 )
+	b.DoClick = function()
+
+		if ( m:IsVisible() ) then
+			m:Hide()
+			return
+		end
+
+        local x, y = b:LocalToScreen( 0, 0 )
+		m:Open( x, y - m:GetTall(), false, m )
+
+        if isfunction(callback) then
+            callback()
+        end
+
+	end
+
+    if not callback then
+        b.OnCursorEntered = function()
+            local opened = self:GetOpenMenu()
+            if ( not IsValid( opened ) or opened == m ) then return end
+            ---@cast opened DMenu
+            opened:Hide()
+            b:DoClick()
+        end
+    end
+
+	return m
+end
+
+function PANEL:GetOpenMenu()
+
+	for k, v in pairs( self.Menus ) do
+		if ( v:IsVisible() ) then return v end
+	end
+
+	return nil
+
+end
+
+---@param parent Panel
+---@param image string
+---@param tooltip string?
+---@return DButton
+local function addButton(parent, image, callback, tooltip)
+    local b = parent:Add("DButton")
+    b:SetText("")
+    b:Dock(LEFT)
+    
+    b:SetIcon(image)
+    b:DockPadding(2, 2, 2, 2)
+
+    b:SizeToContents()
+    ---@diagnostic disable
+    b.m_Image:Dock(FILL)
+    b.m_Image:SetKeepAspect(true)
+    ---@diagnostic enable
+    if tooltip then
+        b:SetTooltip(tooltip)
+        b:SetTooltipDelay(0)
+    end
+
+    b.DoClick = callback
+
+    return b
+end
+
 function PANEL:Init()
 
     self:SetTitle("Stop Motion Helper")
@@ -12,6 +102,11 @@ function PANEL:Init()
     self:SetDeleteOnClose(false)
     self:ShowCloseButton(false)
 
+    ---@type {[string]: DMenu}
+    self.Menus = {}
+    ---@type {[string]: DMenu}
+    self.SubMenus = {}
+
     self._sendKeyframeChanges = true
 
     self.FramePanel = vgui.Create("SMHFramePanel", self)
@@ -21,6 +116,14 @@ function PANEL:Init()
     self.TimelinesBase = vgui.Create("Panel", self)
 
     self.PositionLabel = vgui.Create("DLabel", self)
+
+    self.MenuBar = vgui.Create("DPanel", self)
+    self.MenuBar:SetPaintBackground(false)
+    self.MenuBar:DockPadding(0, 0, 2, 0)
+    -- self.MenuBar:SetBackgroundColor(color_transparent)
+    
+    self.NavigationPlayback = vgui.Create("DPanel", self)
+    self.NavigationPlayback:SetPaintBackground(false)
 
     self.PlaybackRateControl = vgui.Create("DNumberWang", self)
     self.PlaybackRateControl:SetMinMax(1, 216000)
@@ -78,51 +181,79 @@ function PANEL:Init()
     self.EaseOutControl.Label:SetText("Ease out")
     self.EaseOutControl.Label:SizeToContents()
 
-    self.RecordButton = vgui.Create("DButton", self)
-    self.RecordButton:SetText("Record")
-    self.RecordButton.DoClick = function() self:OnRequestRecord() end
+    self.Help = self:AddMenu("Help...", function() self:OnRequestOpenHelp() end)
+    self.Addons = self:AddMenu("Addons")
+    self.Properties = self:AddMenu("Properties...", function() self:OnRequestOpenPropertiesMenu() end)
+    self.Record = self:AddMenu("Record...", function() self:OnRequestRecord() end)
+    self.Edit = self:AddMenu("Edit")
+    self.File = self:AddMenu("File")
 
-    self.PropertiesButton = vgui.Create("DButton", self)
-    self.PropertiesButton:SetText("Properties")
-    self.PropertiesButton.DoClick = function() self:OnRequestOpenPropertiesMenu() end
+    local audioClipToolOption
 
-    self.SaveButton = vgui.Create("DButton", self)
-    self.SaveButton:SetText("Save")
-    self.SaveButton.DoClick = function() self:OnRequestOpenSaveMenu() end
+    self.File:AddOption("New", function ()
+        -- This could be used to clear up animation data
+    end)
+    self.File:AddOption("Save...", function() self:OnRequestOpenSaveMenu() end)
+    self.File:AddOption("Load...", function() self:OnRequestOpenLoadMenu() end)
+    self.File:AddSpacer()
+    self.File:AddOption("Save Audio Sequence...", function() self:OnRequestOpenSaveAudioMenu() end)
+    self.File:AddOption("Load Audio Sequence...", function() self:OnRequestOpenLoadAudioMenu() end)
+    self.Keyframe = self:AddSubMenu(self.Edit, "Keyframes")
+    self.Keyframe:AddOption("Record", function() self:OnRequestRecord() end)
+    self.Keyframe:AddOption("Smooth...", function() self:OnRequestOpenSmoothMenu() end)
+    self.Keyframe:AddOption("Stretch...", function() self:OnRequestOpenStretchMenu() end)
+    self.Keyframe:SetDeleteSelf(false)
+    self.Edit:AddOption("Settings...", function() self:OnRequestOpenSettings() end)
+    self.Edit:AddSpacer()
+    self.Edit:AddOption("Insert Audio...", function() self:OnRequestInsertAudioMenu() end)
+    self.Edit:AddOption("Edit Audio Track", function()
+        self.EditAudioTrack = not self.EditAudioTrack
+        self:OnRequestEditAudioTrack(self.EditAudioTrack)
+        if audioClipToolOption then
+            audioClipToolOption:SetEnabled(self.EditAudioTrack)
+        end
+    end)
+    audioClipToolOption = self.Edit:AddOption("Audio Clip Tools...", function()
+        self:OnRequestAudioClipTools()
+    end)
 
-    self.LoadButton = vgui.Create("DButton", self)
-    self.LoadButton:SetText("Load")
-    self.LoadButton.DoClick = function() self:OnRequestOpenLoadMenu() end
+    self.Addons:AddOption("Physics Recorder", function()
+        self:OnRequestOpenPhysRecorder()
+    end)
+    self.Addons:AddOption("Motion Paths", function()
+        self:OnRequestOpenMotionPaths()
+    end)
 
-    self.SettingsButton = vgui.Create("DButton", self)
-    self.SettingsButton:SetText("Settings")
-    self.SettingsButton.DoClick = function() self:OnRequestOpenSettings() end
+
+    self.SelectPrevious = addButton(self.NavigationPlayback, "icon16/arrow_left.png", function()
+        self:OnSelectPrevious()
+    end, "Select left keyframes")
+    self.PreviousFrame = addButton(self.NavigationPlayback, "icon16/resultset_first.png", function()
+        self:OnPreviousFrame()
+    end, "Jump playhead to previous keyframe")
+    self.Play = addButton(self.NavigationPlayback, "icon16/resultset_next.png", function()
+        self:OnPlay()
+    end)
+    self.NextFrame = addButton(self.NavigationPlayback, "icon16/resultset_last.png", function()
+        self:OnNextFrame()
+    end, "Jump playhead to next keyframe")
+    self.SelectNext = addButton(self.NavigationPlayback, "icon16/arrow_right.png", function()
+        self:OnSelectNext()
+    end, "Select right keyframes")
+    self.SelectAll = addButton(self.NavigationPlayback, "icon16/arrow_in.png", function()
+        self:OnSelectAll()
+    end, "Select all keyframes")
 
     self.Easing:SetVisible(false)
-	
-	-- AUDIO =============================================
-	self.EditAudioTrack = vgui.Create("DCheckBoxLabel", self)
-    self.EditAudioTrack:SetText("Edit Audio Track")
-	self.EditAudioTrack.OnChange = function(bool) self:OnRequestEditAudioTrack(bool) end
-	
-	self.AudioClipTools = vgui.Create("DButton", self)
-    self.AudioClipTools:SetText("Audio Clip Tools")
-	self.AudioClipTools:SetEnabled(false)
-    self.AudioClipTools.DoClick = function() self:OnRequestAudioClipTools() end
-	
-	self.InsertAudioButton = vgui.Create("DButton", self)
-    self.InsertAudioButton:SetText("Insert Audio")
-    self.InsertAudioButton.DoClick = function() self:OnRequestInsertAudioMenu() end
-	
-	self.SaveAudioButton = vgui.Create("DButton", self)
-    self.SaveAudioButton:SetText("Save Audio Seq")
-	self.SaveAudioButton.DoClick = function() self:OnRequestOpenSaveAudioMenu() end
-	
-	self.LoadAudioButton = vgui.Create("DButton", self)
-    self.LoadAudioButton:SetText("Load Audio Seq")
-	self.LoadAudioButton.DoClick = function() self:OnRequestOpenLoadAudioMenu() end
-	-- ===================================================
 
+    -- Hack to get menus to update their sizes
+    -- This prevents the menu from opening at the cursor location
+	self.Addons:Open()
+    self.Edit:Open()
+    self.File:Open()
+	self.Addons:Hide()
+    self.Edit:Hide()
+    self.File:Hide()
 end
 
 function PANEL:PerformLayout(width, height)
@@ -165,37 +296,11 @@ function PANEL:PerformLayout(width, height)
     sizeX, sizeY = self.EaseOutControl.Label:GetSize()
     self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
 
-    self.RecordButton:SetPos(width - 60 * 5 - 5 * 5, 2)
-    self.RecordButton:SetSize(60, 20)
+    self.MenuBar:SetPos(0, 2)
+    self.MenuBar:SetSize(width, 20)
 
-    self.PropertiesButton:SetPos(width - 60 * 4 - 5 * 4, 2)
-    self.PropertiesButton:SetSize(60, 20)
-
-    self.SaveButton:SetPos(width - 60 * 3 - 5 * 3, 2)
-    self.SaveButton:SetSize(60, 20)
-
-    self.LoadButton:SetPos(width - 60 * 2 - 5 * 2, 2)
-    self.LoadButton:SetSize(60, 20)
-
-    self.SettingsButton:SetPos(width - 60 * 1 - 5 * 1, 2)
-    self.SettingsButton:SetSize(60, 20)
-	
-	-- AUDIO ==========================================================
-	self.EditAudioTrack:SetPos(width - 60 * 7.25 - 5 * 7.25 + 3, 2)
-    self.EditAudioTrack:SetSize(120, 20)
-	
-	self.AudioClipTools:SetPos(width - 60 * 8.5 - 5 * 8.5, 2)
-    self.AudioClipTools:SetSize(80, 20)
-	
-	self.InsertAudioButton:SetPos(width - 60 * 9.5 - 5 * 9.5 - 20, 2)
-    self.InsertAudioButton:SetSize(80, 20)
-	
-	self.SaveAudioButton:SetPos(width - 85 * 9.5 - 5 * 9.5 + 30, 2)
-    self.SaveAudioButton:SetSize(85, 20)
-	
-	self.LoadAudioButton:SetPos(width - 85 * 8.5 - 5 * 8.5 + 30, 2)
-    self.LoadAudioButton:SetSize(85, 20)
-	-- ================================================================
+    self.NavigationPlayback:SetSize(width * 0.25, 20)
+    self.NavigationPlayback:SetPos(width * 0.52125 - self.NavigationPlayback:GetWide() * 0.25, 2)
 
 end
 
@@ -260,7 +365,7 @@ end
 
 -- AUDIO
 function PANEL:UpdateAudioTrackEditMode(edit)
-	self.AudioClipTools:SetEnabled(edit)
+	-- self.AudioClipTools:SetEnabled(edit)
 end
 
 ---@param easeIn number
@@ -277,6 +382,15 @@ function PANEL:HideEasingControls()
     self.Easing:SetVisible(false)
 end
 
+function PANEL:SetVisible(bool)
+    if not bool then
+        for _, menu in pairs(self.SubMenus) do
+            menu:SetVisible(bool)
+        end
+    end
+    return self.BaseClass.SetVisible(self, bool)
+end
+
 ---@param newState NewState
 function PANEL:OnRequestStateUpdate(newState) end
 ---@param newKeyframeData any
@@ -286,6 +400,18 @@ function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end
 function PANEL:OnRequestOpenLoadMenu() end
 function PANEL:OnRequestOpenSettings() end
+function PANEL:OnRequestOpenStretchMenu() end
+function PANEL:OnRequestOpenSmoothMenu() end
+function PANEL:OnRequestOpenHelp() end
+function PANEL:OnRequestOpenPhysRecorder() end
+function PANEL:OnRequestOpenMotionPaths() end
+
+function PANEL:OnSelectPrevious() end
+function PANEL:OnPreviousFrame() end
+function PANEL:OnPlay() end
+function PANEL:OnNextFrame() end
+function PANEL:OnSelectNext() end
+function PANEL:OnSelectAll() end
 
 -- AUDIO =========================================
 function PANEL:OnRequestInsertAudioMenu() end

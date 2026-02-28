@@ -60,24 +60,6 @@ function PANEL:Init()
         end
     end
 
-    self.PathButton = vgui.Create("DButton", self)
-    self.PathButton:SetText("Motion Paths")
-    self.PathButton.DoClick = function()
-        self:OnRequestOpenMotionPaths()
-    end
-
-    self.PhysButton = vgui.Create("DButton", self)
-    self.PhysButton:SetText("Physics Recorder")
-    self.PhysButton.DoClick = function()
-        self:OnRequestOpenPhysRecorder()
-    end
-
-    self.HelpButton = vgui.Create("DButton", self)
-    self.HelpButton:SetText("Help")
-    self.HelpButton.DoClick = function()
-        self:OnRequestOpenHelp()
-    end
-
     self.Width = 250
     self.Height = 360
 
@@ -120,18 +102,6 @@ function PANEL:PerformLayout(width, height)
     self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
     setCheckboxPos(self.MajorTickInterval)
     self.MajorTickInterval:SetSize(self:GetWide() - 5 - 5, 25)
-
-    local setButtonPos = setPosition(self.MajorTickInterval:GetY() + 25, 25)
-
-    setButtonPos(self.PathButton)
-    self.PathButton:SetSize(self:GetWide() - 10, 20)
-
-    setButtonPos(self.PhysButton)
-    self.PhysButton:SetSize(self:GetWide() - 10, 20)
-
-    setButtonPos(self.HelpButton)
-    self.HelpButton:SetSize(self:GetWide() - 5 - 5, 20)
-
 end
 
 ---@param settings Settings
@@ -166,8 +136,5 @@ end
 
 ---@param settings Settings
 function PANEL:OnSettingsUpdated(settings) end
-function PANEL:OnRequestOpenHelp() end
-function PANEL:OnRequestOpenPhysRecorder() end
-function PANEL:OnRequestOpenMotionPaths() end
 
 vgui.Register("SMHSettings", PANEL, "DFrame")

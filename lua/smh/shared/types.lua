@@ -29,6 +29,7 @@
 ---@field PlaybackRate integer
 ---@field PlaybackLength integer
 ---@field TimeStamp number
+---@field EditAudioTrack boolean
 
 ---@class AudioClip
 ---@field ID integer
