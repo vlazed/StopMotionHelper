@@ -80,7 +80,7 @@ function PANEL:Init()
     self.SmoothButton:SetText("Smooth")
     self.SmoothButton.DoClick = function()
         self:OnRequestSmooth()
-        self:SetVisible(false)
+        self:SetSmoothEnabled(false)
     end
 
     self.CancelButton = vgui.Create("DButton", self.Buttons)
@@ -89,6 +89,10 @@ function PANEL:Init()
         self:SetVisible(false)
     end
 
+end
+
+function PANEL:SetSmoothEnabled(bool)
+    self.SmoothButton:SetEnabled(bool)
 end
 
 function PANEL:PerformLayout(width, height)

@@ -68,7 +68,7 @@ function PANEL:Init()
     self.StretchButton:SetText("Stretch")
     self.StretchButton.DoClick = function()
         self:OnRequestStretch()
-        self:SetVisible(false)
+        self:SetStretchEnabled(false)
     end
 
     self.CancelButton = vgui.Create("DButton", self.Buttons)
@@ -91,6 +91,10 @@ function PANEL:Init()
     end)
     self.StretchSlider:SetDecimals(3)
 
+end
+
+function PANEL:SetStretchEnabled(bool)
+    self.StretchButton:SetEnabled(bool)
 end
 
 function PANEL:PerformLayout(width, height)

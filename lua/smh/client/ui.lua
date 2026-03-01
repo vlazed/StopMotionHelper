@@ -654,6 +654,16 @@ local function setupUI()
     WorldClicker.MainMenu:SetInitialState(SMH.State)
 end
 
+hook.Add("SMHStretchingFinished", "SMHEnableStretching", function ()
+    WorldClicker.StretchMenu:SetStretchEnabled(true)
+    chat.AddText("SMH Stretching stopped.")
+end)
+
+hook.Add("SMHSmoothingFinished", "SMHEnableSmoothing", function ()
+    WorldClicker.SmoothMenu:SetSmoothEnabled(true)
+    chat.AddText("SMH Smoothing stopped.")
+end)
+
 hook.Add("EntityRemoved", "SMHWorldClickerEntityRemoved", function(entity)
 
     for centity, _ in pairs(ClickerEntity) do
