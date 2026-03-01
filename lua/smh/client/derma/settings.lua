@@ -2,6 +2,40 @@
 ---@field BaseClass DFrame
 local PANEL = {}
 
+---@param tree DTree
+---@param setting DPanel
+---@param label string
+---@param icon string?
+---@return DTree_Node, DScrollPanel
+local function createSettingsPanel(tree, setting, label, icon)
+    local node = tree:AddNode(label, icon)
+    ---@cast node DTree_Node
+    local scroller = setting:Add("DScrollPanel")
+    scroller:DockPadding(0, 20, 0, 20)
+    scroller:Dock(FILL)
+
+    function node:DoClick()
+        for _, s in ipairs(setting:GetChildren()) do
+            s:SetVisible(false)
+        end
+        scroller:SetVisible(true)
+    end
+
+    return node, scroller
+end
+
+---@generic T
+---@param parent Panel
+---@param panel Panel|T
+---@return Panel|T
+local function addSetting(parent, panel)
+    parent:Add(panel)
+    panel:Dock(TOP)
+    panel:DockMargin(5, 10, 5, 0)
+
+    return panel
+end
+
 function PANEL:Init()
 
     local function CreateSettingChanger(name)
@@ -17,6 +51,9 @@ function PANEL:Init()
         end
     end
 
+    ---@param name string
+    ---@param label string
+    ---@return DCheckBoxLabel
     local function CreateCheckBox(name, label)
         local cb = vgui.Create("DCheckBoxLabel", self)
         cb:SetText(label)
@@ -25,6 +62,12 @@ function PANEL:Init()
         return cb
     end
 
+    ---@param name string
+    ---@param label string
+    ---@param min number
+    ---@param max number
+    ---@param decimals integer
+    ---@return DNumSlider
     local function CreateSlider(name, label, min, max, decimals)
         local slider = vgui.Create("DNumSlider", self)
         slider:SetMinMax(min, max)
@@ -37,17 +80,33 @@ function PANEL:Init()
     self:SetTitle("SMH Settings")
     self:SetDeleteOnClose(false)
 
-    self.FreezeAll = CreateCheckBox("FreezeAll", "Freeze all")
-    self.LocalizePhysBones = CreateCheckBox("LocalizePhysBones", "Localize phys bones")
-    self.IgnorePhysBones = CreateCheckBox("IgnorePhysBones", "Don't animate phys bones")
-    self.GhostPrevFrame = CreateCheckBox("GhostPrevFrame", "Ghost previous frame")
-    self.GhostNextFrame = CreateCheckBox("GhostNextFrame", "Ghost next frame")
-    self.GhostAllEntities = CreateCheckBox("GhostAllEntities", "Ghost all entities")
-    self.GhostXRay = CreateCheckBox("GhostXRay", "Enable X-Ray ghosts")
-    self.TweenDisable = CreateCheckBox("TweenDisable", "Disable tweening")
-    self.SmoothPlayback = CreateCheckBox("SmoothPlayback", "Smooth playback")
-    self.EnableWorld = CreateCheckBox("EnableWorld", "Enable World keyframes")
-    self.GhostTransparency = CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2)
+    self.MenuPanel = vgui.Create("DPanel", self)
+    self.SettingPanel = vgui.Create("DPanel", self)
+    self.SettingPanel:SetPaintBackground(false)
+
+    self.MenuTree = vgui.Create("DTree", self.MenuPanel)
+    self.Divider = vgui.Create("DHorizontalDivider", self)
+    
+    self.Divider:Dock(FILL)
+    self.Divider:SetLeft(self.MenuPanel)
+    self.Divider:SetRight(self.SettingPanel)
+    self.MenuTree:Dock(FILL)
+    
+    self.GeneralSettingsNode, self.GeneralSettings = createSettingsPanel(self.MenuTree, self.SettingPanel, "General")
+    self.GhostSettingsNode, self.GhostSettings = createSettingsPanel(self.MenuTree, self.SettingPanel, "Ghost")
+    self.PlaybackSettingsNode, self.PlaybackSettings = createSettingsPanel(self.MenuTree, self.SettingPanel, "Playback")
+
+    self.FreezeAll = addSetting(self.GeneralSettings, CreateCheckBox("FreezeAll", "Freeze all"))
+    self.LocalizePhysBones = addSetting(self.GeneralSettings, CreateCheckBox("LocalizePhysBones", "Localize phys bones"))
+    self.IgnorePhysBones = addSetting(self.GeneralSettings, CreateCheckBox("IgnorePhysBones", "Don't animate phys bones"))
+    self.GhostPrevFrame = addSetting(self.GhostSettings, CreateCheckBox("GhostPrevFrame", "Ghost previous frame"))
+    self.GhostNextFrame = addSetting(self.GhostSettings, CreateCheckBox("GhostNextFrame", "Ghost next frame"))
+    self.GhostAllEntities = addSetting(self.GhostSettings, CreateCheckBox("GhostAllEntities", "Ghost all entities"))
+    self.GhostXRay = addSetting(self.GhostSettings, CreateCheckBox("GhostXRay", "Enable X-Ray ghosts"))
+    self.GhostTransparency = addSetting(self.GhostSettings, CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2))
+    self.TweenDisable = addSetting(self.PlaybackSettings, CreateCheckBox("TweenDisable", "Disable tweening"))
+    self.SmoothPlayback = addSetting(self.PlaybackSettings, CreateCheckBox("SmoothPlayback", "Smooth playback"))
+    self.EnableWorld = addSetting(self.PlaybackSettings, CreateCheckBox("EnableWorld", "Enable World keyframes"))
     
     self.MajorTickInterval = vgui.Create("DNumSlider", self)
     self.MajorTickInterval:SetMinMax(3, 16)
@@ -56,11 +115,16 @@ function PANEL:Init()
     self.MajorTickInterval:SetConVar("smh_majortickinterval")
     self.MajorTickInterval.OnValueChanged = function(_, newVal)
         if newVal < 4 then
-            self.MajorTickInterval.TextArea:SetValue("Disabled")
+            self.MajorTickInterval.TextArea:SetValue("Disabled") ---@diagnostic disable-line
         end
     end
 
-    self.Width = 250
+    addSetting(self.GeneralSettings, self.MajorTickInterval)
+
+    ---@diagnostic disable-next-line
+    self.GeneralSettingsNode:DoClick()
+    
+    self.Width = 500
     self.Height = 360
 
     self:SetSize(self.Width, self.Height)
@@ -69,39 +133,9 @@ function PANEL:Init()
 
 end
 
----Initialize a starting position. Every call to this function will add to the pos variable 
----@param pos number Initial position
----@param offset number
----@return fun(panel: Panel)
-local function setPosition(pos, offset)
-    return function(panel)
-        panel:SetPos(5, pos)
-        pos = pos + offset
-    end
-end
-
 function PANEL:PerformLayout(width, height)
-
-    local setCheckboxPos = setPosition(25, 20)
-
     ---@diagnostic disable-next-line
     self.BaseClass.PerformLayout(self, width, height)
-
-    setCheckboxPos(self.FreezeAll)
-    setCheckboxPos(self.LocalizePhysBones)
-    setCheckboxPos(self.IgnorePhysBones)
-    setCheckboxPos(self.GhostPrevFrame)
-    setCheckboxPos(self.GhostNextFrame)
-    setCheckboxPos(self.GhostAllEntities)
-    setCheckboxPos(self.GhostXRay)
-    setCheckboxPos(self.TweenDisable)
-    setCheckboxPos(self.SmoothPlayback)
-    setCheckboxPos(self.EnableWorld)
-
-    setCheckboxPos(self.GhostTransparency)
-    self.GhostTransparency:SetSize(self:GetWide() - 5 - 5, 25)
-    setCheckboxPos(self.MajorTickInterval)
-    self.MajorTickInterval:SetSize(self:GetWide() - 5 - 5, 25)
 end
 
 ---@param settings Settings
