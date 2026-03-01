@@ -32,6 +32,10 @@ concommand.Add("+smh_menu", function()
     SMH.Controller.OpenMenu()
 end)
 
+concommand.Add("smh_menu", function()
+    SMH.Controller.ToggleMenu()
+end, nil, "Toggle the Stop Motion Helper timeline")
+
 -- Helper functions for incrementing the playhead position on the timeline
 
 ---@param n Falsy<integer>?

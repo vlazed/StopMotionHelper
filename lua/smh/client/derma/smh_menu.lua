@@ -1,5 +1,7 @@
 ---@class SMHMenu: DFrame
 ---@field BaseClass DFrame
+---@field FramePanel SMHFramePanel
+---@field FramePointer SMHFramePointer
 local PANEL = {}
 
 ---@param parentMenu DMenu
@@ -52,7 +54,7 @@ function PANEL:AddMenu(label, callback)
         end
     end
 
-	return m
+	return m, b
 end
 
 function PANEL:GetOpenMenu()
@@ -184,7 +186,9 @@ function PANEL:Init()
     self.Help = self:AddMenu("Help...", function() self:OnRequestOpenHelp() end)
     self.Addons = self:AddMenu("Addons")
     self.Properties = self:AddMenu("Properties...", function() self:OnRequestOpenPropertiesMenu() end)
-    self.Record = self:AddMenu("Record...", function() self:OnRequestRecord() end)
+    self.Record, self.RecordButton = self:AddMenu("Record", function() self:OnRequestRecord() end)
+    self.RecordButton:SetTooltip("Record a keyframe")
+    self.RecordButton:SetTooltipDelay(0)
     self.Edit = self:AddMenu("Edit")
     self.File = self:AddMenu("File")
 
@@ -203,7 +207,6 @@ function PANEL:Init()
     self.Keyframe:AddOption("Smooth...", function() self:OnRequestOpenSmoothMenu() end)
     self.Keyframe:AddOption("Stretch...", function() self:OnRequestOpenStretchMenu() end)
     self.Keyframe:SetDeleteSelf(false)
-    self.Edit:AddOption("Settings...", function() self:OnRequestOpenSettings() end)
     self.Edit:AddSpacer()
     self.Edit:AddOption("Insert Audio...", function() self:OnRequestInsertAudioMenu() end)
     self.Edit:AddOption("Edit Audio Track", function()
@@ -216,6 +219,8 @@ function PANEL:Init()
     audioClipToolOption = self.Edit:AddOption("Audio Clip Tools...", function()
         self:OnRequestAudioClipTools()
     end)
+    self.Edit:AddSpacer()
+    self.Edit:AddOption("Settings...", function() self:OnRequestOpenSettings() end)
 
     self.Addons:AddOption("Physics Recorder", function()
         self:OnRequestOpenPhysRecorder()

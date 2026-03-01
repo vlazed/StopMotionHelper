@@ -641,6 +641,10 @@ function CTRL.ToggleRendering(renderCmd, StartFrame)
     end
 end
 
+function CTRL.ToggleMenu()
+    SMH.UI.Toggle()
+end
+
 function CTRL.OpenMenu()
     SMH.UI.Open()
 end

@@ -2,6 +2,13 @@ local BaseClass = baseclass.Get("EditablePanel")
 ---@class SMHWorldClickerPanel: EditablePanel
 local PANEL = {}
 
+local viewTrace = {
+    start = vector_origin,
+    endPos = vector_origin,
+    filter = {},
+    output = {}
+}
+
 ---@source https://github.com/penolakushari/RagdollMover/blob/eefbda5c3b27e193b1c3e113b258f7a1d4334cad/lua/autorun/ragdollmover.lua#L72
 ---@param output TraceResult
 ---@return Trace
@@ -15,12 +22,12 @@ local function GetViewTrace(output)
         eyePos = viewEntity:LocalToWorld(viewEntity:GetViewOffset())
     end
 
-    return {
-        start = eyePos,
-        endpos = eyePos + player:GetAimVector() * 32678,
-        filter = viewEntity,
-        output = output
-    }
+    viewTrace.start = eyePos
+    viewTrace.endpos = eyePos + player:GetAimVector() * 32678
+    viewTrace.filter = viewEntity
+    viewTrace.output = output
+
+    return viewTrace
 end
 
 function PANEL:Init()

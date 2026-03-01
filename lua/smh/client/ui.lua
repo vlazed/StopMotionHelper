@@ -263,7 +263,18 @@ local function selectFrames(increment)
     end
 end
 
+local function addHoverCallbacks(parent)
+    for _, child in ipairs(parent:GetChildren()) do
+        if ispanel(child) and child ~= parent then
+            function child:TestHover(x, y)
+                parent:SetKeyboardInputEnabled(parent:IsChildHovered(child))
+            end
+        end
+    end
+end
+
 local function AddCallbacks()
+    addHoverCallbacks(WorldClicker)
 
     local lastEntity = NULL
     local entityCount = 1
@@ -430,10 +441,6 @@ local function AddCallbacks()
         SMH.Controller.SetFrame(newFrame)
     end
 
-    WorldClicker.KeyframeSettings.OnRequestSelectFrames = function(_, increment)
-        selectFrames(increment)
-    end
-
     WorldClicker.SmoothMenu.OnRequestSmooth = function(menu)
         RunConsoleCommand("smh_smooth", tostring(menu.Smoothing))
     end
@@ -590,10 +597,6 @@ local function setupUI()
 
     WorldClicker.MainMenu = vgui.Create("SMHMenu", WorldClicker)
 
-    WorldClicker.KeyframeSettings = vgui.Create("SMHKeyframeSettings", WorldClicker)
-    WorldClicker.KeyframeSettings:SetPos(ScrW() * 0.5 - WorldClicker.KeyframeSettings.Width * 0.5, ScrH() - 90 - WorldClicker.KeyframeSettings.Height)
-    WorldClicker.KeyframeSettings:SetVisible(false)
-
     WorldClicker.Settings = vgui.Create("SMHSettings", WorldClicker)
     WorldClicker.Settings:SetPos(ScrW() - WorldClicker.Settings.Width, ScrH() - 90 - WorldClicker.Settings.Height)
     WorldClicker.Settings:SetVisible(false)
@@ -610,8 +613,6 @@ local function setupUI()
     WorldClicker.SmoothMenu:SetVisible(false)
     WorldClicker.StretchMenu = vgui.Create("SMHStretchMenu", WorldClicker)
     WorldClicker.StretchMenu:SetVisible(false)
-
-    -- WorldClicker.SmoothMenu:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
     SaveMenu:MakePopup()
@@ -683,11 +684,31 @@ function MGR.Open()
 
     WorldClicker:SetVisible(true)
     WorldClicker.MainMenu:SetVisible(true)
+    WorldClicker:MakePopup()
+end
+
+function MGR.Toggle()
+    WorldClicker:ToggleVisible()
+    WorldClicker.MainMenu:SetVisible(WorldClicker:IsVisible())
+    WorldClicker.Toggle = WorldClicker:IsVisible()
+    WorldClicker:SetMouseInputEnabled(false)
+    WorldClicker:SetKeyboardInputEnabled(false)
+end
+
+-- Detour to allow other functions that free the mouse cursor to also interact with the SMH menu  
+gui.smh_EnableScreenClickerInternal = gui.smh_EnableScreenClickerInternal or gui.EnableScreenClicker
+function gui.EnableScreenClicker(bool, ...)
+    if WorldClicker then
+        WorldClicker:SetMouseInputEnabled(bool)
+    end
+	return gui.smh_EnableScreenClickerInternal(bool, ...)
 end
 
 function MGR.Close()
     WorldClicker:SetVisible(false)
     WorldClicker.MainMenu:SetVisible(false)
+    WorldClicker:SetMouseInputEnabled(false)
+    WorldClicker:SetKeyboardInputEnabled(false)
 end
 
 function MGR.ScrubAudio(frame, lastFrame, sampleTime)
