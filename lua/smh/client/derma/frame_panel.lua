@@ -399,6 +399,14 @@ function PANEL:Think()
 end
 
 function PANEL:OnScrollBarReleased(mousecode)
+    if mousecode == MOUSE_RIGHT then
+        local m = DermaMenu(true, self)
+        m:AddOption("Reset zoom?", function ()
+            GetConVar("smh_zoom"):Revert()
+        end)
+        m:Open()
+    end
+
     if mousecode ~= MOUSE_LEFT then
         return
     end
