@@ -20,14 +20,22 @@ SMH.Modifiers = {}
 local path = "smh/modifiers/"
 local files, dirs = file.Find(path .. "*.lua", "LUA")
 
-for _, f in pairs(files) do
+local function refreshModifiers()
+	for _, f in pairs(files) do
 
-    _G["MOD"] = setmetatable({}, MODBASE)
+		_G["MOD"] = setmetatable({}, MODBASE)
 
-    include(path .. f)
+		include(path .. f)
 
-    SMH.Modifiers[f:sub(1, -5)] = _G["MOD"]
+		SMH.Modifiers[f:sub(1, -5)] = _G["MOD"]
 
-    _G["MOD"] = nil
+		_G["MOD"] = nil
 
-end
+	end
+end	
+
+refreshModifiers()
+
+concommand.Add("smh_refreshmodifiers", function(ply)
+	refreshModifiers()
+end, nil, "Update modifier data")
