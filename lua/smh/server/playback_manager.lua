@@ -6,6 +6,8 @@ local MGR = {}
 local check = SMH.SettingsManager.CheckSetting
 local getSetting = SMH.SettingsManager.GetSetting
 
+local getBetweenKeyframes = SMH.GetBetweenKeyframes
+
 ---@param player Player
 ---@param playback Playback
 ---@param settings Settings
@@ -15,7 +17,7 @@ local function PlaybackSmooth(player, playback, settings)
     end
 
     playback.Timer = playback.Timer + FrameTime()
-    local timePerFrame = 1 / playback.PlaybackRate
+    local timePerFrame = playback.TimePerFrame
 
     playback.CurrentFrame = playback.Timer / timePerFrame + playback.StartFrame
     if playback.CurrentFrame > playback.EndFrame then
@@ -24,33 +26,39 @@ local function PlaybackSmooth(player, playback, settings)
         playback.Timer = 0
     end
 
+    local currentFrame = playback.CurrentFrame
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
             for name, mod in pairs(SMH.Modifiers) do
-                local prevKeyframe, nextKeyframe, _ = SMH.GetClosestKeyframes(keyframes, playback.CurrentFrame, false, name)
+                local prevKeyframe, nextKeyframe = getBetweenKeyframes(keyframes, currentFrame, false, name)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
 
                 if not prevKeyframe then continue end
 
-                if prevKeyframe.Frame == nextKeyframe.Frame then
-                    if prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity));
+                local prevFrame = prevKeyframe.Frame
+                local nextFrame = nextKeyframe.Frame
+                local invDelta = 1 / (nextFrame - prevFrame)
+                local prevData, nextData = prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name]
+
+                if prevFrame == prevFrame then
+                    if prevData and nextData then
+                        mod:Load(entity, prevData, getSetting(settings, entity));
                     end
                 else
-                    local lerpMultiplier = ((playback.Timer + playback.StartFrame * timePerFrame) - prevKeyframe.Frame * timePerFrame) / ((nextKeyframe.Frame - prevKeyframe.Frame) * timePerFrame)
+                    local lerpMultiplier = (currentFrame - prevFrame) * invDelta
                     lerpMultiplier = math.EaseInOut(lerpMultiplier, prevKeyframe.EaseOut[name], nextKeyframe.EaseIn[name])
 
                     if lerpMultiplier <= 0 or check(settings, "TweenDisable", entity) then
-                        mod:Load(entity, prevKeyframe.Modifiers[name], getSetting(settings, entity))
-                    elseif prevKeyframe.Modifiers[name] and nextKeyframe.Modifiers[name] then
-                        mod:LoadBetween(entity, prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name], lerpMultiplier, getSetting(settings, entity));
+                        mod:Load(entity, prevData, getSetting(settings, entity))
+                    elseif prevData and nextData then
+                        mod:LoadBetween(entity, prevData, nextData, lerpMultiplier, getSetting(settings, entity));
                     end
                 end
             end
         else
             if check(settings, "EnableWorld", entity) then
-                SMH.WorldKeyframesManager.Load(player, math.Round(playback.CurrentFrame), keyframes)
+                SMH.WorldKeyframesManager.Load(player, math.Round(currentFrame), keyframes)
             end
         end
     end
@@ -135,6 +143,7 @@ function MGR.StartPlayback(player, startFrame, endFrame, playbackRate, settings)
         StartFrame = startFrame,
         EndFrame = endFrame,
         PlaybackRate = playbackRate,
+        TimePerFrame = 1 / playbackRate,
         CurrentFrame = startFrame,
         PrevFrame = startFrame - 1,
         Timer = 0,
@@ -223,11 +232,12 @@ hook.Add("Think", "SMHPlaybackManagerThink", function()
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
 
             playback.Timer = playback.Timer + FrameTime()
-            local timePerFrame = 1 / playback.PlaybackRate
+            local timePerFrame = playback.TimePerFrame
+            local playbackRate = playback.PlaybackRate
 
             if playback.Timer >= timePerFrame then
 
-                playback.CurrentFrame = math.floor(playback.Timer / timePerFrame) + playback.StartFrame
+                playback.CurrentFrame = math.floor(playback.Timer * playbackRate) + playback.StartFrame
                 if playback.CurrentFrame > playback.EndFrame then
                     playback.CurrentFrame = 0
                     playback.StartFrame = 0

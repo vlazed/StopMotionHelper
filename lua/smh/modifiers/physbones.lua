@@ -49,10 +49,10 @@ function MOD:Load(entity, data, settings)
 
         if parent and settings.LocalizePhysBones and d.LocalPos and d.LocalAng then
             local pos, ang = LocalToWorld(d.LocalPos, d.LocalAng, parent:GetPos(), parent:GetAngles());
-            pb:SetPos(pos);
+            pb:SetPos(pos, true);
             pb:SetAngles(ang);
         else
-            pb:SetPos(d.Pos);
+            pb:SetPos(d.Pos, true);
             pb:SetAngles(d.Ang);
         end
 
@@ -80,7 +80,7 @@ function MOD:LoadGhost(entity, ghost, data)
         pb:Wake();
 
         local d = data[i];
-        pb:SetPos(d.Pos);
+        pb:SetPos(d.Pos, true);
         pb:SetAngles(d.Ang);
 
         pb:EnableMotion(false);
@@ -105,7 +105,7 @@ function MOD:LoadGhostBetween(entity, ghost, data1, data2, percentage)
         local Ang = SMH.LerpLinearAngle(d1.Ang, d2.Ang, percentage);
 
         pb:EnableMotion(false);
-            pb:SetPos(Pos);
+            pb:SetPos(Pos, true);
         pb:SetAngles(Ang);
 
         pb:Wake();
@@ -135,7 +135,7 @@ function MOD:LoadBetween(entity, data1, data2, percentage, settings)
         else
             pb:EnableMotion(d1.Moveable);
         end
-        pb:SetPos(Pos);
+        pb:SetPos(Pos, true);
         pb:SetAngles(Ang);
 
         pb:Wake();
