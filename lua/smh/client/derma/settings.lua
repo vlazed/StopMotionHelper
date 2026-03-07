@@ -77,6 +77,24 @@ function PANEL:Init()
         return slider
     end
 
+    ---@param label string
+    ---@param convar string
+    ---@param min number
+    ---@param max number
+    ---@param decimals integer
+    ---@param callback function
+    ---@return SMHNumberWang
+    local function CreateNumberWang(label, convar, min, max, decimals, callback)
+        local numberWang = vgui.Create("SMHNumberWang", self)
+        numberWang:SetText(label)
+        numberWang:SetConVar(convar)
+        numberWang:SetMinMax(min, max)
+        numberWang:SetDecimals(decimals)
+        numberWang.OnValueChanged = function(_, value) callback(value) end
+
+        return numberWang
+    end
+
     self:SetTitle("SMH Settings")
     self:SetDeleteOnClose(false)
 
@@ -104,6 +122,13 @@ function PANEL:Init()
     self.GhostAllEntities = addSetting(self.GhostSettings, CreateCheckBox("GhostAllEntities", "Ghost all entities"))
     self.GhostXRay = addSetting(self.GhostSettings, CreateCheckBox("GhostXRay", "Enable X-Ray ghosts"))
     self.GhostTransparency = addSetting(self.GhostSettings, CreateSlider("GhostTransparency", "Ghost transparency", 0, 1, 2))
+
+    self.PlaybackRate = addSetting(self.PlaybackSettings, CreateNumberWang("Framerate", "smh_fps", 1, 216000, 0, function(value)
+        self:OnRequestStateUpdate({ PlaybackRate = tonumber(value) })
+    end))
+    self.PlaybackLength = addSetting(self.PlaybackSettings, CreateNumberWang("Frame count", "smh_framecount", 1, 100000, 0, function(value)
+        self:OnRequestStateUpdate({ PlaybackLength = tonumber(value) })
+    end))
     self.TweenDisable = addSetting(self.PlaybackSettings, CreateCheckBox("TweenDisable", "Disable tweening"))
     self.SmoothPlayback = addSetting(self.PlaybackSettings, CreateCheckBox("SmoothPlayback", "Smooth playback"))
     self.EnableWorld = addSetting(self.PlaybackSettings, CreateCheckBox("EnableWorld", "Enable World keyframes"))
@@ -168,7 +193,16 @@ function PANEL:ApplySettings(settings)
     self._changingSettings = false
 end
 
+---@param state State
+function PANEL:SetInitialState(state)
+    self.PlaybackRate:SetValue(state.PlaybackRate)
+    self.PlaybackLength:SetValue(state.PlaybackLength)
+end
+
 ---@param settings Settings
 function PANEL:OnSettingsUpdated(settings) end
+
+---@param newState NewState
+function PANEL:OnRequestStateUpdate(newState) end
 
 vgui.Register("SMHSettings", PANEL, "DFrame")

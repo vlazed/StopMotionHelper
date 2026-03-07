@@ -4,6 +4,23 @@
 ---@field FramePointer SMHFramePointer
 local PANEL = {}
 
+---The first and second string is the identifier and the format string expected
+---of the identifier. The last index is a table with the following labels:
+---
+---`{hours, minutes, seconds, frame % frameRate, adjustedFrame, frameCount}`
+---
+---where adjustedFrame accounts for the `smh_startatone` offset.
+---
+---I expect more position label formats, hence the use of a table
+---to store these.
+---
+---@type {[1]: string, [2]: string, [3]: integer[]}[]
+local labelFormats = {
+    {"Position", "%d / %d", {5, 6}},
+    {"Time", "%02dh:%02dm:%02ds.%03d", {1, 2, 3, 4}},
+}
+local labelCount = #labelFormats
+
 ---@param parentMenu DMenu
 ---@param label string
 ---@param callback function?
@@ -94,22 +111,30 @@ local function addButton(parent, image, callback, tooltip)
     return b
 end
 
+---This function positions the playback and navigation
+---buttons such that they are centered on the timeline
+---@param width integer
+---@return number
+local function playbackScale(width)
+    return math.max(width * 0.46875 - 400, 0)
+end
+
 function PANEL:Init()
 
     self:SetTitle("Stop Motion Helper")
     self:SetSize(ScrW(), 90)
     self:SetPos(0, ScrH() - self:GetTall())
-    self:SetDraggable(false)
+    self:SetDraggable(true)
     self:ShowCloseButton(false)
     self:SetDeleteOnClose(false)
-    self:ShowCloseButton(false)
+    self:SetSizable(true)
 
     ---@type {[string]: DMenu}
     self.Menus = {}
     ---@type {[string]: DMenu}
     self.SubMenus = {}
 
-    self._sendKeyframeChanges = true
+    self.EditAudioTrack = false
 
     self.FramePanel = vgui.Create("SMHFramePanel", self)
 
@@ -117,71 +142,9 @@ function PANEL:Init()
 
     self.TimelinesBase = vgui.Create("Panel", self)
 
-    self.PositionLabel = vgui.Create("DLabel", self)
-
-    self.MenuBar = vgui.Create("DPanel", self)
-    self.MenuBar:SetPaintBackground(false)
+    self.MenuBar = vgui.Create("Panel", self)
     self.MenuBar:DockPadding(0, 0, 2, 0)
     -- self.MenuBar:SetBackgroundColor(color_transparent)
-    
-    self.NavigationPlayback = vgui.Create("DPanel", self)
-    self.NavigationPlayback:SetPaintBackground(false)
-
-    self.PlaybackRateControl = vgui.Create("DNumberWang", self)
-    self.PlaybackRateControl:SetMinMax(1, 216000)
-    self.PlaybackRateControl:SetDecimals(0)
-    self.PlaybackRateControl:SetConVar("smh_fps")
-    self.PlaybackRateControl.Think = function(self)
-        self:ConVarNumberThink()
-    end
-    self.PlaybackRateControl.OnValueChanged = function(_, value)
-        self:OnRequestStateUpdate({ PlaybackRate = tonumber(value) })
-    end
-    self.PlaybackRateControl.Label = vgui.Create("DLabel", self)
-    self.PlaybackRateControl.Label:SetText("Framerate")
-    self.PlaybackRateControl.Label:SizeToContents()
-
-    self.PlaybackLengthControl = vgui.Create("DNumberWang", self)
-    self.PlaybackLengthControl:SetMinMax(1, 100000)
-    self.PlaybackLengthControl:SetDecimals(0)
-    self.PlaybackLengthControl:SetConVar("smh_framecount")
-    self.PlaybackLengthControl.Think = function(self)
-        self:ConVarNumberThink()
-    end
-    self.PlaybackLengthControl.OnValueChanged = function(_, value)
-        self:OnRequestStateUpdate({ PlaybackLength = tonumber(value) })
-    end
-    self.PlaybackLengthControl.Label = vgui.Create("DLabel", self)
-    self.PlaybackLengthControl.Label:SetText("Frame count")
-    self.PlaybackLengthControl.Label:SizeToContents()
-
-    self.Easing = vgui.Create("Panel", self)
-
-    self.EaseInControl = vgui.Create("DNumberWang", self.Easing)
-    self.EaseInControl:SetNumberStep(0.1)
-    self.EaseInControl:SetMinMax(0, 1)
-    self.EaseInControl:SetDecimals(1)
-    self.EaseInControl.OnValueChanged = function(_, value)
-        if self._sendKeyframeChanges then
-            self:OnRequestKeyframeUpdate({ EaseIn = tonumber(value) })
-        end
-    end
-    self.EaseInControl.Label = vgui.Create("DLabel", self.Easing)
-    self.EaseInControl.Label:SetText("Ease in")
-    self.EaseInControl.Label:SizeToContents()
-
-    self.EaseOutControl = vgui.Create("DNumberWang", self.Easing)
-    self.EaseOutControl:SetNumberStep(0.1)
-    self.EaseOutControl:SetMinMax(0, 1)
-    self.EaseOutControl:SetDecimals(1)
-    self.EaseOutControl.OnValueChanged = function(_, value)
-        if self._sendKeyframeChanges then
-            self:OnRequestKeyframeUpdate({ EaseOut = tonumber(value) })
-        end
-    end
-    self.EaseOutControl.Label = vgui.Create("DLabel", self.Easing)
-    self.EaseOutControl.Label:SetText("Ease out")
-    self.EaseOutControl.Label:SizeToContents()
 
     self.Help = self:AddMenu("Help...", function() self:OnRequestOpenHelp() end)
     self.Addons = self:AddMenu("Addons")
@@ -191,6 +154,24 @@ function PANEL:Init()
     self.RecordButton:SetTooltipDelay(0)
     self.Edit = self:AddMenu("Edit")
     self.File = self:AddMenu("File")
+
+    self.NavigationPlayback = vgui.Create("Panel", self.MenuBar)
+
+    self.NavigationPlayback:Dock(RIGHT)
+
+    self.PositionBar = vgui.Create("Panel", self.MenuBar)
+    self.PositionBar:Dock(LEFT)
+
+    self.PositionLabelCycle = 0
+    self.PositionLabel = vgui.Create("DLabel", self.PositionBar)
+    self.PositionLabel:SetTooltipDelay(0)
+    self.PositionLabel:SetMouseInputEnabled(true)
+    self.PositionLabel:Dock(RIGHT)
+
+    self.PositionLabel.DoClick = function(_)
+        self.PositionLabelCycle = (self.PositionLabelCycle + 1) % labelCount
+        self:UpdatePositionLabel(SMH.State.Frame, SMH.State.PlaybackLength, SMH.State.PlaybackRate)
+    end
 
     local audioClipToolOption
 
@@ -219,6 +200,7 @@ function PANEL:Init()
     audioClipToolOption = self.Edit:AddOption("Audio Clip Tools...", function()
         self:OnRequestAudioClipTools()
     end)
+    audioClipToolOption:SetEnabled(self.EditAudioTrack)
     self.Edit:AddSpacer()
     self.Edit:AddOption("Settings...", function() self:OnRequestOpenSettings() end)
 
@@ -249,8 +231,6 @@ function PANEL:Init()
         self:OnSelectAll()
     end, "Select all keyframes")
 
-    self.Easing:SetVisible(false)
-
     -- Hack to get menus to update their sizes
     -- This prevents the menu from opening at the cursor location
 	self.Addons:Open()
@@ -276,36 +256,16 @@ function PANEL:PerformLayout(width, height)
     self.TimelinesBase:SetPos(0, 25)
     self.TimelinesBase:SetSize(ScrW(),15)
 
-    self.PositionLabel:SetPos(150, 5)
-
-    self.PlaybackRateControl:SetPos(340, 2)
-    self.PlaybackRateControl:SetSize(50, 20)
-    local sizeX, sizeY = self.PlaybackRateControl.Label:GetSize()
-    self.PlaybackRateControl.Label:SetRelativePos(self.PlaybackRateControl, -(sizeX) - 5, 3)
-
-    self.PlaybackLengthControl:SetPos(460, 2)
-    self.PlaybackLengthControl:SetSize(50, 20)
-    sizeX, sizeY = self.PlaybackLengthControl.Label:GetSize()
-    self.PlaybackLengthControl.Label:SetRelativePos(self.PlaybackLengthControl, -(sizeX) - 5, 3)
-
-    self.Easing:SetPos(540, 0)
-    self.Easing:SetSize(250, 30)
-
-    self.EaseInControl:SetPos(60, 2)
-    self.EaseInControl:SetSize(50, 20)
-    sizeX, sizeY = self.EaseInControl.Label:GetSize()
-    self.EaseInControl.Label:SetRelativePos(self.EaseInControl, -(sizeX) - 5, 3)
-
-    self.EaseOutControl:SetPos(160, 2)
-    self.EaseOutControl:SetSize(50, 20)
-    sizeX, sizeY = self.EaseOutControl.Label:GetSize()
-    self.EaseOutControl.Label:SetRelativePos(self.EaseOutControl, -(sizeX) - 5, 3)
+    -- self.PositionLabel:SetPos(150, 5)
+    self.PositionBar:SetSize(300, 5)
 
     self.MenuBar:SetPos(0, 2)
     self.MenuBar:SetSize(width, 20)
 
-    self.NavigationPlayback:SetSize(width * 0.25, 20)
-    self.NavigationPlayback:SetPos(width * 0.52125 - self.NavigationPlayback:GetWide() * 0.25, 2)
+    self.NavigationPlayback:SetTall(20)
+    self.NavigationPlayback:SizeToChildren(true)
+
+    self.NavigationPlayback:DockMargin(0, 0, playbackScale(width), 0)
 
 end
 
@@ -353,38 +313,38 @@ function PANEL:UpdateTimelines(timelineinfo)
     end
 end
 
----@param state State
-function PANEL:SetInitialState(state)
-    self.PlaybackRateControl:SetValue(state.PlaybackRate)
-    self.PlaybackLengthControl:SetValue(state.PlaybackLength)
-    self:UpdatePositionLabel(state.Frame, state.PlaybackLength)
-end
-
 ---@param frame integer
 ---@param totalFrames integer
-function PANEL:UpdatePositionLabel(frame, totalFrames)
+---@param rate integer
+function PANEL:UpdatePositionLabel(frame, totalFrames, rate)
     local offset = GetConVar("smh_startatone"):GetInt()
-    self.PositionLabel:SetText("Position: " .. frame + offset .. " / " .. totalFrames - (1 - offset))
+    local adjustedFrame = frame + offset
+    local total = totalFrames - (1 - offset)
+
+    local seconds = adjustedFrame / rate
+    local minutes = math.floor(seconds / 60)
+    local hours = math.floor(minutes / 60)
+    local timeFormat = {
+        hours, minutes, seconds, frame % rate, adjustedFrame, total 
+    }
+    local format = labelFormats[self.PositionLabelCycle + 1]
+    local selectedList = {}
+    for _, key in ipairs(format[3]) do
+        table.insert(selectedList, timeFormat[key])
+    end
+
+    self.PositionLabel:SetText(Format("%s: %s", format[1], Format(format[2], unpack(selectedList))))
     self.PositionLabel:SizeToContents()
+end
+
+---@param state State
+function PANEL:SetInitialState(state)
+    self:UpdatePositionLabel(state.Frame, state.PlaybackLength, state.PlaybackRate)
 end
 
 -- AUDIO
 function PANEL:UpdateAudioTrackEditMode(edit)
 	-- self.AudioClipTools:SetEnabled(edit)
-end
-
----@param easeIn number
----@param easeOut number
-function PANEL:ShowEasingControls(easeIn, easeOut)
-    self._sendKeyframeChanges = false
-    self.EaseInControl:SetValue(easeIn)
-    self.EaseOutControl:SetValue(easeOut)
-    self.Easing:SetVisible(true)
-    self._sendKeyframeChanges = true
-end
-
-function PANEL:HideEasingControls()
-    self.Easing:SetVisible(false)
 end
 
 function PANEL:SetVisible(bool)
@@ -396,10 +356,6 @@ function PANEL:SetVisible(bool)
     return self.BaseClass.SetVisible(self, bool)
 end
 
----@param newState NewState
-function PANEL:OnRequestStateUpdate(newState) end
----@param newKeyframeData any
-function PANEL:OnRequestKeyframeUpdate(newKeyframeData) end
 function PANEL:OnRequestOpenPropertiesMenu() end
 function PANEL:OnRequestRecord() end
 function PANEL:OnRequestOpenSaveMenu() end

@@ -315,8 +315,9 @@ local function AddCallbacks()
         Tooltip:SetPos(input.GetCursorPos())
     end
 
-    WorldClicker.MainMenu.OnRequestStateUpdate = function(_, newState)
+    WorldClicker.Settings.OnRequestStateUpdate = function(_, newState)
         SMH.Controller.UpdateState(newState)
+        WorldClicker.MainMenu:UpdatePositionLabel(SMH.State.Frame, SMH.State.PlaybackLength, SMH.State.PlaybackRate)
 		WorldClicker.MainMenu.FramePanel:RefreshFrames()
     end
     WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
@@ -613,6 +614,9 @@ local function setupUI()
     WorldClicker.SmoothMenu:SetVisible(false)
     WorldClicker.StretchMenu = vgui.Create("SMHStretchMenu", WorldClicker)
     WorldClicker.StretchMenu:SetVisible(false)
+    
+    WorldClicker.EaseMenu = vgui.Create("SMHEaseMenu", WorldClicker)
+    WorldClicker.EaseMenu:SetVisible(false)
 
     SaveMenu = vgui.Create("SMHSave")
     SaveMenu:MakePopup()
@@ -652,6 +656,7 @@ local function setupUI()
     PropertiesMenu:InitTimelineSettings()
 
     WorldClicker.MainMenu:SetInitialState(SMH.State)
+    WorldClicker.Settings:SetInitialState(SMH.State)
 end
 
 hook.Add("SMHStretchingFinished", "SMHEnableStretching", function ()
@@ -760,18 +765,18 @@ function MGR.SetFrame(frame)
         lastFrame = frame
     end)
     
-    WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength)
+    WorldClicker.MainMenu:UpdatePositionLabel(frame, SMH.State.PlaybackLength, SMH.State.PlaybackRate)
 
     if not PropertiesMenu:GetUsingWorld() then
         if FrameToKeyframe[frame] ~= nil then
             local data = KeyframeEasingData[FrameToKeyframe[frame]]
             if data then
-                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
+                WorldClicker.EaseMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
             else
-                WorldClicker.MainMenu:ShowEasingControls(0, 0)
+                WorldClicker.EaseMenu:HideEasingControls()
             end
         else
-            WorldClicker.MainMenu:HideEasingControls()
+            WorldClicker.EaseMenu:HideEasingControls()
         end
     end
 end
@@ -838,12 +843,12 @@ function MGR.SetKeyframes(keyframes, isreceiving)
         if FrameToKeyframe[SMH.State.Frame] ~= nil then
             local data = KeyframeEasingData[FrameToKeyframe[SMH.State.Frame]]
             if data then
-                WorldClicker.MainMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
+                WorldClicker.EaseMenu:ShowEasingControls(data.EaseIn or 0, data.EaseOut or 0)
             else
-                WorldClicker.MainMenu:ShowEasingControls(0, 0)
+                WorldClicker.EaseMenu:HideEasingControls()
             end
         else
-            WorldClicker.MainMenu:HideEasingControls()
+            WorldClicker.EaseMenu:HideEasingControls()
         end
 
     else
@@ -908,7 +913,7 @@ function MGR.UpdateKeyframe(keyframe)
     end
     FrameToKeyframe[keyframe.Frame] = KeyframeIDs[keyframe.ID]
     if keyframe.Frame == SMH.State.Frame then
-        WorldClicker.MainMenu:ShowEasingControls(keyframe.EaseIn[name] or 0, keyframe.EaseOut[name] or 0)
+        WorldClicker.EaseMenu:ShowEasingControls(keyframe.EaseIn[name] or 0, keyframe.EaseOut[name] or 0)
     end
 end
 
@@ -928,7 +933,7 @@ function MGR.DeleteKeyframe(keyframeId)
         for frame, kid in pairs(FrameToKeyframe) do
             if kid == KeyframeIDs[keyframeId] then
                 if frame == SMH.State.Frame then
-                    WorldClicker.MainMenu:HideEasingControls()
+                    WorldClicker.EaseMenu:HideEasingControls()
                 end
                 FrameToKeyframe[frame] = nil
                 break
@@ -1157,7 +1162,7 @@ end
 function MGR.UpdateState(newState, updatePlaybackControls)
 	local updatePlaybackControls = updatePlaybackControls or false
 	
-    WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength)
+    WorldClicker.MainMenu:UpdatePositionLabel(newState.Frame, newState.PlaybackLength, newState.PlaybackRate)
     WorldClicker.MainMenu.FramePanel:UpdateFrameCount(newState.PlaybackLength)
 	
 	if updatePlaybackControls then
@@ -1193,7 +1198,7 @@ end
 function MGR.SetUsingWorld(set)
     PropertiesMenu:SetUsingWorld(set)
     if set then
-        WorldClicker.MainMenu:HideEasingControls()
+        WorldClicker.EaseMenu:HideEasingControls()
     else
         PropertiesMenu:HideWorldSettings()
     end
