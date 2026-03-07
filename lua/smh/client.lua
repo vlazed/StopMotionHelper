@@ -5,7 +5,6 @@ include("client/state.lua")
 local files = file.Find("smh/client/derma/*.lua", "lcl")
 for _, dermaFile in ipairs(files) do
     local success, errMsg = pcall(function ()
-        print(dermaFile)
         include("client/derma/" .. dermaFile)
     end)
     if not success then

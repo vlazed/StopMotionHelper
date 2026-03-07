@@ -687,6 +687,12 @@ function MGR.IsOpen()
     return WorldClicker:IsVisible()
 end
 
+function MGR.RefreshUI()
+    ---@diagnostic disable-next-line
+    WorldClicker = nil
+    setupUI()
+end
+
 function MGR.Open()
     if not WorldClicker then
         setupUI()

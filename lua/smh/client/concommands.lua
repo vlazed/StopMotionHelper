@@ -79,6 +79,10 @@ concommand.Add("smh_delete", function()
     SMH.Controller.DeleteKeyframe(ids)
 end)
 
+concommand.Add("smh_refreshui", function ()
+    SMH.UI.RefreshUI()
+end)
+
 do
     ---@param command string
     ---@return string[]
