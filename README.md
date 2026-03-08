@@ -29,7 +29,7 @@ The major change involves relocating UI around. Watch the video and view the lis
 
 YMMV with these changes. Currently, some features may lack implementations. I will defer implementation until I receive further UI feedback.
 
-Let me know what I can do to improve the UI/UX!
+If you want to discuss UI changes, [you can do it here.](https://github.com/vlazed/StopMotionHelper/issues/3) Let me know what I can do to improve the UI/UX!
 
 ### 1280 x 720
 
