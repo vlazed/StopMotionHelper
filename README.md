@@ -1,34 +1,42 @@
-Stop Motion Helper
-==================
-Stop Motion Helper is a tool for Garry's Mod designed to make stop motion animation easier and more manageable.
-It can also be used for recorded animation, but it is mainly designed around stop motion.
+# Stop Motion Helper Unofficial: UI development
 
-## Fork Details
+This version branches off from [develop](https://github.com/vlazed/StopMotionHelper/tree/develop). The purpose is to provide a proof-of-concept of the [UI Change issue](https://github.com/vlazed/StopMotionHelper/issues/3), where I implement categorize and compress all related buttons together to allow SMH to scale to different resolutions without overlap from different features.
 
-This unofficial version of SMH adds:
-- Support for animating bonemerged entities
-- Bone motion paths with offsetting
-- Audio playback from this [fork](https://github.com/smg4tech/StopMotionHelper)
-- Exit saves and auto saves
-- Smoothing trick UI and concommand
-- FPS, framecount, and timeline length convars to save between sessions
-- Keyframe jumping
-- Modifiers for environment editors and volumetric clouds
-- Quality-of-life physics-recording indicators
-- Entity names when hovered over
+## Features
 
-See this [tutorial](./TUTORIAL_2.md) for more information. These changes are unlikely to be added into the official SMH version. If these changes happen to be included in the official version, I'd recommend migrating from my fork.
+The following video showcases all new UI features
 
-### Installation
+[![Video](https://img.youtube.com/vi/vadQObUfNdU/0.jpg)](https://www.youtube.com/watch?v=vadQObUfNdU)
 
-> [!IMPORTANT]
-You must have a single Stop Motion Helper folder in your `garrysmod/addons` to properly see the new features. If you have installed different versions of Stop Motion Helper, such as the SMG4 audio fork, you must move these folders somewhere else.
+The major change involves relocating UI around. Watch the video and view the list below to familiarize yourself with the new changes.
 
-1. Navigate to your garrysmod/addons folder.
-2. Either a) download the zip file and extract the folder or b) open up a command terminal (with Git installed) and execute `git clone https://github.com/vlazed/StopMotionHelper.git`
-3. If you did step 2b, execute change directories to the cloned folder (`cd StopMotionHelper`) and `git switch develop`
+- Compressed buttons into categories
+  - **File:** Saving and loading animations/audio
+  - **Edit:** (Audio) keyframe manipulation and settings
+    - Smooth menu and stretch menu are found under Keyframes
+  - **Addons**: Features that do things on their own. I moved the physics recorder and motion paths here
+  - **Properties and Record button are accessible directly to the user**
+- Relocated easing and playback info into other places, to allow space for new UI
+  - Easing is separated into its own window
+  - Frame count and framerate are in the SMH settings
+    - I might make this easier to change without requiring access to the settings or to the console
+- Playback and navigation buttons
+  - These buttons, along with the smooth and stretch menu, replace the **Keyframe Settings UI**
+  - Playback and frame jumping buttons provide alternatives to console commands
+- QoL features
+  - The user can resize the scrollbar to zoom in and out of the timeline, rather than using the scroll wheel
+  - Position label can cycle between `frame / framecount` and `00h:00m:00s.00f` formats
 
-To stay updated to the latest version of this fork, either a) do step 2a again, or b) open the command terminal in the `StopMotionHelper` folder and perform `git pull`.
+YMMV with these changes. Currently, some features may lack implementations. I will defer implementation until I receive further UI feedback.
 
-> [!TIP]
-You do not need to unsubscribe from the workshop version of Stop Motion Helper. This fork will override the functionality of the workshop version with the new features from this fork.
+Let me know what I can do to improve the UI/UX!
+
+### 1280 x 720
+
+![pic](/docs/smh_1280x720.jpg)
+
+### 800 x 600
+
+![pic](/docs/smh_800x600.jpg)
+
+Notice the overlap between the position label and the playback. The aim is to reduce this overlap.
