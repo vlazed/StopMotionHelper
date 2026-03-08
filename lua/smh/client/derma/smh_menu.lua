@@ -113,10 +113,22 @@ end
 
 ---This function positions the playback and navigation
 ---buttons such that they are centered on the timeline
+---This is fed into DockMargin to preserve
+---docking behavior
 ---@param width integer
 ---@return number
 local function playbackScale(width)
-    return math.max(width * 0.46875 - 400, 0)
+    return math.max(width * 0.46875 - 400, 10)
+end
+
+---This function positions the popsition label
+---to a specific spot
+---This is fed into DockMargin to preserve
+---docking behavior
+---@param width integer
+---@return number
+local function positionLabelScale(width)
+    return math.max(width * 0.53125 - 424, 10)
 end
 
 function PANEL:Init()
@@ -160,7 +172,7 @@ function PANEL:Init()
     self.NavigationPlayback:Dock(RIGHT)
 
     self.PositionBar = vgui.Create("Panel", self.MenuBar)
-    self.PositionBar:Dock(LEFT)
+    self.PositionBar:Dock(RIGHT)
 
     self.PositionLabelCycle = 0
     self.PositionLabel = vgui.Create("DLabel", self.PositionBar)
@@ -266,7 +278,7 @@ function PANEL:PerformLayout(width, height)
     self.NavigationPlayback:SizeToChildren(true)
 
     self.NavigationPlayback:DockMargin(0, 0, playbackScale(width), 0)
-
+    self.PositionBar:DockMargin(0, 0, positionLabelScale(width), 0)
 end
 
 ---@param timelineinfo TimelineSetting
