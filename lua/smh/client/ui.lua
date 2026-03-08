@@ -320,7 +320,7 @@ local function AddCallbacks()
         WorldClicker.MainMenu:UpdatePositionLabel(SMH.State.Frame, SMH.State.PlaybackLength, SMH.State.PlaybackRate)
 		WorldClicker.MainMenu.FramePanel:RefreshFrames()
     end
-    WorldClicker.MainMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
+    WorldClicker.EaseMenu.OnRequestKeyframeUpdate = function(_, newKeyframeData)
         local keyframes = {}
         for id, pointer in pairs(KeyframePointers) do
             if pointer:GetFrame() == SMH.State.Frame then
