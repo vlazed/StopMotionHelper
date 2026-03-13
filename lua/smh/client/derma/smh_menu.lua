@@ -17,7 +17,7 @@ local PANEL = {}
 ---@type {[1]: string, [2]: string, [3]: integer[]}[]
 local labelFormats = {
     {"Position", "%d / %d", {5, 6}},
-    {"Time", "%02dh:%02dm:%02ds.%03d", {1, 2, 3, 4}},
+    {"Time", "%02d:%02d:%02d.%03d", {1, 2, 3, 4}},
 }
 local labelCount = #labelFormats
 
@@ -179,6 +179,7 @@ function PANEL:Init()
     self.PositionLabel:SetTooltipDelay(0)
     self.PositionLabel:SetMouseInputEnabled(true)
     self.PositionLabel:Dock(RIGHT)
+    self.PositionLabel:SetTooltip("Click to change time format")
 
     self.PositionLabel.DoClick = function(_)
         self.PositionLabelCycle = (self.PositionLabelCycle + 1) % labelCount
