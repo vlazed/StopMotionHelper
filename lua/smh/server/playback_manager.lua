@@ -34,6 +34,8 @@ local function PlaybackSmooth(player, playback, settings)
         return
     end
 
+    local timePerFrame = 1 / playback.PlaybackRate
+
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
             for name, mod in pairs(SMH.Modifiers) do
