@@ -41,7 +41,7 @@ local function PlaybackSmooth(player, playback, settings)
                 local invDelta = 1 / (nextFrame - prevFrame)
                 local prevData, nextData = prevKeyframe.Modifiers[name], nextKeyframe.Modifiers[name]
 
-                if prevFrame == prevFrame then
+                if prevFrame == nextFrame then
                     if prevData and nextData then
                         mod:Load(entity, prevData, getSetting(settings, entity));
                     end
