@@ -160,12 +160,12 @@ function PANEL:Init()
 
     self.Help = self:AddMenu("Help...", function() self:OnRequestOpenHelp() end)
     self.Addons = self:AddMenu("Addons")
+    self.Edit = self:AddMenu("Edit")
+    self.File = self:AddMenu("File")
     self.Properties = self:AddMenu("Properties...", function() self:OnRequestOpenPropertiesMenu() end)
     self.Record, self.RecordButton = self:AddMenu("Record", function() self:OnRequestRecord() end)
     self.RecordButton:SetTooltip("Record a keyframe")
     self.RecordButton:SetTooltipDelay(0)
-    self.Edit = self:AddMenu("Edit")
-    self.File = self:AddMenu("File")
 
     self.NavigationPlayback = vgui.Create("Panel", self.MenuBar)
 
