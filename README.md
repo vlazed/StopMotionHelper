@@ -40,4 +40,4 @@ Please do not upload this version of Stop Motion Helper on the Steam Workshop. I
 
 `https://github.com/vlazed/StopMotionHelper/tree/develop`
 
-I wish to respect the roadmap for the official Stop Motion Helper addon and prevent any unnecessary competition related to having multiple versions of an addon. Uploading my version to Github is a good compromise; this version is meant to work independently from the Workshop by checking for updates, and it is not readily available to the common Steam user
+[See this comment for more info.](https://github.com/vlazed/StopMotionHelper/issues/4#issuecomment-3620767976). In short, I wish to respect the roadmap for the official Stop Motion Helper addon and prevent any unnecessary competition related to having multiple versions of an addon. Uploading my version to Github is a good compromise; this version is meant to work independently from the Workshop by checking for updates, and it is not readily available to the common Steam user
