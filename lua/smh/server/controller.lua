@@ -948,6 +948,7 @@ local function StopPhysicsRecord(msgLength, player)
     SMH.PhysRecord.RecordStop(player)
 end
 
+---@type Receiver
 local function RequestNodes(msgLength, player)
     local settings = net.ReadTable()
     local nodes = SMH.GhostsManager.RequestNodes(player, settings)
@@ -961,6 +962,12 @@ local function RequestNodes(msgLength, player)
         net.WriteAngle(nodes[i][3])
     end
     net.Send(player)
+end
+
+---@type Receiver
+local function RequestNewSession(msgLength, player)
+    SMH.KeyframeData.Players[player] = nil
+    return RequestUnpack(msgLength, player)
 end
 
 local MGR = {}
@@ -1118,3 +1125,5 @@ net.Receive(SMH.MessageTypes.StopPhysicsRecord, StopPhysicsRecord)
 
 net.Receive(SMH.MessageTypes.RequestNodes, RequestNodes)
 net.Receive(SMH.MessageTypes.RequestDefaultPoseResponse, RequestDefaultPoseResponse)
+
+net.Receive(SMH.MessageTypes.RequestNewSession, RequestNewSession)

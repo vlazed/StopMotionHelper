@@ -77,6 +77,10 @@ concommand.Add("smh_delete", function()
     SMH.Controller.DeleteKeyframe(ids)
 end)
 
+concommand.Add("smh_resetsession", function (ply, cmd, args, argStr)
+    SMH.Controller.RequestNewSession()
+end)
+
 do
     ---@param command string
     ---@return string[]

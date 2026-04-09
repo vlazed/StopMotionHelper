@@ -98,7 +98,9 @@ SMH.MessageTypes = {
     "RequestNodesResponse",
     "RequestDefaultPose",
     "RequestDefaultPoseResponse",
-    "UpdateNode"
+    "UpdateNode",
+
+    "RequestNewSession"
 }
 for key, val in pairs(SMH.MessageTypes) do
     local prefixVal = "SMH" .. val

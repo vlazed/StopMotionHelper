@@ -900,6 +900,15 @@ function CTRL.StopPhysicsRecord()
     net.SendToServer()
 end
 
+function CTRL.RequestNewSession()
+    local entities = {}
+    SMH.State.Entity = entities
+    SMH.UI.SetSelectedEntity(entities)
+    SMH.UI.SetKeyframes(entities)
+    net.Start(SMH.MessageTypes.RequestNewSession)
+    net.SendToServer()
+end
+
 SMH.Controller = CTRL
 
 ---@type Receiver

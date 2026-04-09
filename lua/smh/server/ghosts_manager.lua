@@ -491,6 +491,8 @@ function MGR.RequestNodes(player, settings)
     local keyframes = entities[entity]
     local boneName = player:GetInfo("smh_motionpathbone")
 
+    if not IsValid(entity) then return {} end
+
     if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
         entity = entity.AttachedEntity
     end
