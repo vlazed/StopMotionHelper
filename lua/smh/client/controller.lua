@@ -471,9 +471,14 @@ function CTRL.Load(path, modelName, loadFromClient)
     net.WriteBool(loadFromClient)
 
     if loadFromClient then
-        local serializedKeyframes = SMH.Saves.LoadForEntity(path, modelName, LocalPlayer())
+        local serializedKeyframes, _, _, settings = SMH.Saves.LoadForEntity(path, modelName, LocalPlayer())
         ---@cast serializedKeyframes SMHFile
+        ---@cast settings Settings
+        if settings then
+            SMH.Settings.Update(settings, SMH.State.Entity)
+        end
         net.WriteTable(serializedKeyframes)
+        net.WriteTable(settings)
     else
         net.WriteString(path)
         net.WriteString(modelName)
@@ -500,6 +505,7 @@ function CTRL.RequestSave(path, saveToClient, isFolder)
     net.WriteBool(saveToClient)
     net.WriteBool(isFolder)
     net.WriteString(path)
+    net.WriteTable(SMH.Settings.GetAll(true))
     net.SendToServer()
 end
 
@@ -509,6 +515,7 @@ function CTRL.Save(path, isAutoSave)
     net.Start(SMH.MessageTypes.Save)
     net.WriteString(path)
     net.WriteBool(isAutoSave ~= nil and true or false)
+    net.WriteTable(SMH.Settings.GetAll(true))
     net.SendToServer()
 end
 
@@ -673,7 +680,7 @@ end
 
 ---@param newSettings any
 function CTRL.UpdateSettings(newSettings)
-    SMH.Settings.Update(newSettings)
+    SMH.Settings.Update(newSettings, SMH.State.Entity)
 end
 
 function CTRL.UpdateUISetting(setting, value)
@@ -990,10 +997,21 @@ end
 local function LoadResponse(msgLength)
     local keyframes = ReceiveKeyframes()
     local entity = net.ReadEntity()
+    local settings = net.ReadTable()
 
     if SMH.State.Entity[entity] then
         SMH.UI.SetKeyframes(keyframes)
+        if GetConVar("smh_entity_settings"):GetBool() then
+            SMH.Settings.Initialize(entity, settings)
+            SMH.UI.UpdateUISettings(settings)
+        end
     end
+end
+
+local function LoadResponseSettings(msgLength)
+    local entity = net.ReadEntity()
+    local settings = net.ReadTable()
+    SMH.Settings.Initialize(entity, settings)
 end
 
 ---@type Receiver
@@ -1169,6 +1187,7 @@ local function Setup()
     net.Receive(SMH.MessageTypes.GetModelListResponse, GetModelListResponse)
     net.Receive(SMH.MessageTypes.GetServerEntitiesResponse, GetServerEntitiesResponse)
     net.Receive(SMH.MessageTypes.LoadResponse, LoadResponse)
+    net.Receive(SMH.MessageTypes.LoadResponseSettings, LoadResponseSettings)
     net.Receive(SMH.MessageTypes.GetModelInfoResponse, GetModelInfoResponse)
     net.Receive(SMH.MessageTypes.SaveExists, SaveExists)
     net.Receive(SMH.MessageTypes.SaveResponse, SaveResponse)
