@@ -7,30 +7,41 @@ local check = SMH.SettingsManager.CheckSetting
 local getSetting = SMH.SettingsManager.GetSetting
 
 local getBetweenKeyframes = SMH.GetBetweenKeyframes
-
----@param player Player
+---Increment the current frame, validate it, and return its new value
+---@param increment number
 ---@param playback Playback
----@param settings Settings
-local function PlaybackSmooth(player, playback, settings)
-    if not SMH.KeyframeData.Players[player] then
-        return
-    end
-
-    playback.Timer = playback.Timer + FrameTime()
-    local timePerFrame = playback.TimePerFrame
-
-    playback.CurrentFrame = playback.Timer / timePerFrame + playback.StartFrame
+local function incrementFrame(increment, playback)
+    playback.CurrentFrame = increment + playback.StartFrame
     if playback.CurrentFrame > playback.EndFrame then
         playback.CurrentFrame = 0
         playback.StartFrame = 0
         playback.Timer = 0
     end
+    return playback.CurrentFrame
+end
 
-    local currentFrame = playback.CurrentFrame
+---Increment the `Playback.Timer` and return the new value 
+---@param playback Playback
+---@return number
+local function incrementTime(playback)
+    playback.Timer = playback.Timer + FrameTime()
+    return playback.Timer
+end
+
+---@param player Player
+---@param playback Playback
+---@param settings Settings
+local function PlaybackSmooth(player, playback, settings)
+    local currentFrame = incrementFrame(playback.Timer * playback.PlaybackRate, playback)
+
+    if not SMH.KeyframeData.Players[player] then
+        return
+    end
+
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
             for name, mod in pairs(SMH.Modifiers) do
-                local prevKeyframe, nextKeyframe = getBetweenKeyframes(keyframes, currentFrame, false, name)
+                local prevKeyframe, nextKeyframe, _ = getBetweenKeyframes(keyframes, currentFrame, false, name)
                 ---@cast prevKeyframe FrameData
                 ---@cast nextKeyframe FrameData
 
@@ -179,29 +190,31 @@ end
 ---@param player Player
 ---@param playback Playback
 function MGR.AudioPlayback(player, playback)
-	--check for end of playback
-	if playback.CurrentFrame == playback.EndFrame then
+    local currentFrame = math.floor(playback.Timer * playback.PlaybackRate) + playback.StartFrame
+
+    --check for end of playback
+	if currentFrame == playback.EndFrame then
 		SMH.Controller.StopAllAudio(player)
 		table.Empty(audioStopFrames) --clear stop frames table when playback reaches end of timeline
 		return
 	end
 	--check for end of clip
-	if audioStopFrames[playback.CurrentFrame] then
+	if audioStopFrames[currentFrame] then
 		--stop audio
-		for k,v in pairs(audioStopFrames[playback.CurrentFrame]) do
+		for k,v in pairs(audioStopFrames[currentFrame]) do
 			SMH.Controller.StopAudio(v.ID, player)
 		end
-		table.remove(audioStopFrames,playback.CurrentFrame) --remove stop frames once playback has reached them
+		table.remove(audioStopFrames,currentFrame) --remove stop frames once playback has reached them
 	end
 	
 	--check for start of clip
 	if playerAudio[player] then
-		if playerAudio[player].audioFrames[playback.CurrentFrame] ~= nil then
-			for i,clip in pairs(playerAudio[player].audioFrames[playback.CurrentFrame]) do
+		if playerAudio[player].audioFrames[currentFrame] ~= nil then
+			for i,clip in pairs(playerAudio[player].audioFrames[currentFrame]) do
 				local audioFrame = clip
 				
 				--calculate end point
-				local endFrame = math.ceil(playback.CurrentFrame + playback.PlaybackRate * audioFrame.Duration)
+				local endFrame = math.ceil(currentFrame + playback.PlaybackRate * audioFrame.Duration)
 				local audioStop = {
 					ID = audioFrame.ID,
 					Player = player
@@ -227,26 +240,18 @@ local AudioPlayback = MGR.AudioPlayback
 
 hook.Add("Think", "SMHPlaybackManagerThink", function()
     for player, playback in pairs(ActivePlaybacks) do
+        local timer = incrementTime(playback)
 		AudioPlayback(player,playback) -- AUDIO PLAYBACK
 		
         if not playback.Settings.SmoothPlayback or playback.Settings.TweenDisable then
 
-            playback.Timer = playback.Timer + FrameTime()
-            local timePerFrame = playback.TimePerFrame
-            local playbackRate = playback.PlaybackRate
+            if timer >= 1 / playback.PlaybackRate then
+                
+                local currentFrame = incrementFrame(math.floor(timer * playback.PlaybackRate), playback)
 
-            if playback.Timer >= timePerFrame then
-
-                playback.CurrentFrame = math.floor(playback.Timer * playbackRate) + playback.StartFrame
-                if playback.CurrentFrame > playback.EndFrame then
-                    playback.CurrentFrame = 0
-                    playback.StartFrame = 0
-                    playback.Timer = 0
-                end
-
-                if playback.CurrentFrame ~= playback.PrevFrame then
-                    playback.PrevFrame = playback.CurrentFrame
-                    MGR.SetFrame(player, playback.CurrentFrame, playback.Settings)
+                if currentFrame ~= playback.PrevFrame then
+                    playback.PrevFrame = currentFrame
+                    MGR.SetFrame(player, currentFrame, playback.Settings)
                 end
 
             end

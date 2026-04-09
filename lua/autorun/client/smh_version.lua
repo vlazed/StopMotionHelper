@@ -1,8 +1,10 @@
 ---Current ISO date since this has been versioned.
 ---May produce false positives, so I try to offset this by plus a minute or two to the future. Doesn't seem as reliable,
 ---but it's able to cover cases where either the user downloaded this addon with a zip, or `git clone`d it
-local DATE = "2025-11-05T17:50:01Z"
+local DATE = "2026-04-09T12:26:00Z"
 local changelog = ""
+
+local URL = "https://github.com/vlazed/StopMotionHelper/tree/develop"
 
 local RED = Color(255, 0, 0)
 local GREEN = Color(0, 255, 0)
@@ -17,6 +19,8 @@ local function versionCheckResponse(isUpToDate)
         chat.AddText("Stop Motion Helper Unofficial is not up-to-date. Check the console for the latest changes, and update your addon")
         if #changelog > 0 then
             displayChangelog()
+            MsgC(GREY, "Download the latest version from the following url:\n")
+            MsgC(GREY, URL, "\n")
         end
     else
         chat.AddText("Stop Motion Helper Unofficial is up-to-date.")
