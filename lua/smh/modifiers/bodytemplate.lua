@@ -57,7 +57,6 @@ function MOD:Load(entity, data, settings)
     for i = 0, count - 1 do
 
         local pb = entity:GetPhysicsObjectNum(i);
-		local ppb = GetPhysBoneParent(entity, i)
 
         local d = data[i];
 
