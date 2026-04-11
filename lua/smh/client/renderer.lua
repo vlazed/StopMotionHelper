@@ -74,7 +74,11 @@ end
 ---@param nodeSet SerializedNode[]
 local function updateNodes(nodeSet)
     for frame, pose in SortedPairs(nodeSet) do
-        table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
+        -- Edge case: we don't consider any motion paths at vector_origin. I assume
+        -- almost all animations don't take place at vector_origin
+        if pose[1] ~= vector_origin then
+            table.insert(Nodes, {Pos = pose[1], Ang = pose[2], Frame = frame})
+        end
     end
 end
 

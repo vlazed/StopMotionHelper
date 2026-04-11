@@ -1,5 +1,6 @@
 
 MOD.Name = "Physical Bones";
+MOD.Ghost = true
 
 function MOD:Save(entity)
 
