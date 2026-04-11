@@ -4,6 +4,8 @@
 
 If you are looking for the version with extra features, [view it here](https://github.com/vlazed/StopMotionHelper/tree/develop).
 
+[![Video Title](https://img.youtube.com/vi/fzceiqpZDbk/0.jpg)](https://www.youtube.com/watch?v=fzceiqpZDbk)
+
 This version contains modifiers for animating a group of physical bones (grouped bone timelines or GBTs). The list is as follows
 
 - **Lower Body**: Animate lower body parts, including the root bone
@@ -14,14 +16,33 @@ This version contains modifiers for animating a group of physical bones (grouped
 
 These differ from the `Physical Bones` modifier in that it does not record the transforms of **all** physics bones. Instead, it records the transforms of a **group** of physics bones. This allows animation
 
-## Usage
+## Installation
 
-### Enabling Ghosts
+> [!WARNING]
+> Proceed with caution! Any issues you stumble upon when you install this should not be reported to the workshop version!
+
+[Navigate to this directory](https://github.com/vlazed/StopMotionHelper/tree/gbt-modifiers/lua/smh/modifiers), and download the following modifiers:
+
+- bodytemplate.lua
+- lowerbody.lua
+- upperbody.lua
+- rootphysics.lua
+- childphysics.lua
+- physbones.lua
+
+Then drag and drop these modifiers into either one of the following directories (not both):
+
+```
+garrysmod/lua/smh/modifiers
+garrysmod/addons/my-modifiers/lua/smh/modifiers (where "my-modifier" can be any name that you want)
+```
+
+### Re-enabling Ghosts
 
 > [!TIP]
 > If you are using my fork, you do not need to follow these steps
 
-If you want to use this in your version of Stop Motion Helper, you need to do the following:
+After installing these, by default, ghosts will not work on the workshop version. If you want to use this in your local version of Stop Motion Helper, you need to do the following:
 
 - In `lua/smh/server/ghosts_manager.lua`, make the following change:
 
@@ -33,6 +54,28 @@ if SMH.Modifiers[modname].Ghost then ghost.Physbones = true end
 ```
 
 Afterwards, ghosts will be enabled for your custom physical bone modifiers.
+
+## Usage
+
+### Animation
+
+To animate with these modifiers, do the following:
+
+1. Open the properties menu
+2. Add new timelines for the modifiers that you want to work with
+3. Check the specified modifier for each timeline (for instance, Timeline 2 will contain `Lower Body`, and TImeline 3 will contain `Upper Body`)
+4. Optionally, disable the `Physical Bone` modifier in any timeline
+5. Optionally, make a new timeline preset for convenience
+
+To "export" your animation onto the original `Physical Bone` modifier for others to use, open the properties menu again, and then:
+
+1. Add a timeline and check the `Physical Bone` modifier, along with other modifiers that you've worked with
+2. Record at each keyframe on the timeline ([using a macro](https://steamcommunity.com/sharedfiles/filedetails/?id=3532714734) can make this easy)
+
+To clean up your keyframes from the custom modifiers after baking,
+
+1. Add a timeline and set it to all the modifiers you've used
+2. Remove each keyframe
 
 ### Model compatibility
 
@@ -62,6 +105,27 @@ bip_hand_R
 You can then specify the bones of your model to allow these modifiers to work on them.
 
 The custom modifiers record the transforms starting from the leaf bone, and moves up to its parent bone (e.g. `bip_head` to `bip_neck` to `bip_spine_2`) until it reaches its root bone or the bone nearest to the root bone (depending on the modifier used).
+
+### Authoring your own modifiers
+
+This repo comes with the `bodytemplate.lua` modifier. This is what all physical bone custom modifiers must use. You can make your own by doing the following:
+
+1. Copy one of the custom modifiers (e.g. copy `lowerbody.lua`) and rename it to the name of your modifier
+2. Open your modifier in a text editor, and change the `modName = ...` variable to the filename of your modifier
+3. Go to the bottom of the modifier file, and change `MOD.Name` to a short, fancier name of your filename
+4. Modify `MOD.SetRoot` if you want your modifier to move bones like pelvis bones
+5. Reload your modifiers by reloading the GMod session (map change, running `reload`) (alternatively, if you are using my fork, run `smh_refreshmodifiers`)
+
+> [!TIP]
+> If you know your modifier moves the root, you should indicate it in `MOD.Name` e.g. Lower Body (moves root)
+
+> [!WARNING]
+> When animating, you should have only one modifier checked that moves the root. Attempting to use multiple modifiers that move root bones will result in one modifier overpowering another
+
+## Remarks
+
+- Ghosting previous or next frame does not work on the workshop version if you install this.
+- You should use these modifiers for ragdolls. Prefer using the original `Physical Bone` modifier for physics props, effect props, camera props, or similar.
 
 ## Rational
 
