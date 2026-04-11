@@ -52,14 +52,14 @@ end
 local function SetGhostFrame(entity, ghost, modifiers, modname)
     if modifiers[modname] ~= nil then
         SMH.Modifiers[modname]:LoadGhost(entity, ghost, modifiers[modname])
-        if modname == "physbones" then ghost.Physbones = true end
+        if SMH.Modifiers[modname].Ghost then ghost.Physbones = true end
     end
 end
 
 local function SetGhostBetween(entity, ghost, data1, data2, modname, percentage)
     if data1[modname] ~= nil then
         SMH.Modifiers[modname]:LoadGhostBetween(entity, ghost, data1[modname], data2[modname], percentage)
-        if modname == "physbones" then ghost.Physbones = true end
+        if SMH.Modifiers[modname].Ghost then ghost.Physbones = true end
     end
 end
 
