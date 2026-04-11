@@ -33,5 +33,5 @@ do
     initializeDirectory()
 end
 
-MOD.Name = "Lower Body"
+MOD.Name = "Lower Body (Root)"
 MOD.SetRoot = true

@@ -33,5 +33,5 @@ do
     initializeDirectory()
 end
 
-MOD.Name = "Root Physics"
+MOD.Name = "Root Physics (Root)"
 MOD.SetRoot = true
