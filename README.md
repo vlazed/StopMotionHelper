@@ -77,6 +77,14 @@ To clean up your keyframes from the custom modifiers after baking,
 1. Add a timeline and set it to all the modifiers you've used
 2. Remove each keyframe
 
+### Physics Bones
+
+Animating with these modifiers comes with some inconsistencies with physical bones, which make it difficult to select bones using tools like Ragdoll Mover. To overcome this, you can do one of the following:
+
+- Use [Ragdoll Unstretch](https://steamcommunity.com/sharedfiles/filedetails/?id=2587143550) on the ragdoll
+- Use Ragdoll Mover's `Reset +Children Position` option
+- [Use this script](https://gist.github.com/vlazed/117fdf704c91c48a0bda31b56a8788f6), which combines the Ragdoll Mover and Ragdoll Unstretch fixes into a concommand which you can bind to any key
+
 ### Model compatibility
 
 Unlike the `Physical Bone` modifier, the custom modifiers need explicit support for different models.
