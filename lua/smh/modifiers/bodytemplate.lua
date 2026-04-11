@@ -30,11 +30,13 @@ function MOD:Save(entity)
             local newWalk = GetPhysBoneParent(entity, walk)
             if not data[walk] then
                 local pb = entity:GetPhysicsObjectNum(walk)
-                data[walk] = {
-                    Pos = pb:GetPos(),
-                    Ang = pb:GetAngles(),
-                    Moveable = pb:IsMoveable(),
-                }
+				if (not self.SetRoot and newWalk >= 0) or (self.SetRoot and newWalk == -1) then
+					data[walk] = {
+						Pos = pb:GetPos(),
+						Ang = pb:GetAngles(),
+						Moveable = pb:IsMoveable(),
+					}
+				end
             end
             walk = newWalk
         end
@@ -55,13 +57,14 @@ function MOD:Load(entity, data, settings)
     for i = 0, count - 1 do
 
         local pb = entity:GetPhysicsObjectNum(i);
+		local ppb = GetPhysBoneParent(entity, i)
 
         local d = data[i];
 
         if not d then continue end
 
-        pb:SetPos(d.Pos, true);
-        pb:SetAngles(d.Ang);
+		pb:SetPos(d.Pos, true);
+		pb:SetAngles(d.Ang);
 
         if settings and settings.FreezeAll then
             pb:EnableMotion(false);
