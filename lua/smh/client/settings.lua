@@ -89,7 +89,7 @@ function MGR.Initialize(entity, settings)
             if not EntitySettings[entity] then
                 EntitySettings[entity] = {}
             end
-            EntitySettings[entity][name] = settings[name] or convar:GetValue()
+            EntitySettings[entity][name] = Either(settings[name] ~= nil, settings[name], convar:GetValue())
         end
     end
 end
