@@ -125,7 +125,8 @@ function MGR.SelectEntity(player, entities)
             Nodes = {},
             PreviousName = "",
             LastEntity = NULL,
-            Updated = false
+            Updated = false,
+            LastTween = false,
         }
     end
 
@@ -402,10 +403,10 @@ end
 ---@param modifier string
 ---@param tweening boolean
 ---@param index integer?
----@return Vector
----@return Angle
+---@return Vector?
+---@return Angle?
 local function lerpTransform(keyframes, frame, modifier, tweening, index)
-    local pos, ang = vector_origin, angle_zero
+    local pos, ang
     local prevFrame, nextFrame, lerp = SMH.GetClosestKeyframes(keyframes, frame, true, modifier)
     if prevFrame and nextFrame then
         local prevData, nextData
@@ -484,18 +485,6 @@ function MGR.RequestNode(player)
     return {pos, ang}
 end
 
----@param modifierArray FramePose[]
----@return boolean
-local function isPhysBoneModifier(modifierArray)
-    if not istable(modifierArray) then return false end
-    
-    for _, pose in pairs(modifierArray) do
-        if istable(pose) and pose.Moveable ~= nil then return true end
-    end
-
-    return false
-end
-
 ---@param player Player
 ---@param settings Settings
 ---@return table?
@@ -507,17 +496,18 @@ function MGR.RequestNodes(player, settings)
     local previousName = GhostData[player].PreviousName
     local lastEntity = GhostData[player].LastEntity
     local updated = GhostData[player].Updated
-    local tweening = not settings.TweenDisable
-
+    local lastTween = GhostData[player].LastTween
+    
     local entities = SMH.KeyframeData.Players[player] and SMH.KeyframeData.Players[player].Entities
-
+    
     if not nodes or not entities or not selectedEntities or #selectedEntities == 0 then return {} end
-
+    
     local entity = selectedEntities[1]
     local keyframes = entities[entity]
     local boneName = player:GetInfo("smh_motionpathbone")
-
+    
     if not IsValid(entity) then return {} end
+    local tweening = not check(settings, "TweenDisable", entity)
 
     if entity:GetClass() == "prop_effect" and IsValid(entity.AttachedEntity) then
         entity = entity.AttachedEntity
@@ -531,9 +521,12 @@ function MGR.RequestNodes(player, settings)
     local sameKeyframeCount = #keyframes == #nodes
     local sameBoneName = previousName == boneName
     local sameEntity = lastEntity == entity
+    local sameTween = lastTween == tweening
+
+    GhostData[player].LastTween = tweening
 
     -- Don't send any data back if the number of keyframes, the motion path bone, or the selected entity hasn't changed at all
-    if sameKeyframeCount and sameBoneName and sameEntity and not updated then
+    if sameKeyframeCount and sameBoneName and sameEntity and sameTween and not updated then
         return
     end
 
@@ -547,20 +540,23 @@ function MGR.RequestNodes(player, settings)
     local isPhysBone = bone and physBone >= 0
 
     for _, keyframe in pairs(keyframes) do
-        local pos, ang = vector_origin, angle_zero
+        local pos, ang
         if isPhysBone then
-            local calc = false
-            for name, modifier in pairs(keyframe.Modifiers) do
-                if istable(modifier) and modifier[physBone] and modifier[physBone].Moveable ~= nil then
-                    pos = modifier[physBone].Pos
-                    ang = modifier[physBone].Ang
-                    calc = true
-                elseif isPhysBoneModifier(modifier) then
-                    local newPos, newAng = lerpTransform(keyframes, keyframe.Frame, name, tweening, physBone)
-                    calc = pos ~= newPos and ang ~= newAng
-                end
-                if calc then
-                    break
+            for name, m in pairs(SMH.Modifiers) do
+                if m.Ghost then
+                    local modifier = keyframe.Modifiers[name]
+                    local newPos, newAng
+                    if istable(modifier) and modifier[physBone] then
+                        pos = modifier[physBone].Pos
+                        ang = modifier[physBone].Ang
+                        break
+                    else
+                        newPos, newAng = lerpTransform(keyframes, keyframe.Frame, name, tweening, physBone)
+                        if newPos and newAng then
+                            pos, ang = newPos, newAng
+                            break
+                        end
+                    end
                 end
             end
         elseif bone and DefaultPoseTrees[entity:GetModel()] then
@@ -581,39 +577,56 @@ function MGR.RequestNodes(player, settings)
             for i = 1, #branch do
                 local lPos, lAng = defaultPoseTree[branch[i]].LocalPos, defaultPoseTree[branch[i]].LocalAng
                 local dataPos, dataAng = vector_origin, angle_zero
-                if keyframe.Modifiers.bones then
-                    dataPos, dataAng = keyframe.Modifiers.bones[branch[i]].Pos, keyframe.Modifiers.bones[branch[i]].Ang
+                
+                local boneData = keyframe.Modifiers.bones and keyframe.Modifiers.bones[branch[i]]
+                if boneData then
+                    dataPos, dataAng = boneData.Pos, boneData.Ang
                 else
-                    dataPos, dataAng = lerpTransform(keyframes, keyframe.Frame, "bones", tweening, bone)
+                    local newPos, newAng = lerpTransform(keyframes, keyframe.Frame, "bones", tweening, bone)
+                    if newPos and newAng then
+                        dataPos, dataAng = newPos, newAng
+                    end
                 end
                 local finalPos, finalAng = LocalToWorld(dataPos, dataAng, lPos, lAng)
                 pos, ang = LocalToWorld(pos, ang, finalPos, finalAng)
             end
 
-            local parentPos, parentAng = vector_origin, angle_zero
-            local calc = false
-            for name, modifier in pairs(keyframe.Modifiers) do
-                if istable(modifier) and modifier[physBoneParent] and modifier[physBoneParent].Moveable ~= nil then
-                    parentPos, parentAng = modifier[physBoneParent].Pos, modifier[physBoneParent].Ang
-                    calc = true
-                elseif physBoneParent and isPhysBoneModifier(modifier) then
-                    local newPos, newAng = lerpTransform(keyframes, keyframe.Frame, name, tweening, physBoneParent)
-                    calc = parentPos ~= newPos and parentAng ~= newAng
-                else
-                    if name == "position" then
-                        parentPos, parentAng = modifier.Pos or parentPos, modifier.Ang or parentAng
-                        break
+            local parentPos, parentAng
+
+            if physBoneParent and physBoneParent >= 0 then
+                for name, m in pairs(SMH.Modifiers) do
+                    if m.Ghost then
+                        local modifier = keyframe.Modifiers[name]
+                        if istable(modifier) and modifier[physBoneParent] then
+                            parentPos, parentAng = modifier[physBoneParent].Pos, modifier[physBoneParent].Ang
+                            break
+                        else
+                            local newPos, newAng = lerpTransform(keyframes, keyframe.Frame, name, tweening, physBoneParent)
+                            if newPos and newAng then
+                                parentPos, parentAng = newPos, newAng
+                                break
+                            end
+                        end
                     end
                 end
-                if calc then
-                    break
+            else
+                if keyframe.Modifiers.position then
+                    parentPos, parentAng = keyframe.Modifiers.position.Pos, keyframe.Modifiers.position.Ang
+                else
+                    local newPos, newAng = lerpTransform(keyframes, keyframe.Frame, "position", tweening)
+                    if newPos and newAng then
+                        parentPos, parentAng = newPos, newAng
+                    end
                 end
             end
-            pos = LocalToWorld(pos, ang, parentPos, parentAng)
+            if parentPos and parentAng then
+                pos = LocalToWorld(pos, ang, parentPos, parentAng)
+            else
+                pos, ang = nil, nil
+            end
         else
             if keyframe.Modifiers.position then
-                pos = keyframe.Modifiers.position.Pos
-                ang = keyframe.Modifiers.position.Ang
+                pos, ang = keyframe.Modifiers.position.Pos, keyframe.Modifiers.position.Ang
             else
                 pos, ang = lerpTransform(keyframes, keyframe.Frame, "position", tweening)
             end

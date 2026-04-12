@@ -192,6 +192,7 @@
 ---@field PreviousName string
 ---@field LastEntity Entity
 ---@field Updated boolean
+---@field LastTween boolean
 
 ---@alias GhostSettings {[Player]: Settings}
 ---@alias SpawnGhost {[Player]: Entity}

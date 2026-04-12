@@ -15,6 +15,7 @@ function MODBASE:IsEffect(entity) -- checking if the entity is an effect prop
     return false
 end
 
+---@type {[string]: table}
 SMH.Modifiers = {}
 
 local path = "smh/modifiers/"
