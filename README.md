@@ -40,7 +40,7 @@ garrysmod/addons/my-modifiers/lua/smh/modifiers (where "my-modifier" can be any 
 ### Re-enabling Ghosts
 
 > [!TIP]
-> If you are using my fork, you do not need to follow these steps
+> If you are using the `develop` branch of my fork, you do not need to follow these steps
 
 After installing these, by default, ghosts will not work on the workshop version. If you want to use this in your local version of Stop Motion Helper, you need to do the following:
 
