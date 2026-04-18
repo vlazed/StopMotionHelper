@@ -30,13 +30,23 @@ function MOD:Save(entity)
             local newWalk = GetPhysBoneParent(entity, walk)
             if not data[walk] then
                 local pb = entity:GetPhysicsObjectNum(walk)
-				if (not self.SetRoot and newWalk >= 0) or (self.SetRoot and newWalk == -1) then
-					data[walk] = {
-						Pos = pb:GetPos(),
-						Ang = pb:GetAngles(),
-						Moveable = pb:IsMoveable(),
-					}
-				end
+                local record = false
+                if self.SetRoot then
+                    record = true
+                else
+                    -- We're a child bone
+                    if newWalk >= 0 then
+                        record = true
+                    end
+                end
+                if record then
+                    data[walk] = {
+                        Pos = pb:GetPos(),
+                        Ang = pb:GetAngles(),
+                        Moveable = pb:IsMoveable(),
+                    }
+                end
+
             end
             walk = newWalk
         end
