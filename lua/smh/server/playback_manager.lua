@@ -68,7 +68,7 @@ local function PlaybackSmooth(player, playback, settings)
                 end
             end
         else
-            if check(settings, "EnableWorld", entity) then
+            if tobool(player:GetInfo("smh_enableworldkeyframes")) then
                 SMH.WorldKeyframesManager.Load(player, math.Round(currentFrame), keyframes)
             end
         end
@@ -102,7 +102,7 @@ function MGR.SetFrame(player, newFrame, settings)
                 end
             end
         else
-            if check(settings, "EnableWorld", entity) then
+            if tobool(player:GetInfo("smh_enableworldkeyframes")) then
                 SMH.WorldKeyframesManager.Load(player, newFrame, keyframes)
             end
         end

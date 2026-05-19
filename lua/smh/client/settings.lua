@@ -1,3 +1,4 @@
+---@enum ConVarType
 local ConVarType = {
     Bool = 1,
     Int = 2,
@@ -13,6 +14,10 @@ local GhostVars = {
     smh_ghostxray = "GhostXRay",
 }
 
+---@class TypedConVar
+---@field Type ConVarType
+---@field ConVar ConVar
+---@field Global boolean
 local TYPED_CV = {}
 TYPED_CV.__index = TYPED_CV
 
@@ -26,6 +31,16 @@ function TYPED_CV:GetValue()
     end
 end
 
+function TYPED_CV:GetDefault()
+    if self.Type == ConVarType.Bool then
+        return tobool(self.ConVar:GetDefault())
+    elseif self.Type == ConVarType.Int then
+        return tonumber(self.ConVar:GetDefault())
+    elseif self.Type == ConVarType.Float then
+        return tonumber(self.ConVar:GetDefault())
+    end
+end
+
 function TYPED_CV:SetValue(value)
     if self.Type == ConVarType.Bool then
         return self.ConVar:SetBool(value)
@@ -36,7 +51,14 @@ function TYPED_CV:SetValue(value)
     end
 end
 
-local function CreateTypedConVar(type, name, defaultValue, helptext)
+---@param type ConVarType
+---@param name string
+---@param defaultValue any
+---@param helptext string?
+---@param userInfo boolean?
+---@param isGlobal boolean?
+---@return TypedConVar
+local function CreateTypedConVar(type, name, defaultValue, helptext, userInfo, isGlobal)
     if type == ConVarType.Bool then
         defaultValue = tostring(defaultValue and 1 or 0)
     elseif type == ConVarType.Int then
@@ -47,7 +69,8 @@ local function CreateTypedConVar(type, name, defaultValue, helptext)
 
     local cv = {
         Type = type,
-        ConVar = CreateClientConVar(name, defaultValue, true, false, helptext, nil, nil),
+        Global = userInfo,
+        ConVar = CreateClientConVar(name, defaultValue, true, Either(userInfo ~= nil, userInfo, false), helptext, nil, nil),
     }
     setmetatable(cv, TYPED_CV)
 
@@ -63,8 +86,10 @@ local function CreateTypedConVar(type, name, defaultValue, helptext)
     return cv
 end
 
+---@type {[Entity]: Settings}
 local EntitySettings = {}
 
+---@type {[string]: TypedConVar}
 local ConVars = {
     FreezeAll = CreateTypedConVar(ConVarType.Bool, "smh_freezeall", true),
     LocalizePhysBones = CreateTypedConVar(ConVarType.Bool, "smh_localizephysbones", false),
@@ -77,21 +102,41 @@ local ConVars = {
     OnionSkin = CreateTypedConVar(ConVarType.Bool, "smh_onionskin", false),
     TweenDisable = CreateTypedConVar(ConVarType.Bool, "smh_tweendisable", false),
     SmoothPlayback = CreateTypedConVar(ConVarType.Bool, "smh_smoothplayback", false),
-    EnableWorld = CreateTypedConVar(ConVarType.Bool, "smh_enableworldkeyframes", false),
+    EnableWorld = CreateTypedConVar(ConVarType.Bool, "smh_enableworldkeyframes", false, nil, true),
 }
 
+local InitialSettings = {}
+for name, convar in pairs(ConVars) do
+    InitialSettings[name] = convar:GetDefault()
+end
+
+---@type {[string]: TypedConVar}
+local Globals = {}
+for name, convar in pairs(ConVars) do
+    if convar.Global then
+        Globals[name] = convar
+    end
+end 
 
 local MGR = {}
+
+local function initializeSetting(entity)
+    EntitySettings[entity] = table.Copy(InitialSettings)
+end
 
 function MGR.Initialize(entity, settings)
     if IsValid(entity) then
         for name, convar in pairs(ConVars) do
             if not EntitySettings[entity] then
-                EntitySettings[entity] = {}
+                initializeSetting(entity)
             end
             EntitySettings[entity][name] = Either(settings[name] ~= nil, settings[name], convar:GetValue())
         end
     end
+end
+
+function MGR.GetGlobals()
+    return Globals
 end
 
 ---@param isSave boolean?
@@ -113,20 +158,22 @@ end
 
 function MGR.Update(newSettings, entities)
     for name, value in pairs(newSettings) do
-        if not ConVars[name] then
+        local convar = ConVars[name]
+        if not convar then
             continue
         end
-        if istable(entities) and GetConVar("smh_entity_settings"):GetBool() then
+
+        if not convar.Global and istable(entities) and GetConVar("smh_entity_settings"):GetBool() then
             for entity, _ in pairs(entities) do
                 if IsValid(entity) then
                     if not EntitySettings[entity] then
-                        EntitySettings[entity] = {}
+                        initializeSetting(entity)
                     end
                     EntitySettings[entity][name] = value
                 end
             end
         else
-            ConVars[name]:SetValue(value)
+            convar:SetValue(value)
         end
     end
 end

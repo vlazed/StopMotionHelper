@@ -113,9 +113,9 @@ local function SetFrame(msgLength, player)
     local timelineset = net.ReadUInt(INT_BITCOUNT)
     local timeline = SMH.PropertiesManager.GetTimelinesInfo(player)
 
+    SMH.SettingsManager.StorePlayerSettings(player, settings)
     SMH.PlaybackManager.SetFrame(player, newFrame, settings)
     SMH.GhostsManager.UpdateState(player, newFrame, settings, timeline, timelineset)
-    SMH.SettingsManager.StorePlayerSettings(player, settings)
 
     net.Start(SMH.MessageTypes.SetFrameResponse)
     net.WriteUInt(newFrame, INT_BITCOUNT)

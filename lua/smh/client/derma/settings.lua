@@ -151,9 +151,14 @@ function PANEL:ApplySettings(settings)
         "EnableWorld",
     }
 
+    local globals = SMH.Settings.GetGlobals()
+
     for _, key in pairs(checkBoxes) do
         if settings[key] ~= nil then
             self[key]:SetChecked(settings[key])
+        end
+        if globals[key] then
+            self[key]:SetChecked(globals[key]:GetValue())
         end
     end
 
