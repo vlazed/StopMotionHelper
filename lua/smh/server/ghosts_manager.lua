@@ -50,6 +50,7 @@ local function CreateGhost(player, entity, color, frame, ghostable, xray)
     g:SetCollisionGroup(COLLISION_GROUP_NONE)
     g:SetNotSolid(true)
     g:SetColor(color)
+    g.DoNotDuplicate = true
     g:Spawn()
 
     g:SetPos(entity:GetPos())
@@ -322,6 +323,7 @@ function MGR.SetSpawnPreview(class, modelpath, data, settings, player)
     SpawnGhost[player]:SetCollisionGroup(COLLISION_GROUP_NONE)
     SpawnGhost[player]:SetNotSolid(true)
     SpawnGhost[player]:SetColor(Color(255, 255, 255, alpha))
+    SpawnGhost[player].DoNotDuplicate = true
     SpawnGhost[player]:Spawn()
 
     for name, mod in pairs(SMH.Modifiers) do
