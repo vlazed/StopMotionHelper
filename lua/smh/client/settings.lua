@@ -103,6 +103,7 @@ local ConVars = {
     TweenDisable = CreateTypedConVar(ConVarType.Bool, "smh_tweendisable", false),
     SmoothPlayback = CreateTypedConVar(ConVarType.Bool, "smh_smoothplayback", false),
     EnableWorld = CreateTypedConVar(ConVarType.Bool, "smh_enableworldkeyframes", false, nil, true),
+    EnablePhysBake = CreateTypedConVar(ConVarType.Bool, "smh_enablephysbake", false, "When enabled, it will disable loading keyframes from the Physical Bone modifier, to enable baking the body modifiers")
 }
 
 local InitialSettings = {}

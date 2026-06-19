@@ -86,6 +86,10 @@ function MGR.SetFrame(player, newFrame, settings)
     for entity, keyframes in pairs(SMH.KeyframeData.Players[player].Entities) do
         if entity ~= player then
             for name, mod in pairs(SMH.Modifiers) do
+                -- Skip loading Physical Bone keyframes when enabled, so the animator can use other 
+                -- physics bone body modifiers to either record manually or automatically with the physics recorder
+                if name == "physbones" and check(settings, "EnablePhysBake", entity) then continue end
+                
                 local prevKeyframe, nextKeyframe, lerpMultiplier = SMH.GetClosestKeyframes(keyframes, newFrame, false, name)
                 if not prevKeyframe then
                     continue
