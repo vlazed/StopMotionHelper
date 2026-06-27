@@ -1,3 +1,5 @@
+# DISCLAIMER: Use the [official Beta version](https://steamcommunity.com/sharedfiles/filedetails/?id=3745556544). All the features in this fork is included there.
+
 # Stop Motion Helper
 
 Stop Motion Helper is a tool for Garry's Mod designed to make stop motion animation easier and more manageable.
